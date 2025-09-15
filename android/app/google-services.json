@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "932235207263",
+    "project_id": "ja-chwi-eui-jeong-seok",
+    "storage_bucket": "ja-chwi-eui-jeong-seok.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:932235207263:android:3954c863ac7609ba41b1ea",
+        "android_client_info": {
+          "package_name": "com.example.ja_chwi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqwwq_FYET2yy-okN_pMDEJ0EAVUDIWY8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
