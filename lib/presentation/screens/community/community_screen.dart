@@ -22,6 +22,7 @@ class CommunityScreen extends StatelessWidget {
             ],
           ),
           bottom: TabBar(
+            padding: EdgeInsets.symmetric(horizontal: 16),
             indicator: UnderlineTabIndicator(
               //  insets: EdgeInsets.zero,
               borderSide: BorderSide(color: Colors.black, width: 2),
@@ -32,16 +33,20 @@ class CommunityScreen extends StatelessWidget {
             isScrollable: false,
             labelPadding: EdgeInsets.symmetric(horizontal: 16),
             indicatorWeight: 3,
+            labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             tabs: tabs.map((e) => Tab(text: e)).toList(),
           ),
         ),
-        body: TabBarView(
-          children:
-              //TODO:카테고리템 이름, 게시글 리스트
-              //TODO: 카테고리별 게시글정보들 어떻게 넣을것인지
-              tabs.map((e) {
-                return _CategoryTab(e);
-              }).toList(),
+        body: Container(
+          padding: EdgeInsets.only(left: 24, right: 24, top: 18),
+          child: TabBarView(
+            children:
+                //TODO:카테고리템 이름, 게시글 리스트
+                //TODO: 카테고리별 게시글정보들 어떻게 넣을것인지
+                tabs.map((e) {
+                  return _CategoryTab(e);
+                }).toList(),
+          ),
         ),
         floatingActionButton: SizedBox(
           width: 55,
@@ -71,12 +76,12 @@ class _CategoryTab extends StatelessWidget {
       children: [
         SizedBox(height: 12),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 1),
           child: Row(
             children: [
               Text(
                 title,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               _SortChip(text: '최신순', selected: true),
@@ -88,7 +93,7 @@ class _CategoryTab extends StatelessWidget {
         const SizedBox(height: 12),
         Expanded(
           child: ListView.separated(
-            padding: EdgeInsets.all(25),
+            padding: EdgeInsets.only(top: 8),
             itemCount: 10,
             itemBuilder: (BuildContext context, int index) {
               return _PlaceholderCard();
@@ -133,7 +138,7 @@ class _PlaceholderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 88,
+      height: 96,
       decoration: BoxDecoration(
         color: const Color(0xFFF2F2F2),
         borderRadius: BorderRadius.circular(12),
