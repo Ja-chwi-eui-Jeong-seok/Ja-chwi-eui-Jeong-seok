@@ -1,0 +1,89 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/auth/character_create_screen.dart';
+import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
+import 'package:ja_chwi/presentation/screens/community/community_create_screen.dart';
+import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
+import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
+import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_achievers_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_create_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_saved_list_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_screen.dart';
+import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
+
+// AppBar 타이틀
+// GoRouter는 현재 라우트 정보를 GoRouterState.of(context)로 제공한다.
+// 그 안의 matchedLocation이나 uri를 읽으면 현재 경로(/mission-create 등)를 얻을 수 있다.
+// RouteTitles.map은 경로 → 화면명(한글) 매핑 테이블이다.
+// RouteTitles.of(context)는 현재 경로를 가져와서 가장 잘 맞는 key를 찾아, 해당 화면명을 반환한다.
+// → 즉, 경로 /mission-create → '미션 작성'.
+//final title = RouteTitles.of(context);
+//라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
+
+final GoRouter router = GoRouter(
+  initialLocation: '/login',
+  routes: [
+    GoRoute(
+      path: '/login',
+      name: '로그인',
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/character-create',
+      name: '캐릭터 생성',
+      builder: (context, state) => const CharacterCreateScreen(),
+    ),
+    GoRoute(
+      path: '/home',
+      name: '메인',
+      builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/mission',
+      name: '미션',
+      builder: (context, state) => const MissionScreen(),
+    ),
+    GoRoute(
+      path: '/mission-create',
+      name: '미션 작성',
+      builder: (context, state) => const MissionCreateScreen(),
+    ),
+    GoRoute(
+      path: '/mission-saved-list',
+      name: '미션 저장목록',
+      builder: (context, state) => const MissionSavedListScreen(),
+    ),
+    GoRoute(
+      path: '/mission-edit',
+      name: '미션 수정',
+      builder: (context, state) => const MissionEditScreen(),
+    ),
+    GoRoute(
+      path: '/mission-achievers',
+      name: '미션 달성자목록',
+      builder: (context, state) => const MissionAchieversScreen(),
+    ),
+    GoRoute(
+      path: '/community',
+      name: '커뮤니티',
+      builder: (context, state) => const CommunityScreen(),
+    ),
+    GoRoute(
+      path: '/community-detail',
+      name: '커뮤니티 상세',
+      builder: (context, state) => const CommunityDetailScreen(),
+    ),
+    GoRoute(
+      path: '/community-create',
+      name: '커뮤니티 작성',
+      builder: (context, state) => const CommunityCreateScreen(),
+    ),
+    GoRoute(
+      path: '/profile',
+      name: '프로필',
+      builder: (context, state) => const ProfileScreen(),
+    ),
+  ],
+);
