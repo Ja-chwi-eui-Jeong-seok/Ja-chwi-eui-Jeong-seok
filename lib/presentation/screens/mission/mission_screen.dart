@@ -95,16 +95,13 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   Widget _buildMissionAchieversSection() {
-    const missionTitle = '삼시세끼 다 먹기';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
           '오늘의 미션 달성자',
           action: TextButton(
-            onPressed: () {
-              context.push('/mission-achievers', extra: missionTitle);
-            },
+            onPressed: () => context.push('/mission-achievers'),
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: const Size(50, 30),

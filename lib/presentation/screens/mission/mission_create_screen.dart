@@ -6,15 +6,15 @@ import 'package:ja_chwi/presentation/screens/mission/widgets/photo_upload_sectio
 import 'package:ja_chwi/presentation/screens/mission/widgets/public_toggle_switch.dart';
 
 class MissionCreateScreen extends StatefulWidget {
-  final String? missionTitle;
-
-  const MissionCreateScreen({super.key, this.missionTitle});
+  const MissionCreateScreen({super.key});
 
   @override
   State<MissionCreateScreen> createState() => _MissionCreateScreenState();
 }
 
 class _MissionCreateScreenState extends State<MissionCreateScreen> {
+  // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
+  final String _missionTitle = '삼시세끼 다 먹기';
   bool _isPublic = true;
   final List<String> _photos = []; // 사진 업로드 시뮬레이션을 위한 임시 리스트
   final TextEditingController _descriptionController = TextEditingController();
@@ -41,7 +41,7 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.missionTitle ?? '미션 인증',
+                _missionTitle,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,

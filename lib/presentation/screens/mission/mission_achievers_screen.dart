@@ -5,15 +5,15 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 
 class MissionAchieversScreen extends StatefulWidget {
-  final String? missionTitle;
-
-  const MissionAchieversScreen({super.key, this.missionTitle});
+  const MissionAchieversScreen({super.key});
 
   @override
   State<MissionAchieversScreen> createState() => MissionAchieversScreenState();
 }
 
 class MissionAchieversScreenState extends State<MissionAchieversScreen> {
+  // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
+  final String _missionTitle = '삼시세끼 다 먹기';
   int _selectedCategoryIndex = 0;
   final List<String> _categories = ['요리', '청소', '운동'];
 
@@ -135,7 +135,7 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
               text: '오늘의 미션 : ',
               style: TextStyle(color: Colors.grey[700]),
             ),
-            TextSpan(text: widget.missionTitle ?? '미션 정보 없음'),
+            TextSpan(text: _missionTitle),
           ],
         ),
       ),

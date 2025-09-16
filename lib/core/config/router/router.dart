@@ -48,28 +48,17 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/mission-create',
       name: '미션 작성',
-      builder: (context, state) {
-        final missionTitle = state.extra as String?;
-        return MissionCreateScreen(missionTitle: missionTitle);
-      },
+      builder: (context, state) => const MissionCreateScreen(),
     ),
     GoRoute(
       path: '/mission-saved-list',
       name: '미션 저장목록',
       builder: (context, state) => const MissionSavedListScreen(),
     ),
-    // GoRoute(
-    //   path: '/mission-edit',
-    //   name: '미션 수정',
-    //   builder: (context, state) => const MissionEditScreen(),
-    // ),
     GoRoute(
       path: '/mission-achievers',
       name: '미션 달성자목록',
-      builder: (context, state) {
-        final missionTitle = state.extra as String?;
-        return MissionAchieversScreen(missionTitle: missionTitle);
-      },
+      builder: (context, state) => const MissionAchieversScreen(),
     ),
     GoRoute(
       path: '/community',
