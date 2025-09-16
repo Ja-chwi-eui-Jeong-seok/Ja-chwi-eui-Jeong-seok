@@ -23,7 +23,7 @@ import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/mission',
   routes: [
     GoRoute(
       path: '/login',
@@ -48,7 +48,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/mission-create',
       name: '미션 작성',
-      builder: (context, state) => const MissionCreateScreen(),
+      builder: (context, state) {
+        final missionTitle = state.extra as String?;
+        return MissionCreateScreen(missionTitle: missionTitle);
+      },
     ),
     GoRoute(
       path: '/mission-saved-list',
@@ -63,7 +66,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/mission-achievers',
       name: '미션 달성자목록',
-      builder: (context, state) => const MissionAchieversScreen(),
+      builder: (context, state) {
+        final missionTitle = state.extra as String?;
+        return MissionAchieversScreen(missionTitle: missionTitle);
+      },
     ),
     GoRoute(
       path: '/community',

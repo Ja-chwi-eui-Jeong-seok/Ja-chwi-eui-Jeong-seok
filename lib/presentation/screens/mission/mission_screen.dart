@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_Achievers_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
+// import 'package:ja_chwi/presentation/screens/mission/mission_Achievers_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/app_bottom_navigation_bar.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/go_to_completed_button.dart';
@@ -15,7 +17,7 @@ class MissionScreen extends StatefulWidget {
 }
 
 class _MissionScreenState extends State<MissionScreen> {
-  int _currentIndex = 1; // 현재 선택된 탭 인덱스 (1: 미션)
+  int _currentIndex = 1;
 
   // 오늘의 미션 달성자 임시 데이터
   final List<Map<String, String>> _achievers = [
@@ -29,7 +31,7 @@ class _MissionScreenState extends State<MissionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: CommonAppBar(actions: [RefreshIconButton(onPressed: () {})]),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -64,30 +66,6 @@ class _MissionScreenState extends State<MissionScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      automaticallyImplyLeading: false, // 뒤로가기 버튼 자동 생성 방지
-      title: const Text(
-        '자취의 정석',
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        RefreshIconButton(
-          onPressed: () {
-            // TODO: 새로고침 로직 추가
-          },
-        ),
-      ],
-    );
-  }
-
   // 섹션 제목을 만드는 헬퍼 메소드
   Widget _buildSectionHeader(String title, {Widget? action}) {
     return Padding(
@@ -111,11 +89,7 @@ class _MissionScreenState extends State<MissionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader('오늘의 미션'),
-        const MissionCard(
-          // 미션 카드 위젯 사용 (isCompleted = false)
-          title: '삼시세끼 다 먹기',
-          tags: ['건강'],
-        ),
+        const MissionCard(title: '삼시세끼 다 먹기', tags: ['건강']),
       ],
     );
   }
@@ -129,13 +103,7 @@ class _MissionScreenState extends State<MissionScreen> {
           '오늘의 미션 달성자',
           action: TextButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      MissionAchieversScreen(missionTitle: missionTitle),
-                ),
-              );
+              context.push('/mission-achievers', extra: missionTitle);
             },
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/description_input_field.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/photo_upload_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/public_toggle_switch.dart';
@@ -26,22 +28,11 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+      appBar: CommonAppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
-        title: const Text(
-          '미션 인증하기',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -92,7 +83,7 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
         child: ElevatedButton(
           onPressed: () {
             // TODO: 미션 완료 데이터 처리 로직
-            Navigator.of(context).pop();
+            context.pop();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,

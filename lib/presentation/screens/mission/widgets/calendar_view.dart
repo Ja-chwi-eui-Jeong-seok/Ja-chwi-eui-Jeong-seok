@@ -59,7 +59,7 @@ class CalendarView extends StatelessWidget {
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                    color: Colors.red, // 마커 색상
+                    color: Colors.black, // 마커 색상
                     shape: BoxShape.circle,
                   ),
                 ),

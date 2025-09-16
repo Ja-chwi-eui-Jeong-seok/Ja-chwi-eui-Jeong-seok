@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/calendar_view.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/selected_day_mission_view.dart';
@@ -28,10 +30,10 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
   };
 
   List<dynamic> _getEventsForDay(DateTime day) {
-    // table_calendar는 local time으로 날짜를 전달하므로, UTC로 변환하여 Map의 키와 비교합니다.
+    // table_calendar는 local time으로 날짜를 전달하므로, UTC로 변환하여 Map의 키와 비교
     final date = DateTime.utc(day.year, day.month, day.day);
     if (_completedMissions.containsKey(date)) {
-      return [_completedMissions[date]!]; // 점을 표시하기 위해 리스트에 아이템을 추가합니다.
+      return [_completedMissions[date]!]; // 점을 표시하기 위해 리스트에 아이템을 추가
     }
     return [];
   }
@@ -39,29 +41,12 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+      appBar: CommonAppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
-        title: const Text(
-          '완료된 미션',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          RefreshIconButton(
-            onPressed: () {
-              // TODO: Implement refresh logic
-            },
-          ),
-        ],
+        actions: [RefreshIconButton(onPressed: () {})],
       ),
       body: SingleChildScrollView(
         child: Padding(

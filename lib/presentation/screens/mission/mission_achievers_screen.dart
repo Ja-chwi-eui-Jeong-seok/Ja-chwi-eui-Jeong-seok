@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
+import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 
 class MissionAchieversScreen extends StatefulWidget {
@@ -27,29 +29,12 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+      appBar: CommonAppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
-        title: const Text(
-          '미션 달성자',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: false,
-        actions: [
-          RefreshIconButton(
-            onPressed: () {
-              // TODO: Implement refresh logic
-            },
-          ),
-        ],
+        actions: [RefreshIconButton(onPressed: () {})],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
