@@ -21,7 +21,14 @@ class CommunityScreen extends StatelessWidget {
             ],
           ),
           bottom: const TabBar(
-            isScrollable: true,
+            indicator: UnderlineTabIndicator(
+              insets: EdgeInsets.zero,
+              borderSide: BorderSide(color: Colors.black, width: 2),
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorColor: Colors.black,
+            labelColor: Colors.black,
+            isScrollable: false,
             labelPadding: EdgeInsets.symmetric(horizontal: 16),
             indicatorWeight: 3,
             tabs: [
@@ -29,12 +36,13 @@ class CommunityScreen extends StatelessWidget {
               Tab(text: '청소'),
               Tab(text: '운동'),
               Tab(text: '미션'),
-              Tab(text: '자유'),
+              Tab(child: Text('자유')),
             ],
           ),
         ),
         body: const TabBarView(
           children: [
+            //TODO:카테고리템 이름, 게시글 리스트
             _CategoryTab(),
             _CategoryTab(),
             _CategoryTab(),
