@@ -8,7 +8,7 @@ import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
 import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_achievers_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_create_screen.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
+// import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_saved_list_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
@@ -55,11 +55,11 @@ final GoRouter router = GoRouter(
       name: '미션 저장목록',
       builder: (context, state) => const MissionSavedListScreen(),
     ),
-    GoRoute(
-      path: '/mission-edit',
-      name: '미션 수정',
-      builder: (context, state) => const MissionEditScreen(),
-    ),
+    // GoRoute(
+    //   path: '/mission-edit',
+    //   name: '미션 수정',
+    //   builder: (context, state) => const MissionEditScreen(),
+    // ),
     GoRoute(
       path: '/mission-achievers',
       name: '미션 달성자목록',

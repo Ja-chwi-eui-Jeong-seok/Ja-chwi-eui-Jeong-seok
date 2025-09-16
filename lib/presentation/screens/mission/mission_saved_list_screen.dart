@@ -1,14 +1,117 @@
 import 'package:flutter/material.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/calendar_view.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/selected_day_mission_view.dart';
+import 'package:table_calendar/table_calendar.dart';
 
-class MissionSavedListScreen extends StatelessWidget {
+class MissionSavedListScreen extends StatefulWidget {
   const MissionSavedListScreen({super.key});
+
+  @override
+  State<MissionSavedListScreen> createState() => _MissionSavedListScreenState();
+}
+
+class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
+  // 날짜별 완료된 미션 데이터 (임시)
+  final Map<DateTime, Map<String, dynamic>> _completedMissions = {
+    DateTime.utc(DateTime.now().year, 9, 12): {
+      'title': '삼시세끼 다 먹기',
+      'tags': ['건강', '요리'],
+    },
+    DateTime.utc(DateTime.now().year, 9, 10): {
+      'title': '아침 9시 기상',
+      'tags': ['생활패턴'],
+    },
+  };
+
+  List<dynamic> _getEventsForDay(DateTime day) {
+    // table_calendar는 local time으로 날짜를 전달하므로, UTC로 변환하여 Map의 키와 비교합니다.
+    final date = DateTime.utc(day.year, day.month, day.day);
+    if (_completedMissions.containsKey(date)) {
+      return [_completedMissions[date]!]; // 점을 표시하기 위해 리스트에 아이템을 추가합니다.
+    }
+    return [];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('MissionSavedListScreen')),
-      body: const Center(
-        child: Text('MissionSavedListScreen Screen'),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          '완료된 미션',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          RefreshIconButton(
+            onPressed: () {
+              // TODO: Implement refresh logic
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CalendarView(
+                focusedDay: _focusedDay,
+                selectedDay: _selectedDay,
+                onDaySelected: (selectedDay, focusedDay) {
+                  if (!isSameDay(_selectedDay, selectedDay)) {
+                    setState(() {
+                      _selectedDay = selectedDay;
+                      _focusedDay = focusedDay;
+                    });
+                  }
+                },
+                eventLoader: _getEventsForDay,
+              ),
+              const SizedBox(height: 24),
+              _buildSectionHeader(
+                _selectedDay != null
+                    ? '${_selectedDay!.month}.${_selectedDay!.day} 완료 미션'
+                    : '날짜를 선택해주세요',
+              ),
+              SelectedDayMissionView(
+                selectedDay: _selectedDay,
+                completedMissions: _completedMissions,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _focusedDay;
+  }
+
+  // 섹션 제목을 만드는 헬퍼 메소드
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
