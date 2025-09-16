@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ja_chwi/core/config/router/router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,10 +11,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-
-      home: Scaffold(body: Center(child: Text('Myhome'))),
+    return MaterialApp.router(
+      routerConfig: router, // go_router
+      title: '자취의정석',
+      debugShowCheckedModeBanner: false,
     );
   }
 }
