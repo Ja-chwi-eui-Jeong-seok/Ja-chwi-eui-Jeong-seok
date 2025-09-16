@@ -5,6 +5,7 @@ class CommunityScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<String> tabs = ['자유', '요리', '청소', '운동', '미션'];
     return DefaultTabController(
       length: 5,
       child: Scaffold(
@@ -20,9 +21,9 @@ class CommunityScreen extends StatelessWidget {
               IconButton(icon: const Icon(Icons.search), onPressed: () {}),
             ],
           ),
-          bottom: const TabBar(
+          bottom: TabBar(
             indicator: UnderlineTabIndicator(
-              insets: EdgeInsets.zero,
+              //  insets: EdgeInsets.zero,
               borderSide: BorderSide(color: Colors.black, width: 2),
             ),
             indicatorSize: TabBarIndicatorSize.tab,
@@ -31,24 +32,16 @@ class CommunityScreen extends StatelessWidget {
             isScrollable: false,
             labelPadding: EdgeInsets.symmetric(horizontal: 16),
             indicatorWeight: 3,
-            tabs: [
-              Tab(text: '요리'),
-              Tab(text: '청소'),
-              Tab(text: '운동'),
-              Tab(text: '미션'),
-              Tab(child: Text('자유')),
-            ],
+            tabs: tabs.map((e) => Tab(text: e)).toList(),
           ),
         ),
-        body: const TabBarView(
-          children: [
-            //TODO:카테고리템 이름, 게시글 리스트
-            _CategoryTab(),
-            _CategoryTab(),
-            _CategoryTab(),
-            _CategoryTab(),
-            _CategoryTab(),
-          ],
+        body: TabBarView(
+          children:
+              //TODO:카테고리템 이름, 게시글 리스트
+              //TODO: 카테고리별 게시글정보들 어떻게 넣을것인지
+              tabs.map((e) {
+                return _CategoryTab(e);
+              }).toList(),
         ),
         floatingActionButton: SizedBox(
           width: 55,
@@ -69,19 +62,20 @@ class CommunityScreen extends StatelessWidget {
 }
 
 class _CategoryTab extends StatelessWidget {
-  const _CategoryTab();
+  const _CategoryTab(this.title);
+  final String title;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              const Text(
-                '제목',
+              Text(
+                title,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const Spacer(),
@@ -93,14 +87,15 @@ class _CategoryTab extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: const [
-              _PlaceholderCard(),
-              SizedBox(height: 12),
-              _PlaceholderCard(),
-              SizedBox(height: 12),
-            ],
+          child: ListView.separated(
+            padding: EdgeInsets.all(25),
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              return _PlaceholderCard();
+            },
+            separatorBuilder: (context, index) {
+              return const SizedBox(height: 12); // 아이템 사이 간격
+            },
           ),
         ),
       ],
