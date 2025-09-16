@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_saved_list_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class GoToCompletedButton extends StatelessWidget {
   const GoToCompletedButton({super.key});
@@ -7,14 +7,7 @@ class GoToCompletedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MissionSavedListScreen(),
-          ),
-        );
-      },
+      onPressed: () => context.push('/mission-saved-list'),
       style: TextButton.styleFrom(
         backgroundColor: const Color(0xD3D3D3D3),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
