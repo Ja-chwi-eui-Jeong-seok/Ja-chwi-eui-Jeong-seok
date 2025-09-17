@@ -5,9 +5,9 @@ class CommunityScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> tabs = ['자유', '요리', '청소', '운동', '미션'];
+    final List<String> tabs = ['자유', '요리', '청소', '운동', '미션', '산책'];
     return DefaultTabController(
-      length: 5,
+      length: tabs.length,
       child: Scaffold(
         appBar: AppBar(
           titleSpacing: 10,
@@ -31,7 +31,7 @@ class CommunityScreen extends StatelessWidget {
             indicatorColor: Colors.black,
             labelColor: Colors.black,
             isScrollable: false,
-            labelPadding: EdgeInsets.symmetric(horizontal: 16),
+            //labelPadding: EdgeInsets.symmetric(horizontal: 16),
             indicatorWeight: 3,
             labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             tabs: tabs.map((e) => Tab(text: e)).toList(),
