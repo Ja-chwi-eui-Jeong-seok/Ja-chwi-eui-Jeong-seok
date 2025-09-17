@@ -19,9 +19,26 @@ class CommunityDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Title',
+                  '제목',
                   textAlign: TextAlign.left,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                Divider(
+                  thickness: 2, // 선 굵기
+                  color: Color(0xFFEBEBEB), // 색상
+                ),
+                Row(
+                  children: [
+                    Container(
+                      child: Row(children: [Text('프로필이미지'), Text('작성자')]),
+                    ),
+                    Spacer(),
+                    Text('시간'),
+                  ],
+                ),
+                Divider(
+                  thickness: 2, // 선 굵기
+                  color: Color(0xFFEBEBEB), // 색상
                 ),
                 Container(
                   width: double.infinity,
@@ -56,6 +73,8 @@ class CommunityDetailScreen extends StatelessWidget {
                       //  insets: EdgeInsets.zero,
                       borderSide: BorderSide(color: Colors.black, width: 2),
                     ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Colors.black,
                     tabs: [
                       Tab(text: '최신순'),
                       Tab(text: '추천순'),
