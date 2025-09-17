@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ja_chwi/core/config/router/router.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:ja_chwi/firebase_options.dart';
 
-void main() {
+void main() async {
+  // Firebase 초기화 전에 반드시 호출되어야 함
+  WidgetsFlutterBinding.ensureInitialized();
+  // 플랫폼에 맞는 Firebase 설정을 사용하여 앱을 초기화
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
