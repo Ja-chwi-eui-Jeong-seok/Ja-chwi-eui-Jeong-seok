@@ -61,7 +61,11 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
               PhotoUploadSection(
                 photos: _photos,
                 onAddPhoto: () {
-                  setState(() => _photos.add('placeholder'));
+                  setState(() {
+                    _photos.add(
+                      'https://picsum.photos/200/300?random=${DateTime.now().millisecondsSinceEpoch}',
+                    );
+                  });
                 },
               ),
               const SizedBox(height: 24),
