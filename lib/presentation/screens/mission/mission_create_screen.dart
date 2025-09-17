@@ -13,7 +13,7 @@ class MissionCreateScreen extends StatefulWidget {
 }
 
 class _MissionCreateScreenState extends State<MissionCreateScreen> {
-  // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
+  // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 함
   final String _missionTitle = '삼시세끼 다 먹기';
   bool _isPublic = true;
   final List<String> _photos = []; // 사진 업로드 시뮬레이션을 위한 임시 리스트
