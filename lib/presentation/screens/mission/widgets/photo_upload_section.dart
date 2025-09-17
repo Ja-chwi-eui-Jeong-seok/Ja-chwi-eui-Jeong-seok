@@ -31,8 +31,8 @@ class PhotoUploadSection extends StatelessWidget {
                     margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://via.placeholder.com/80'),
+                      image: DecorationImage(
+                        image: NetworkImage(photos[index]),
                         fit: BoxFit.cover,
                       ),
                     ),

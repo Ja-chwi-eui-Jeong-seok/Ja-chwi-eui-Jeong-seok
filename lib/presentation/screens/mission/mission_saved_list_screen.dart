@@ -17,6 +17,10 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  // 임시 데이터
+  final int _totalCompletedMissions = 10;
+  final int _consecutiveSuccessDays = 4;
+
   // 날짜별 완료된 미션 데이터 (임시)
   final Map<DateTime, Map<String, dynamic>> _completedMissions = {
     DateTime.utc(DateTime.now().year, 9, 12): {
@@ -40,6 +44,12 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final daysInMonth = DateTime(
+      _focusedDay.year,
+      _focusedDay.month + 1,
+      0,
+    ).day;
+
     return Scaffold(
       appBar: CommonAppBar(
         leading: IconButton(
@@ -57,6 +67,9 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
               CalendarView(
                 focusedDay: _focusedDay,
                 selectedDay: _selectedDay,
+                totalCompletedMissions: _totalCompletedMissions,
+                daysInMonth: daysInMonth,
+                consecutiveSuccessDays: _consecutiveSuccessDays,
                 onDaySelected: (selectedDay, focusedDay) {
                   if (!isSameDay(_selectedDay, selectedDay)) {
                     setState(() {
@@ -66,6 +79,38 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
                   }
                 },
                 eventLoader: _getEventsForDay,
+                builders: CalendarBuilders(
+                  selectedBuilder: (context, day, focusedDay) {
+                    return Container(
+                      margin: const EdgeInsets.all(4.0),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        day.day.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  },
+                  markerBuilder: (context, day, events) {
+                    if (events.isNotEmpty) {
+                      // 선택된 날짜에 이벤트 마커가 있으면 색상을 흰색으로 변경하여 가시성 확보
+                      final isSelected = isSameDay(_selectedDay, day);
+                      return Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Icon(
+                          Icons.check,
+                          color: isSelected ? Colors.white : Colors.red,
+                          size: 16,
+                        ),
+                      );
+                    }
+                    return null;
+                  },
+                ),
               ),
               const SizedBox(height: 24),
               _buildSectionHeader(
