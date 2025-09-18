@@ -24,7 +24,7 @@ class ProfileGrid extends ConsumerWidget {
           SizedBox(
             height: 250,
             child: GridView.builder(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(15),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 mainAxisSpacing: 8,
