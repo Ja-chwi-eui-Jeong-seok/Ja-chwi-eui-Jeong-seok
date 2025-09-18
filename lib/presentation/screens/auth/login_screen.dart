@@ -11,7 +11,8 @@ class LoginScreen extends StatelessWidget {
     final accepted = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()),
-    ); // 로그인 성공시 개인정보처리방침 동의 여부 확인 페이지로 이동
+    );
+    // 로그인 성공시 개인정보처리방침 동의 여부 확인 페이지로 이동 + 이미 동의했으면 다시 안나타나게 만들 예정
 
     if (accepted == true) {
       // 사용자가 개인정보처리방침에 동의하면 동의 완료 후 나타나지 않게 만들 예정
@@ -33,7 +34,7 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    WaveText(text: '자취 준비중...'), // 텍스트애니메이션 넣을 예정
+                    WaveText(text: '자취의 정석 \n 시작하기'), // 텍스트애니메이션 넣을 예정
 
                     const SizedBox(height: 40),
                     Image.asset(

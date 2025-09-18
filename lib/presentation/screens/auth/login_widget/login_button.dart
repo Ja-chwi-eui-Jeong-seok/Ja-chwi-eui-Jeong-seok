@@ -20,8 +20,9 @@ class LoginButton extends StatelessWidget {
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 14),
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24), // 둥근모서리 4dp 권장
+                  borderRadius: BorderRadius.circular(24),
                   side: const BorderSide(
                     color: Colors.grey,
                     width: 1,
