@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class JachwiWidget extends StatelessWidget {
   final String text;
 
-  const JachwiWidget({required this.text, Key? key}) : super(key: key);
+  const JachwiWidget({required this.text, super.key});
 
   @override
   Widget build(BuildContext context) {
