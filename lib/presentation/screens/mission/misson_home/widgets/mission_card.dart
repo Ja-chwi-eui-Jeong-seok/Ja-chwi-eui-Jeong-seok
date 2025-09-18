@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-// import 'package:ja_chwi/presentation/screens/mission/mission_create_screen.dart'; // GoRouter로 화면을 관리하므로 직접 import할 필요가 없습니다.
-import 'custom_tag.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/custom_tag.dart';
 
 class MissionCard extends StatelessWidget {
   final String title;

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class PhotoUploadSection extends StatelessWidget {
   final List<String> photos;
   final VoidCallback onAddPhoto;
+  final Function(int) onRemovePhoto;
 
   const PhotoUploadSection({
     super.key,
     required this.photos,
     required this.onAddPhoto,
+    required this.onRemovePhoto,
   });
 
   @override
@@ -26,15 +28,40 @@ class PhotoUploadSection extends StatelessWidget {
                 itemCount: photos.length,
                 itemBuilder: (context, index) {
                   return Container(
-                    width: 80,
-                    height: 80,
                     margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(
-                        image: NetworkImage(photos[index]),
-                        fit: BoxFit.cover,
-                      ),
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            image: DecorationImage(
+                              image: NetworkImage(photos[index]),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () => onRemovePhoto(index),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },

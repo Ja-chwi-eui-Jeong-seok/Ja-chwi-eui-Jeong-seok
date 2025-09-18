@@ -49,6 +49,7 @@ class CalendarView extends StatelessWidget {
               ),
             ),
             calendarStyle: CalendarStyle(
+              outsideDaysVisible: false,
               todayDecoration: const BoxDecoration(
                 color: Colors.grey,
                 shape: BoxShape.circle,

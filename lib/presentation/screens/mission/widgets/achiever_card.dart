@@ -61,31 +61,6 @@ class AchieverCard extends StatelessWidget {
               ),
             ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              // TODO: 상세보기 화면으로 이동
-
-              // 근데 이부분 사용 안할지도
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[200],
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            child: const Row(
-              children: [
-                Text(
-                  '상세보기',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-                Icon(Icons.arrow_forward_ios, size: 12),
-              ],
-            ),
-          ),
         ],
       ),
     );
