@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
+import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -41,6 +42,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar:BottomNav(mode: BottomNavMode.tab)
     );
   }
 }

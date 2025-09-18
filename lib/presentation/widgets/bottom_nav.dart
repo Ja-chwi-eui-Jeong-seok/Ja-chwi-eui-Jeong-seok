@@ -43,27 +43,47 @@ class BottomNav extends StatelessWidget {
       '/home',
       '/mission',
       '/community',
-      '/profile',
+      '/profile-detail',
     ];
 
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: currentIndex,
-      onTap: (index) => context.go(routes[index]),
-      backgroundColor: Colors.transparent, // 배경 투명
-      elevation: 0, // 그림자 제거
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "홈"),
-        BottomNavigationBarItem(icon: Icon(Icons.assignment), label: "미션"),
-        BottomNavigationBarItem(icon: Icon(Icons.group), label: "커뮤니티"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "내 정보"),
-      ],
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(
+            color: Colors.grey, // 테두리 색
+            width: 2,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: currentIndex,
+            onTap: (index) => context.go(routes[index]),
+            selectedItemColor: Colors.red,      // 선택된 아이콘 + 텍스트 색상
+            unselectedItemColor: Colors.grey,   // 선택되지 않은 아이콘 색상
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home_outlined, size: 30.0), label: "홈"),
+              BottomNavigationBarItem(icon: Icon(Icons.article_outlined, size: 30.0), label: "미션"),
+              BottomNavigationBarItem(icon: Icon(Icons.groups_outlined, size: 30.0), label: "커뮤니티"),
+              BottomNavigationBarItem(icon: Icon(Icons.person_rounded, size: 30.0), label: "내 정보"),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-    final routes = ['/home', '/mission', '/community', '/profile'];
+    final routes = ['/home', '/mission', '/community', '/profile-detail'];
     final index = routes.indexWhere((route) => location.startsWith(route));
     return index != -1 ? index : 0;
   }
@@ -71,14 +91,14 @@ class BottomNav extends StatelessWidget {
   Widget _buildConfirmNav(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: ElevatedButton(
+      child: OutlinedButton(
         onPressed: () {
           if (confirmRoute != null) {
             context.go(confirmRoute!);
           }
         },
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size.fromHeight(50),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(70),
         ),
         child: const Text('확인'),
       ),
