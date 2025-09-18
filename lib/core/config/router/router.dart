@@ -9,7 +9,7 @@ import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers
 import 'package:ja_chwi/presentation/screens/mission/create/mission_create_screen.dart';
 // import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_list_screen.dart';
-import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_home_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
 import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
@@ -44,7 +44,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/mission',
       name: '미션',
-      builder: (context, state) => const MissionScreen(),
+      builder: (context, state) => const MissionHomeScreen(),
     ),
     GoRoute(
       path: '/mission-create',
