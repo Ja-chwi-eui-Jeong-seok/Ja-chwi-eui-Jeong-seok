@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "thumbUrl": "assets/images/m_profile/m_black.png",
+    "fullUrl": "assets/images/profile/black.png"
+  }, 
+  {
+    "id": "2",
+    "thumbUrl": "assets/images/m_profile/m_red.png",
+    "fullUrl": "assets/images/profile/red.png"
+  }, 
+  {
+    "id": "3",
+    "thumbUrl": "assets/images/m_profile/m_orange.png",
+    "fullUrl": "assets/images/profile/orange.png"
+  }, 
+  {
+    "id": "4",
+    "thumbUrl": "assets/images/m_profile/m_banana.png",
+    "fullUrl": "assets/images/profile/banana.png"
+  }, 
+  {
+    "id": "5",
+    "thumbUrl": "assets/images/m_profile/m_night_blu.png",
+    "fullUrl": "assets/images/profile/night_blu.png"
+  }, 
+  {
+    "id": "6",
+    "thumbUrl": "assets/images/m_profile/m_sky_blu.png",
+    "fullUrl": "assets/images/profile/sky_blu.png"
+  }, 
+  {
+    "id": "7",
+    "thumbUrl": "assets/images/m_profile/m_white.png",
+    "fullUrl": "assets/images/profile/white.png"
+  }, 
+  {
+    "id": "8",
+    "thumbUrl": "assets/images/m_profile/m_rainbow.png",
+    "fullUrl": "assets/images/profile/rainbow.png"
+  }
+]
