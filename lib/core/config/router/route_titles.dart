@@ -15,6 +15,7 @@ class RouteTitles {
     '/community-detail': '커뮤니티 상세',
     '/community-create': '커뮤니티 작성',
     '/profile': '프로필',   
+    '/profile-detail': '프로필 상세', 
     '/admin': '관리자',   
     '/report': '신고 내역',    
     '/report-detail': '신고내역 상세',
