@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_achiever.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
 
 class AchieversList extends StatelessWidget {
-  final List<Map<String, String>> achievers;
+  final List<MissionAchiever> achievers;
 
   const AchieversList({super.key, required this.achievers});
 
@@ -13,7 +14,11 @@ class AchieversList extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final achiever = achievers[index];
-        return AchieverCard(name: achiever['name']!, time: achiever['time']!);
+        return AchieverCard(
+          name: achiever.name,
+          time: achiever.time,
+          level: achiever.level,
+        );
       },
     );
   }
