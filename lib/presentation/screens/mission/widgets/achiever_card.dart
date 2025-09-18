@@ -46,7 +46,7 @@ class AchieverCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
-                      fontSize: 12,
+                      fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -54,7 +54,7 @@ class AchieverCard extends StatelessWidget {
                     name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 18,
                     ),
                   ),
                 ],

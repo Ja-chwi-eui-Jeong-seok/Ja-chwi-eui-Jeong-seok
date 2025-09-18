@@ -9,14 +9,14 @@ import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 
-class MissionScreen extends StatefulWidget {
-  const MissionScreen({super.key});
+class MissionHomeScreen extends StatefulWidget {
+  const MissionHomeScreen({super.key});
 
   @override
-  State<MissionScreen> createState() => _MissionScreenState();
+  State<MissionHomeScreen> createState() => _MissionHomeScreenState();
 }
 
-class _MissionScreenState extends State<MissionScreen> {
+class _MissionHomeScreenState extends State<MissionHomeScreen> {
   int _currentIndex = 1;
 
   // 오늘의 미션 달성자 임시 데이터
