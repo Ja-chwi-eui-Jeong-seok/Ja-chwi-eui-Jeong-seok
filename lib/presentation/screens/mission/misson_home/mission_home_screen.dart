@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-// import 'package:ja_chwi/presentation/screens/mission/mission_Achievers_screen.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
-import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/app_bottom_navigation_bar.dart';
+import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/go_to_completed_button.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
+import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class MissionHomeScreen extends StatefulWidget {
   const MissionHomeScreen({super.key});
@@ -17,17 +17,6 @@ class MissionHomeScreen extends StatefulWidget {
 }
 
 class _MissionHomeScreenState extends State<MissionHomeScreen> {
-  int _currentIndex = 1;
-
-  // 오늘의 미션 달성자 임시 데이터
-  final List<Map<String, String>> _achievers = [
-    {'name': '집인데 집가고 싶다님', 'time': '08:12 완료'},
-    {'name': '아니 아님', 'time': '09:12 완료'},
-    {'name': '뿌뿌로', 'time': '10:12 완료'},
-    {'name': '네번째 달성자', 'time': '11:00 완료'},
-    {'name': '다섯번째 달성자', 'time': '12:00 완료'},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,16 +42,7 @@ class _MissionHomeScreenState extends State<MissionHomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        // 임시 네비게이터임
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-            // TODO: 각 탭에 대한 화면 전환 로직 추가
-          });
-        },
-      ),
+      bottomNavigationBar: const BottomNav(mode: BottomNavMode.tab),
     );
   }
 
@@ -122,13 +102,14 @@ class _MissionHomeScreenState extends State<MissionHomeScreen> {
           ),
           child: Column(
             children: [
-              for (int i = 0; i < _achievers.take(3).length; i++) ...[
+              for (int i = 0; i < mockAllAchievers.take(3).length; i++) ...[
                 AchieverCard(
-                  name: _achievers[i]['name']!,
-                  time: _achievers[i]['time']!,
+                  level: mockAllAchievers[i]['level']!,
+                  name: mockAllAchievers[i]['name']!,
+                  time: mockAllAchievers[i]['time']!,
                   backgroundColor: Colors.white,
                 ),
-                if (i < _achievers.take(3).length - 1)
+                if (i < mockAllAchievers.take(3).length - 1)
                   const SizedBox(height: 8),
               ],
             ],
