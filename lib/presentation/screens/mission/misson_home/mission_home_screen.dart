@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_achiever.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/go_to_completed_button.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
@@ -9,16 +11,12 @@ import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart'
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
-class MissionHomeScreen extends StatefulWidget {
+class MissionHomeScreen extends ConsumerWidget {
   const MissionHomeScreen({super.key});
 
   @override
-  State<MissionHomeScreen> createState() => _MissionHomeScreenState();
-}
-
-class _MissionHomeScreenState extends State<MissionHomeScreen> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final achievers = ref.watch(achieversProvider);
     return Scaffold(
       appBar: CommonAppBar(actions: [RefreshIconButton(onPressed: () {})]),
       body: SingleChildScrollView(
@@ -34,9 +32,9 @@ class _MissionHomeScreenState extends State<MissionHomeScreen> {
                 children: [const ProfileSection(), const GoToCompletedButton()],
               ),
               const SizedBox(height: 32),
-              _buildTodayMissionSection(),
+              _buildTodayMissionSection(context),
               const SizedBox(height: 32),
-              _buildMissionAchieversSection(),
+              _buildMissionAchieversSection(context, achievers),
               const SizedBox(height: 40),
             ],
           ),
@@ -46,7 +44,11 @@ class _MissionHomeScreenState extends State<MissionHomeScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, {Widget? action}) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    Widget? action,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -63,21 +65,25 @@ class _MissionHomeScreenState extends State<MissionHomeScreen> {
     );
   }
 
-  Widget _buildTodayMissionSection() {
+  Widget _buildTodayMissionSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('오늘의 미션'),
+        _buildSectionHeader(context, '오늘의 미션'),
         const MissionCard(title: '삼시세끼 다 먹기', tags: ['건강']),
       ],
     );
   }
 
-  Widget _buildMissionAchieversSection() {
+  Widget _buildMissionAchieversSection(
+    BuildContext context,
+    List<MissionAchiever> mockAllAchievers,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
+          context,
           '오늘의 미션 달성자',
           action: TextButton(
             onPressed: () => context.push('/mission-achievers'),
@@ -104,9 +110,9 @@ class _MissionHomeScreenState extends State<MissionHomeScreen> {
             children: [
               for (int i = 0; i < mockAllAchievers.take(3).length; i++) ...[
                 AchieverCard(
-                  level: mockAllAchievers[i]['level']!,
-                  name: mockAllAchievers[i]['name']!,
-                  time: mockAllAchievers[i]['time']!,
+                  level: mockAllAchievers[i].level,
+                  name: mockAllAchievers[i].name,
+                  time: mockAllAchievers[i].time,
                   backgroundColor: Colors.white,
                 ),
                 if (i < mockAllAchievers.take(3).length - 1)

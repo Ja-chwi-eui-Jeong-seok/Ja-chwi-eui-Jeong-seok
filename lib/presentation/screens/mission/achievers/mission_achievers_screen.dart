@@ -1,34 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/achievers/widgets/category_tabs.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_achiever.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 
-// TODO: 실제 데이터는 서버에서 가져오도록 리팩토링해야 합니다.
-final List<Map<String, String>> mockAllAchievers = [
-  {'name': '집인데 집가고 싶다님', 'time': '08:12 완료', 'level': 'Lv.15'},
-  {'name': '아니 아님', 'time': '09:12 완료', 'level': 'Lv.10'},
-  {'name': '뿌뿌로', 'time': '10:12 완료', 'level': 'Lv.5'},
-  {'name': '네번째 달성자', 'time': '11:00 완료', 'level': 'Lv.4'},
-  {'name': '다섯번째 달성자', 'time': '12:00 완료', 'level': 'Lv.3'},
-  {'name': '여섯번째 달성자', 'time': '13:00 완료', 'level': 'Lv.2'},
-];
-
-class MissionAchieversScreen extends StatefulWidget {
+class MissionAchieversScreen extends ConsumerStatefulWidget {
   const MissionAchieversScreen({super.key});
 
   @override
-  State<MissionAchieversScreen> createState() => MissionAchieversScreenState();
+  ConsumerState<MissionAchieversScreen> createState() =>
+      MissionAchieversScreenState();
 }
 
-class MissionAchieversScreenState extends State<MissionAchieversScreen> {
+class MissionAchieversScreenState
+    extends ConsumerState<MissionAchieversScreen> {
   // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
   int _selectedCategoryIndex = 0;
   final List<String> _categories = ['요리', '청소', '운동'];
 
   @override
   Widget build(BuildContext context) {
+    final achievers = ref.watch(achieversProvider);
+
     return Scaffold(
       appBar: CommonAppBar(
         leading: IconButton(
@@ -53,17 +50,17 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
               },
             ),
             const SizedBox(height: 24),
-            _buildRankingSection(),
+            _buildRankingSection(achievers),
             const SizedBox(height: 24),
             Expanded(
               child: ListView.separated(
-                itemCount: mockAllAchievers.length,
+                itemCount: achievers.length,
                 itemBuilder: (context, index) {
-                  final achiever = mockAllAchievers[index];
+                  final achiever = achievers[index];
                   return AchieverCard(
-                    level: achiever['level']!,
-                    name: achiever['name']!,
-                    time: achiever['time']!,
+                    level: achiever.level,
+                    name: achiever.name,
+                    time: achiever.time,
                   );
                 },
                 separatorBuilder: (context, index) => const SizedBox(height: 8),
@@ -75,28 +72,30 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
     );
   }
 
-  Widget _buildRankingSection() {
+  Widget _buildRankingSection(List<MissionAchiever> mockAllAchievers) {
     // TODO: 실제 랭킹 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
     // UI 레이아웃 순서(2위, 1위, 3위)에 맞게 데이터를 재구성합니다.
+    // 데이터가 3개 미만일 경우 에러 방지
+    if (mockAllAchievers.length < 3) return const SizedBox.shrink();
     final topRankers = [
       {
         'rank': 2,
-        'name': mockAllAchievers[1]['name'],
-        'level': mockAllAchievers[1]['level'],
+        'name': mockAllAchievers[1].name,
+        'level': mockAllAchievers[1].level,
         'size': 80.0,
         'isFirst': false,
       },
       {
         'rank': 1,
-        'name': mockAllAchievers[0]['name'],
-        'level': mockAllAchievers[0]['level'],
+        'name': mockAllAchievers[0].name,
+        'level': mockAllAchievers[0].level,
         'size': 100.0,
         'isFirst': true,
       },
       {
         'rank': 3,
-        'name': mockAllAchievers[2]['name'],
-        'level': mockAllAchievers[2]['level'],
+        'name': mockAllAchievers[2].name,
+        'level': mockAllAchievers[2].level,
         'size': 80.0,
         'isFirst': false,
       },
