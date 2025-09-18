@@ -34,6 +34,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // 앱의 전체적인 배경색을 흰색으로 설정
         scaffoldBackgroundColor: Colors.white,
+        // 스크롤 시 AppBar 색상이 변하는 것을 방지하기 위한 글로벌 테마 설정
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white, // Scaffold 배경색과 동일하게 설정
+          surfaceTintColor: Colors.transparent, // 스크롤 시 색상 변경 효과 제거
+          elevation: 0, // AppBar의 그림자 제거
+        ),
       ),
       routerConfig: router,
     );

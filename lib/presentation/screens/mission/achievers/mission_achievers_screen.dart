@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/screens/mission/achievers/widgets/achievers_list.dart';
 import 'package:ja_chwi/presentation/screens/mission/achievers/widgets/category_tabs.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
+
+// TODO: 실제 데이터는 서버에서 가져오도록 리팩토링해야 합니다.
+final List<Map<String, String>> mockAllAchievers = [
+  {'name': '집인데 집가고 싶다님', 'time': '08:12 완료', 'level': 'Lv.15'},
+  {'name': '아니 아님', 'time': '09:12 완료', 'level': 'Lv.10'},
+  {'name': '뿌뿌로', 'time': '10:12 완료', 'level': 'Lv.5'},
+  {'name': '네번째 달성자', 'time': '11:00 완료', 'level': 'Lv.4'},
+  {'name': '다섯번째 달성자', 'time': '12:00 완료', 'level': 'Lv.3'},
+  {'name': '여섯번째 달성자', 'time': '13:00 완료', 'level': 'Lv.2'},
+];
 
 class MissionAchieversScreen extends StatefulWidget {
   const MissionAchieversScreen({super.key});
@@ -16,15 +26,6 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
   // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
   int _selectedCategoryIndex = 0;
   final List<String> _categories = ['요리', '청소', '운동'];
-
-  final List<Map<String, String>> _allAchievers = [
-    {'name': '집인데 집가고 싶다님', 'time': '08:12 완료'},
-    {'name': '아니 아님', 'time': '09:12 완료'},
-    {'name': '뿌뿌로', 'time': '10:12 완료'},
-    {'name': '네번째 달성자', 'time': '11:00 완료'},
-    {'name': '다섯번째 달성자', 'time': '12:00 완료'},
-    {'name': '여섯번째 달성자', 'time': '13:00 완료'},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,20 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
             const SizedBox(height: 24),
             _buildRankingSection(),
             const SizedBox(height: 24),
-            Expanded(child: AchieversList(achievers: _allAchievers)),
+            Expanded(
+              child: ListView.separated(
+                itemCount: mockAllAchievers.length,
+                itemBuilder: (context, index) {
+                  final achiever = mockAllAchievers[index];
+                  return AchieverCard(
+                    level: achiever['level']!,
+                    name: achiever['name']!,
+                    time: achiever['time']!,
+                  );
+                },
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
+              ),
+            ),
           ],
         ),
       ),
@@ -63,25 +77,26 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
 
   Widget _buildRankingSection() {
     // TODO: 실제 랭킹 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
+    // UI 레이아웃 순서(2위, 1위, 3위)에 맞게 데이터를 재구성합니다.
     final topRankers = [
       {
         'rank': 2,
-        'name': '아니 아님',
-        'level': 'Lv.15',
+        'name': mockAllAchievers[1]['name'],
+        'level': mockAllAchievers[1]['level'],
         'size': 80.0,
         'isFirst': false,
       },
       {
         'rank': 1,
-        'name': '집인데 집가고 싶다님',
-        'level': 'Lv.20',
+        'name': mockAllAchievers[0]['name'],
+        'level': mockAllAchievers[0]['level'],
         'size': 100.0,
         'isFirst': true,
       },
       {
         'rank': 3,
-        'name': '뿌뿌로',
-        'level': 'Lv.10',
+        'name': mockAllAchievers[2]['name'],
+        'level': mockAllAchievers[2]['level'],
         'size': 80.0,
         'isFirst': false,
       },
@@ -129,12 +144,12 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
           alignment: Alignment.center,
           children: [
             Container(
-              width: circleSize,
-              height: circleSize,
+              width: circleSize * 1.2,
+              height: circleSize * 1.2,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.grey[200],
-                border: Border.all(color: medalColor, width: 4),
+                border: Border.all(color: medalColor, width: 4), // 랭킹 테두리 색
               ),
               child: Icon(
                 Icons.person_outline,
@@ -167,7 +182,7 @@ class MissionAchieversScreenState extends State<MissionAchieversScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        Text(level, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(level, style: const TextStyle(fontSize: 12, color: Colors.black)),
         const SizedBox(height: 4),
         Text(
           name,

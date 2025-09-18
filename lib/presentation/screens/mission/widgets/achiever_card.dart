@@ -4,12 +4,14 @@ class AchieverCard extends StatelessWidget {
   final String name;
   final String time;
   final Color? backgroundColor;
+  final String level;
 
   const AchieverCard({
     super.key,
     required this.name,
     required this.time,
     this.backgroundColor,
+    required this.level,
   });
 
   @override
@@ -41,9 +43,9 @@ class AchieverCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'LV.1', // 임시 레벨
-                    style: TextStyle(
+                  Text(
+                    level,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                       fontSize: 16,
@@ -61,6 +63,7 @@ class AchieverCard extends StatelessWidget {
               ),
             ],
           ),
+          // Text(time, style: const TextStyle(color: Colors.grey, fontSize: 14)),
         ],
       ),
     );
