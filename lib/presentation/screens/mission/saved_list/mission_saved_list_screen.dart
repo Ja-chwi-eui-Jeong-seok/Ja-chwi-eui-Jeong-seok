@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/calendar_view.dart';
+import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/calendar_view.dart';
+import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/completed_mission_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/selected_day_mission_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MissionSavedListScreen extends StatefulWidget {
@@ -26,10 +26,21 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
     DateTime.utc(DateTime.now().year, 9, 12): {
       'title': '삼시세끼 다 먹기',
       'tags': ['건강', '요리'],
+      'photos': [
+        'https://picsum.photos/200/300?random=1',
+        'https://picsum.photos/200/300?random=2',
+        'https://picsum.photos/200/300?random=3',
+      ],
+      'isPublic': true,
+      'description':
+          '오늘은 직접 요리해서 삼시세끼를 모두 챙겨 먹었습니다. 점심에는 김치찌개, 저녁에는 된장찌개를 만들었어요. 아주 뿌듯한 하루입니다! 앞으로도 꾸준히 실천해야겠어요.',
     },
     DateTime.utc(DateTime.now().year, 9, 10): {
       'title': '아침 9시 기상',
       'tags': ['생활패턴'],
+      'photos': ['https://picsum.photos/200/300?random=4'],
+      'isPublic': false,
+      'description': '겨우 일어났다. 너무 피곤하다.',
     },
   };
 
@@ -99,12 +110,18 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
                       // 선택된 날짜에 이벤트 마커가 있으면 색상을 흰색으로 변경하여 가시성 확보
                       final isSelected = isSameDay(_selectedDay, day);
                       return Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Icon(
-                          Icons.check,
-                          color: isSelected ? Colors.white : Colors.red,
-                          size: 16,
+                        top: 2,
+                        left: 4,
+                        right: 0,
+                        child: Center(
+                          child: Text(
+                            '✓', // 바꿀예정
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.red,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ),
                       );
                     }
@@ -113,12 +130,7 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildSectionHeader(
-                _selectedDay != null
-                    ? '${_selectedDay!.month}.${_selectedDay!.day} 완료 미션'
-                    : '날짜를 선택해주세요',
-              ),
-              SelectedDayMissionView(
+              CompletedMissionSection(
                 selectedDay: _selectedDay,
                 completedMissions: _completedMissions,
               ),
@@ -133,16 +145,5 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
-  }
-
-  // 섹션 제목을 만드는 헬퍼 메소드
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-    );
   }
 }

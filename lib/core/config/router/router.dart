@@ -6,11 +6,11 @@ import 'package:ja_chwi/presentation/screens/community/community_create_screen.d
 import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
 import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_achievers_screen.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_create_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/create/mission_create_screen.dart';
 // import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_saved_list_screen.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_list_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 
 // AppBar 타이틀

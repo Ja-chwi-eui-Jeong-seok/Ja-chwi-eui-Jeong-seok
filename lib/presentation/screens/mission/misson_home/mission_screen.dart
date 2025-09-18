@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 // import 'package:ja_chwi/presentation/screens/mission/mission_Achievers_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/app_bottom_navigation_bar.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/go_to_completed_button.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/mission_card.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/profile_section.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/app_bottom_navigation_bar.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/go_to_completed_button.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission_card.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 
 class MissionScreen extends StatefulWidget {
@@ -66,7 +66,6 @@ class _MissionScreenState extends State<MissionScreen> {
     );
   }
 
-  // 섹션 제목을 만드는 헬퍼 메소드
   Widget _buildSectionHeader(String title, {Widget? action}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),

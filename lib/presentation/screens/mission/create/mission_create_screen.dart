@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/description_input_field.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/photo_upload_section.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/public_toggle_switch.dart';
+import 'package:ja_chwi/presentation/screens/mission/create/widgets/description_input_field.dart';
+import 'package:ja_chwi/presentation/screens/mission/create/widgets/photo_upload_section.dart';
+import 'package:ja_chwi/presentation/screens/mission/create/widgets/public_toggle_switch.dart';
 
 class MissionCreateScreen extends StatefulWidget {
   const MissionCreateScreen({super.key});
@@ -13,11 +13,37 @@ class MissionCreateScreen extends StatefulWidget {
 }
 
 class _MissionCreateScreenState extends State<MissionCreateScreen> {
-  // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 함
-  final String _missionTitle = '삼시세끼 다 먹기';
+  String _missionTitle = '';
   bool _isPublic = true;
-  final List<String> _photos = []; // 사진 업로드 시뮬레이션을 위한 임시 리스트
+  List<String> _photos = [];
   final TextEditingController _descriptionController = TextEditingController();
+  bool _isInitialized = false;
+  bool _isEditing = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 위젯 트리에서 여러 번 호출될 수 있으므로, 초기화는 한 번만 수행
+    if (_isInitialized) return;
+
+    final extra = GoRouterState.of(context).extra;
+    if (extra is Map<String, dynamic>) {
+      // 수정 모드
+      _isEditing = true;
+      final missionData = extra;
+      _missionTitle = missionData['title'] as String? ?? '';
+      _isPublic = missionData['isPublic'] as bool? ?? true;
+      _photos = List<String>.from(missionData['photos'] as List? ?? []);
+      _descriptionController.text = missionData['description'] as String? ?? '';
+    } else if (extra is String) {
+      // 생성 모드 (템플릿 제목 전달)
+      _missionTitle = extra;
+    } else {
+      // 기본 생성 모드 (임시)
+      _missionTitle = '삼시세끼 다 먹기';
+    }
+    _isInitialized = true;
+  }
 
   @override
   void dispose() {
@@ -67,6 +93,11 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
                     );
                   });
                 },
+                onRemovePhoto: (index) {
+                  setState(() {
+                    _photos.removeAt(index);
+                  });
+                },
               ),
               const SizedBox(height: 24),
 
@@ -99,7 +130,10 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
             side: BorderSide(color: Colors.grey.shade300),
             elevation: 0,
           ),
-          child: const Text('확인', style: TextStyle(fontSize: 18)),
+          child: Text(
+            _isEditing ? '수정하기' : '확인',
+            style: const TextStyle(fontSize: 18),
+          ),
         ),
       ),
     );
