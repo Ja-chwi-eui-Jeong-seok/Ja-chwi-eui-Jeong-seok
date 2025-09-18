@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
+import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,7 +9,16 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('자취의 정석')),
+      appBar: AppBar(
+        title: const Text(
+          '자취의 정석',
+          style: TextStyle(
+            fontFamily: 'GamjaFlower',
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           const HomeBackground(),
