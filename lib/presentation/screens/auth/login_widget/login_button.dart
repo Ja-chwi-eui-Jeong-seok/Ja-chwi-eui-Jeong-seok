@@ -20,8 +20,11 @@ class LoginButton extends StatelessWidget {
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4), // 둥근모서리 4dp 권장
-                  side: const BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(24), // 둥근모서리 4dp 권장
+                  side: const BorderSide(
+                    color: Colors.grey,
+                    width: 1,
+                  ), // 외부 테두리
                 ),
               ),
               onPressed: () async {
@@ -29,14 +32,11 @@ class LoginButton extends StatelessWidget {
                 GoogleSignIn googleSignIn = GoogleSignIn();
                 await googleSignIn.signIn();
               },
-              icon: Image.asset(
-                'assets/android_neutral_rd_na@4x.png',
-                height: 18,
-              ),
+              icon: Image.asset('assets/images/google.png', height: 18),
               label: const Text(
                 'Sign in with Google',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.w500,
                 ),
@@ -52,13 +52,13 @@ class LoginButton extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey, width: 1), // 외부 테두리
-                borderRadius: BorderRadius.circular(4), // 버튼 모서리와 일치
+                borderRadius: BorderRadius.circular(24), // 버튼 모서리와 일치
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4), // Apple 권장 범위 4~8dp
                 child: SignInWithAppleButton(
                   style: SignInWithAppleButtonStyle.white, // 흰색 버튼, Apple 권장
-                  borderRadius: BorderRadius.circular(4), // 내부 버튼 모서리와 동일하게
+                  borderRadius: BorderRadius.circular(24), // 내부 버튼 모서리와 동일하게
                   onPressed: () async {
                     // Firebase Auth 등 연동
                     final credential =

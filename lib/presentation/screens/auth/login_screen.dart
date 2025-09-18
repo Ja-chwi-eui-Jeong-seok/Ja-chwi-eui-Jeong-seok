@@ -37,7 +37,8 @@ class LoginScreen extends StatelessWidget {
 
                     const SizedBox(height: 40),
                     Image.asset(
-                      'assets/change_image/black.png',
+                      'assets/images/profile_img/black.png',
+                      width: 150,
                       height: 150,
                     ), // 캐릭터이미지
                   ],
