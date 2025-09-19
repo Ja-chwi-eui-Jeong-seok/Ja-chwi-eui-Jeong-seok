@@ -21,7 +21,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
   void submit() {
     final text = commentController.text.trim();
     print(text);
-    //firebase 게시글 키를 가지고 댓글에
+    //firebase 게시글 키를 가지고 댓글 등록
   }
 
   @override
@@ -162,84 +162,94 @@ class CommentWrite extends StatelessWidget {
       child: Material(
         elevation: 8,
         type: MaterialType.transparency, // Material은 투명
-        child: Ink(
-          // 여기서 gradient 적용
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromARGB(0, 255, 255, 255),
-                Colors.white,
-                Colors.white,
-                Colors.white,
-                Colors.white,
-              ],
-            ),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.all(25),
-
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 36,
-                    width: 36,
-                    child: Image.asset('assets/images/m_profile/m_black.png'),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Column(
+            children: [
+              //투명화
+              Container(
+                height: 50,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color.fromARGB(0, 255, 255, 255), Colors.white],
                   ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(),
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            // TextFormField 필수
-                            child: TextFormField(
-                              controller: commentController,
-                              minLines: 1,
-                              maxLines: 6, // 자동 줄 증가
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '댓글을 입력하세요',
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            height: 46,
-                            width: 64,
-                            child: GestureDetector(
-                              onTap: submit,
-                              child: Center(
-                                child: Text(
-                                  '확인',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              //SizedBox(height: 50),
+              Container(
+                decoration: BoxDecoration(color: Colors.white),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 25,
+                    top: 25,
+                    right: 25,
+                    bottom: 25,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 36,
+                        width: 36,
+                        child: Image.asset(
+                          'assets/images/m_profile/m_black.png',
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(),
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                // TextFormField 필수
+                                child: TextFormField(
+                                  controller: commentController,
+                                  minLines: 1,
+                                  maxLines: 6, // 자동 줄 증가
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: '댓글을 입력하세요',
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                height: 46,
+                                width: 64,
+                                child: GestureDetector(
+                                  onTap: submit,
+                                  child: Center(
+                                    child: Text(
+                                      '확인',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -275,6 +285,9 @@ class CommentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      //스크롤 못하게
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       itemCount: itemCount,
       //itemExtent: 80, // 고정 높이로 성능 향상
