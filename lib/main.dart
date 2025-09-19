@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/core/config/router/router.dart';
-import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
-import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
+import 'package:ja_chwi/core/config/theme/app_theme.dart';
+// import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
+// import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -15,10 +16,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: router, // go_router
-      title: '자취의정석',
+
+      routerConfig: router,
+      title: '자취의 정석',
       debugShowCheckedModeBanner: false,
+
+      // 테마 및 로컬라이제이션 설정
+      theme: AppTheme.lightTheme,
+      localizationsDelegates: AppTheme.localizationsDelegates,
+      supportedLocales: AppTheme.supportedLocales,
+      locale: const Locale('ko', 'KR'),
     );
-    // return MaterialApp(home: HomeScreen());
+
   }
 }

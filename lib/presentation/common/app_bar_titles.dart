@@ -4,15 +4,26 @@ import 'package:ja_chwi/core/config/router/route_titles.dart';
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final Widget? leading;
+  final double? titleSpacing;
+  final TextStyle? titleTextStyle;
+  final bool? centerTitle;
 
-  const CommonAppBar({super.key, this.actions, this.leading});
+  const CommonAppBar({
+    super.key,
+    this.actions,
+    this.leading,
+    this.titleSpacing,
+    this.centerTitle,
+    this.titleTextStyle,
+  });
 
   @override
   Widget build(BuildContext context) {
     final title = RouteTitles.of(context);
     return AppBar(
-      title: Text(title),
-      //centerTitle: true,
+      title: Text(title, style: titleTextStyle),
+      titleSpacing: titleSpacing,
+      centerTitle: centerTitle,
       actions: actions,
       leading: leading,
     );

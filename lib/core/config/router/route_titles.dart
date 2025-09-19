@@ -8,17 +8,17 @@ class RouteTitles {
     '/home': '메인',
     '/mission': '미션',
     '/mission-create': '미션 작성',
-    '/mission-saved-list': '미션 저장목록',
+    '/mission-saved-list': '자취의 정석',
     '/mission-edit': '미션 수정',
     '/mission-achievers': '미션 달성자목록',
     '/community': '커뮤니티',
     '/community-detail': '커뮤니티 상세',
     '/community-create': '커뮤니티 작성',
-    '/profile': '프로필',   
-    '/admin': '관리자',   
-    '/report': '신고 내역',    
+    '/profile': '프로필',
+    '/profile-detail': '프로필 상세',
+    '/admin': '관리자',
+    '/report': '신고 내역',
     '/report-detail': '신고내역 상세',
-    
   };
 
   static String of(BuildContext context) {
