@@ -13,9 +13,9 @@ class ProfileHeader extends ConsumerWidget {
         // 1️⃣ FittedBox로 이미지 최대화
         SizedBox(
           width: double.infinity,
-          height: 380, // 상단 이미지 영역 높이
+          height: 300, // 상단 이미지 영역 높이
           child: Transform.scale(
-              scale: 0.5, // 80% 크기
+              scale: 0.6, // 80% 크기
                 child: FittedBox(
                   fit: BoxFit.contain,  // 비율 유지하며 최대 영역
                   alignment: Alignment.center,
@@ -29,7 +29,7 @@ class ProfileHeader extends ConsumerWidget {
         // 2️⃣ 이미지 위 텍스트
         Positioned(
           left: 80,
-          bottom: 320,
+          bottom: 250,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
