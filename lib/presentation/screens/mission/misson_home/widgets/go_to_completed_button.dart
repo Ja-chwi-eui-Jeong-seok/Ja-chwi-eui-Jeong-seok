@@ -9,12 +9,12 @@ class GoToCompletedButton extends StatelessWidget {
     return TextButton(
       onPressed: () => context.push('/mission-saved-list'),
       style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 20),
         backgroundColor: const Color(0xD3D3D3D3),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       child: const Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             '완료된 미션 보러가기',

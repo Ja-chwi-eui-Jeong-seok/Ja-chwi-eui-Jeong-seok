@@ -26,11 +26,7 @@ class MissionHomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [const ProfileSection(), const GoToCompletedButton()],
-              ),
+              const ProfileSection(),
               const SizedBox(height: 32),
               _buildTodayMissionSection(context),
               const SizedBox(height: 32),
@@ -57,7 +53,7 @@ class MissionHomeScreen extends ConsumerWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           if (action != null) action,
         ],
@@ -71,6 +67,8 @@ class MissionHomeScreen extends ConsumerWidget {
       children: [
         _buildSectionHeader(context, '오늘의 미션'),
         const MissionCard(title: '삼시세끼 다 먹기', tags: ['건강']),
+        const SizedBox(height: 12),
+        const SizedBox(width: double.infinity, child: GoToCompletedButton()),
       ],
     );
   }
