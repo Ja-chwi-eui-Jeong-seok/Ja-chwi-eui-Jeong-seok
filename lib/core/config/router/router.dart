@@ -15,6 +15,7 @@ import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
 import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
+import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 // AppBar 타이틀
 // GoRouter는 현재 라우트 정보를 GoRouterState.of(context)로 제공한다.
 // 그 안의 matchedLocation이나 uri를 읽으면 현재 경로(/mission-create 등)를 얻을 수 있다.
@@ -25,10 +26,15 @@ import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-
   initialLocation: '/profile',
 
+
   routes: [
+    GoRoute(
+      path: '/splash',
+      name: '스플레시',
+      builder: (context, state) => const SplashScreen(),
+    ),
     GoRoute(
       path: '/login',
       name: '로그인',
@@ -98,12 +104,11 @@ final GoRouter router = GoRouter(
       path: '/report',
       name: '신고내역',
       builder: (context, state) => const ReportScreen(),
-    ), 
-  GoRoute(
+    ),
+    GoRoute(
       path: '/report-detail',
       name: '신고내역 상세',
       builder: (context, state) => const ReportDetailScreen(),
-    ), 
-
+    ),
   ],
 );
