@@ -12,6 +12,7 @@ import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_li
 import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_home_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
+import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
 import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
 // AppBar 타이틀
@@ -24,7 +25,9 @@ import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
+
   initialLocation: '/profile',
+
   routes: [
     GoRoute(
       path: '/login',
@@ -69,7 +72,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/community-detail',
       name: '커뮤니티 상세',
-      builder: (context, state) => const CommunityDetailScreen(),
+      builder: (context, state) => CommunityDetailScreen(),
     ),
     GoRoute(
       path: '/community-create',
@@ -80,6 +83,11 @@ final GoRouter router = GoRouter(
       path: '/profile',
       name: '프로필',
       builder: (context, state) => const ProfileScreen(),
+    ),
+     GoRoute(
+      path: '/profile-detail',
+      name: '프로필 상세',
+      builder: (context, state) => const ProfileDetail(),
     ),
     GoRoute(
       path: '/admin',
