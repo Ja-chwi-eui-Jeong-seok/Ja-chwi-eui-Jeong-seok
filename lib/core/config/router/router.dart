@@ -12,6 +12,7 @@ import 'package:ja_chwi/presentation/screens/mission/mission_saved_list_screen.d
 import 'package:ja_chwi/presentation/screens/mission/mission_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
+import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
 import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
@@ -93,6 +94,11 @@ final GoRouter router = GoRouter(
       path: '/profile',
       name: '프로필',
       builder: (context, state) => const ProfileScreen(),
+    ),
+     GoRoute(
+      path: '/profile-detail',
+      name: '프로필 상세',
+      builder: (context, state) => const ProfileDetail(),
     ),
     GoRoute(
       path: '/admin',

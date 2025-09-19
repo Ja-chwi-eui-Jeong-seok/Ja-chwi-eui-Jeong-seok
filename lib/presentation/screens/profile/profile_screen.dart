@@ -21,11 +21,11 @@ class ProfileScreen extends ConsumerWidget {
           ],
         ),
       ),
-      //  bottomNavigationBar:BottomNav(
-      //                       mode: BottomNavMode.confirm,
-      //                       confirmRoute: '/home',
-      //                     ) // 불러오기만 하면 됨
-       bottomNavigationBar:BottomNav(mode: BottomNavMode.tab)
+       bottomNavigationBar:BottomNav(
+                            mode: BottomNavMode.confirm,
+                            confirmRoute: '/home',
+                          ) // 불러오기만 하면 됨
+       //bottomNavigationBar:BottomNav(mode: BottomNavMode.tab)
     );
   }
 }

@@ -37,7 +37,14 @@ class ProfileGrid extends ConsumerWidget {
                   onTap: () {
                     ref.read(selectedImageProvider.notifier).state = img.fullUrl;
                   },
-                  child: Image.asset(img.thumbUrl, fit: BoxFit.cover),
+                 // child: Image.asset(img.thumbUrl, fit: BoxFit.cover),
+                 child: Center(
+                  child: SizedBox(
+                    width: 70,
+                    height: 70,
+                    child: Image.asset(img.thumbUrl, fit: BoxFit.cover),
+                  ),
+                ),
                 );
               },
             ),
