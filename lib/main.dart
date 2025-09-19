@@ -5,11 +5,7 @@ import 'package:ja_chwi/core/config/router/router.dart';
 // import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -23,6 +19,5 @@ class MyApp extends StatelessWidget {
       title: '자취의정석',
       debugShowCheckedModeBanner: false,
     );
-   // return MaterialApp(home: HomeScreen());
   }
 }
