@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -19,8 +20,9 @@ class LoginButton extends StatelessWidget {
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 14),
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24), // 둥근모서리 4dp 권장
+                  borderRadius: BorderRadius.circular(24),
                   side: const BorderSide(
                     color: Colors.grey,
                     width: 1,
@@ -28,9 +30,18 @@ class LoginButton extends StatelessWidget {
                 ),
               ),
               onPressed: () async {
-                // 파이어베이스 등 뭐시기 추가 예정
-                GoogleSignIn googleSignIn = GoogleSignIn();
-                await googleSignIn.signIn();
+                try {
+                  GoogleSignIn googleSignIn = GoogleSignIn();
+                  final googleUser = await googleSignIn.signIn();
+                  if (googleUser != null && context.mounted) {
+                    // 로그인 성공 시 프로필 설정 화면으로 이동
+                    debugPrint('Google Sign-In Success: ${googleUser.email}');
+                    context.go('/profile');
+                  }
+                } catch (error) {
+                  // 로그인 실패 시 에러를 콘솔에 출력
+                  debugPrint('Google Sign-In failed: $error');
+                }
               },
               icon: Image.asset('assets/images/google.png', height: 18),
               label: const Text(
@@ -61,13 +72,21 @@ class LoginButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24), // 내부 버튼 모서리와 동일하게
                   onPressed: () async {
                     // Firebase Auth 등 연동
-                    final credential =
-                        await SignInWithApple.getAppleIDCredential(
-                          scopes: [
-                            AppleIDAuthorizationScopes.email,
-                            AppleIDAuthorizationScopes.fullName,
-                          ],
-                        );
+                    try {
+                      await SignInWithApple.getAppleIDCredential(
+                        scopes: [
+                          AppleIDAuthorizationScopes.email,
+                          AppleIDAuthorizationScopes.fullName,
+                        ],
+                      );
+                      if (context.mounted) {
+                        // 로그인 성공 시 프로필 설정 화면으로 이동
+                        context.go('/profile');
+                      }
+                    } catch (e) {
+                      // 사용자가 취소하는 등 에러 처리
+                      debugPrint('Apple Sign-In failed: $e');
+                    }
                   },
                 ),
               ),

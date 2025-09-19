@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
@@ -6,7 +7,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("개인정보처리방침")),
+      appBar: AppBar(title: const Text('개인정보처리방침')),
       body: SafeArea(
         child: Column(
           children: [
@@ -46,9 +47,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context, true);
+                    context.go('/home');
                   },
-                  child: const Text("확인"),
+                  child: const Text('동의'),
                 ),
               ),
             ),
