@@ -27,6 +27,8 @@ import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/splash',
+  initialLocation: '/profile',
+
   routes: [
     GoRoute(
       path: '/splash',
