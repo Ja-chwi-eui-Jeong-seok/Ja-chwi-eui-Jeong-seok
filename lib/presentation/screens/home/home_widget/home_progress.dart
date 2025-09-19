@@ -7,24 +7,70 @@ class HomeProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
-      child: LinearPercentIndicator(
-        lineHeight: 20.0,
-        percent: 0.65, // 65% 진행
-        barRadius: const Radius.circular(10), // 모서리 둥글게
-        linearGradient: const LinearGradient(
-          colors: [
-            Color(0xFF7FA8DA), // sky
-            Color(0xFF6664CE), // night
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        backgroundColor: Colors.grey.shade300,
-        center: Text(
-          "65%",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+      padding: const EdgeInsets.all(4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 레벨 알약
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Lv. 12',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // 경험치
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  '640/808',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // 진행 바
+          Stack(
+            children: [
+              LinearPercentIndicator(
+                lineHeight: 15.0,
+                percent: 0.65,
+                barRadius: const Radius.circular(10),
+                linearGradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF7FA8DA),
+                    Color(0xFF6664CE),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                backgroundColor: Colors.grey.shade300,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

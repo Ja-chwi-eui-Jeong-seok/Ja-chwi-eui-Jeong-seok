@@ -19,6 +19,5 @@ class MyApp extends StatelessWidget {
       title: '자취의정석',
       debugShowCheckedModeBanner: false,
     );
-    // return MaterialApp(home: HomeScreen());
   }
 }

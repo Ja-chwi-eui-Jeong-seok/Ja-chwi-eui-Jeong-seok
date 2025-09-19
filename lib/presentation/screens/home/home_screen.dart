@@ -13,18 +13,18 @@ class HomeScreen extends StatelessWidget {
   // 2 하단 네비 연결,
   // 3 하단 그라데이션, 앱바 종아이콘,
   // 4 ai챗 버튼,
-
   //가이드 화면도 들어가기
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           '자취의 정석',
           style: TextStyle(
             fontFamily: 'GamjaFlower',
             fontWeight: FontWeight.bold,
-            fontSize: 24,
+            fontSize: 28,
           ),
         ),
       ),
@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                 // 레벨 ProgressBar
                 HomeProgress(),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
 
                 // 미션
                 HomeCard(),
