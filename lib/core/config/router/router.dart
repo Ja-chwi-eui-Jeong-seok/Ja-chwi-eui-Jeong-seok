@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/auth/character_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
@@ -12,7 +11,9 @@ import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_saved_list_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
-
+import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
+import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
+import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
 // AppBar 타이틀
 // GoRouter는 현재 라우트 정보를 GoRouterState.of(context)로 제공한다.
 // 그 안의 matchedLocation이나 uri를 읽으면 현재 경로(/mission-create 등)를 얻을 수 있다.
@@ -23,7 +24,9 @@ import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/community-detail',
+
+  initialLocation: '/profile',
+
   routes: [
     GoRoute(
       path: '/login',
@@ -85,5 +88,21 @@ final GoRouter router = GoRouter(
       name: '프로필',
       builder: (context, state) => const ProfileScreen(),
     ),
+    GoRoute(
+      path: '/admin',
+      name: '관리자 메뉴',
+      builder: (context, state) => const AdminScreen(),
+    ),
+    GoRoute(
+      path: '/report',
+      name: '신고내역',
+      builder: (context, state) => const ReportScreen(),
+    ), 
+  GoRoute(
+      path: '/report-detail',
+      name: '신고내역 상세',
+      builder: (context, state) => const ReportDetailScreen(),
+    ), 
+
   ],
 );
