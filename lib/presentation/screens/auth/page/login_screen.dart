@@ -1,22 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/login_button.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/wave_text.dart';
-import 'package:ja_chwi/presentation/screens/auth/privacy_policy_page.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
-
-  void _showPrivacyPolicy(BuildContext context) async {
-    final accepted = await context.push<bool>('/privacy-policy');
-
-    // 로그인 성공시 개인정보처리방침 동의 여부 확인 페이지로 이동 + 이미 동의했으면 다시 안나타나게 만들 예정
-
-    if (accepted == true) {
-      // 사용자가 개인정보처리방침에 동의하면 동의 완료 후 나타나지 않게 만들 예정
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +33,14 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const LoginButton(),
+            LoginButton(
+              onLoginSuccess: () async {
+                final accepted = await context.push<bool>('/privacy-policy');
+                if (accepted == true) {
+                  context.go('/home');
+                }
+              },
+            ),
             SizedBox(height: 20),
           ],
         ),

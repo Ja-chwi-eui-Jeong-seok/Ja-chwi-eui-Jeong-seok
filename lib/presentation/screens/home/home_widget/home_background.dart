@@ -1,35 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 class HomeBackground extends StatelessWidget {
   const HomeBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Stack(
       children: [
-        //언덕
+        // 언덕
         Positioned(
-          bottom: -550,
-          left: -650,
-          right: -650,
+          bottom: -0.1 * screenHeight, // 화면 높이 비율
+          left: -0.55 * screenWidth, // 화면 너비 비율
+          right: -0.55 * screenWidth,
           child: Container(
-            height: 850,
+            height: 0.45 * screenHeight, // 높이도 비율로
             decoration: BoxDecoration(
               color: Color(0xFFD9D9D9),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(850)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(0.45 * screenHeight),
+              ),
             ),
           ),
         ),
-        //그라데이션
+        // 그라디언트
         Positioned(
-          bottom: -500,
-          left: -650,
-          right: -650,
+          bottom: -0.3 * screenHeight,
+          left: -0.65 * screenWidth,
+          right: -0.65 * screenWidth,
           child: Container(
-            height: 1900,
+            height: screenHeight * 1.0, // 화면 전체 높이
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(750)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(0.4 * screenHeight),
+              ),
               gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
@@ -37,7 +43,7 @@ class HomeBackground extends StatelessWidget {
                   Colors.white,
                   Colors.white.withOpacity(0),
                 ],
-                stops: [0.3, 0.4], //그라데이션 시작 끝 위치조절
+                stops: [0.3, 0.4], // 그라디언트 시작과 끝 비율
               ),
             ),
           ),

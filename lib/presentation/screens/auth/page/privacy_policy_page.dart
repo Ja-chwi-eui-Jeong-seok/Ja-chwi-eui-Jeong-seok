@@ -47,6 +47,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    print('push');
                     context.go('/home');
                   },
                   child: const Text('동의'),

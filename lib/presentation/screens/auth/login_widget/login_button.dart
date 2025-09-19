@@ -1,10 +1,42 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginButton extends StatelessWidget {
-  const LoginButton({super.key});
+  final VoidCallback? onLoginSuccess;
+  const LoginButton({super.key, this.onLoginSuccess});
+  Future<void> _signInWithGoogle(BuildContext context) async {
+    try {
+      //구글 로그인
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // 로그인 취소됨
+
+      //구글 인증 정보 가져오기
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      //Firebase Auth 크레덴셜 생성
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      //Firebase Auth 로그인
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      //로그인 성공 → 개인정보처리방침으로 이동
+      if (context.mounted) {
+        context.go('/privacy-policy');
+      }
+    } catch (e) {
+      print("구글 로그인 오류: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("로그인 실패: $e")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +61,7 @@ class LoginButton extends StatelessWidget {
                   ), // 외부 테두리
                 ),
               ),
-              onPressed: () async {
-                // 파이어베이스 등 뭐시기 추가 예정
-                GoogleSignIn googleSignIn = GoogleSignIn();
-                await googleSignIn.signIn();
-              },
+              onPressed: () => _signInWithGoogle(context),
               icon: Image.asset('assets/images/google.png', height: 18),
               label: const Text(
                 'Sign in with Google',
