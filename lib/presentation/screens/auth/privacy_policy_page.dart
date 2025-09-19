@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
@@ -46,7 +47,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context, true);
+                    context.go('/home');
                   },
                   child: const Text('동의'),
                 ),
