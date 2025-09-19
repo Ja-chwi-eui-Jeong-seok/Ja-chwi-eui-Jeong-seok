@@ -21,11 +21,15 @@ class ProfileSection extends StatelessWidget {
         const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('LV 24', style: TextStyle(fontSize: 16)),
             Text(
-              'LV 24',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              '2조이죠',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            Text('2조이죠', style: TextStyle(fontSize: 14, color: Colors.grey)),
           ],
         ),
       ],
