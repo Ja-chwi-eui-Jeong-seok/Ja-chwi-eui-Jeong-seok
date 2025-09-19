@@ -150,13 +150,18 @@ class _PostBody extends StatelessWidget {
 }
 
 //SliverPersistentHeader 델리게이트 ---
+//SliverPersistentHeader는 스크롤했을때 TabBar부분이 고정되게 해주는 어댑터
+//SliverPersistentHeader를 쓰기위해 delegate로 정의하는 부분
 class _TabBarDelegate extends SliverPersistentHeaderDelegate {
   _TabBarDelegate(this.tabBar);
   final TabBar tabBar;
+
+  //header의 최소높이와 최대높이를 지정하는 부분
   @override
-  double get minExtent => tabBar.preferredSize.height;
+  double get minExtent => tabBar.preferredSize.height; //48px
   @override
   double get maxExtent => tabBar.preferredSize.height;
+
   @override
   Widget build(
     BuildContext context,
@@ -166,6 +171,7 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
     return Container(color: Colors.white, child: tabBar);
   }
 
+  //델리게이트 리빌드 여부 결정, 탭바는 겨의 안바뀌니까 false
   @override
   bool shouldRebuild(covariant _TabBarDelegate old) => false;
 }
