@@ -60,9 +60,10 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                   child: Divider(thickness: 10, color: Color(0xFFEBEBEB)),
                 ),
                 //
-                //SliverToBoxAdapter 댓글영역 시작
+                //SliverPersistentHeader 댓글해더 시작
                 //최신순 추천선
                 SliverPersistentHeader(
+                  //SliverPersistentHeader 델리게이트필요
                   pinned: true,
                   delegate: _TabBarDelegate(
                     TabBar(
@@ -77,7 +78,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                       ],
                     ),
                   ),
-                ),
+                ), //SliverPersistentHeader 댓글해더 끝
               ],
               body:
                   //댓글리스트
@@ -87,7 +88,6 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                       CommentCard(itemCount: 20),
                     ],
                   ),
-              //SliverToBoxAdapter 댓글영역 끝
             ),
 
             //댓글 입력창
@@ -107,7 +107,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
   }
 }
 
-// --- 헤더 보조 위젯들 ---
+//헤더
 class _HeaderRow extends StatelessWidget {
   _HeaderRow({super.key});
   @override
@@ -131,6 +131,7 @@ class _HeaderRow extends StatelessWidget {
   }
 }
 
+//게시글
 class _PostBody extends StatelessWidget {
   _PostBody({super.key});
   @override
@@ -148,7 +149,7 @@ class _PostBody extends StatelessWidget {
   }
 }
 
-// --- SliverPersistentHeader 델리게이트 ---
+//SliverPersistentHeader 델리게이트 ---
 class _TabBarDelegate extends SliverPersistentHeaderDelegate {
   _TabBarDelegate(this.tabBar);
   final TabBar tabBar;
@@ -242,7 +243,7 @@ class _HeartButtonState extends State<_HeartButton> {
   }
 }
 
-// --- 입력창(그라데이션 포함) ---
+// 입력창
 class CommentWrite extends StatelessWidget {
   CommentWrite({
     super.key,
