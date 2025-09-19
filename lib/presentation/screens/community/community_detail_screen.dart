@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 
 class CommunityDetailScreen extends StatelessWidget {
-  const CommunityDetailScreen({super.key});
+  CommunityDetailScreen({super.key});
+  //댓글입력 컨트롤러
+  final commentController = TextEditingController();
+
+  void submit() {
+    Text(commentController.text);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Row(children: [Text('커뮤니티'), Spacer(), Text('즐찾')]),
-      ),
+      appBar: CommonAppBar(),
+      // AppBar(
+      //   title: const Row(children: [Text('커뮤니티'), Spacer(), Text('즐찾')]),
+      // ),
+
+      //바디영역
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 15, 24, 50),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   '제목',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -25,10 +35,19 @@ class CommunityDetailScreen extends StatelessWidget {
                   height: 55,
                   child: Row(
                     children: [
-                      Text('프로필이미지'),
+                      //프로필 이미지
+                      SizedBox(
+                        height: 35,
+                        width: 35,
+                        child: Image.asset(
+                          'assets/images/m_profile/m_black.png',
+                        ),
+                      ),
                       SizedBox(width: 8),
+                      //작성자 닉네임
                       Text('작성자'),
                       Spacer(),
+                      //작성날짜
                       Text('09.17 17:47'),
                     ],
                   ),
@@ -40,10 +59,12 @@ class CommunityDetailScreen extends StatelessWidget {
           ),
           const Divider(thickness: 10, color: Color(0xFFEBEBEB)),
           Expanded(
+            //댓글목록 최신순 추천순 정렬 탭바
             child: DefaultTabController(
               length: 2,
+
               child: Column(
-                children: const [
+                children: [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24),
                     child: TabBar(
@@ -61,7 +82,12 @@ class CommunityDetailScreen extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
+                        //정렬 메서느 추가해서 전달할지?
+                        //댓글 불러온 다음에 화면에서 정렬(기본값은 최신순)
+                        //최신순
                         CommentCard(itemCount: 10),
+
+                        //추천순
                         CommentCard(itemCount: 10),
                       ],
                     ),
@@ -72,10 +98,73 @@ class CommunityDetailScreen extends StatelessWidget {
           ),
         ],
       ),
+      //댓글입력영역
+      bottomSheet: Padding(
+        // 키보드 올라오면 같이 올림
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Material(
+          elevation: 8,
+          color: Colors.white,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(25),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    height: 36,
+                    width: 36,
+                    child: Image.asset('assets/images/m_profile/m_black.png'),
+                  ),
+                  SizedBox(width: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        // TextFormField 필수
+                        child: SizedBox(
+                          height: 40,
+                          child: TextFormField(
+                            controller: commentController,
+                            minLines: 1,
+                            maxLines: 6, // 자동 줄 증가
+                            decoration: InputDecoration(
+                              hintText: '댓글을 입력하세요',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 36,
+                        width: 64,
+                        child: ElevatedButton(
+                          onPressed: submit,
+                          child: const Text('확인'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
+//작성된 글 영역
 class _PostBody extends StatelessWidget {
   const _PostBody({super.key});
   @override
@@ -88,11 +177,14 @@ class _PostBody extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(8),
+      //작성 내용 인자로 받아와야함
       child: const Text('오늘 청소하는데 얼룩이 잘 안지워지더라구요...'),
     );
   }
 }
 
+//댓글 카드
+//댓글들 리스트로 받아와야함
 class CommentCard extends StatelessWidget {
   const CommentCard({super.key, required this.itemCount});
   final int itemCount;
@@ -109,7 +201,12 @@ class CommentCard extends StatelessWidget {
           height: 80,
           child: Row(
             children: [
-              CircleAvatar(radius: 16),
+              //댓글작성자 프로필 이미지
+              SizedBox(
+                height: 45,
+                width: 45,
+                child: Image.asset('assets/images/m_profile/m_black.png'),
+              ),
               SizedBox(width: 8),
               Expanded(
                 child: Column(
