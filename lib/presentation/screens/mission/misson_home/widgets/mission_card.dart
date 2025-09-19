@@ -19,41 +19,43 @@ class MissionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 10, 8, 10),
       decoration: BoxDecoration(
         // color: const Color(0xFFF5F5F5),
         color: const Color(0xD3D3D3D3),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // 미션 제목과 태그
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: tags
-                    .map(
-                      (tag) => Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: CustomTag(tag),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Row(
+                  children: tags
+                      .map(
+                        (tag) => Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: CustomTag(tag),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            ),
           ),
 
-          // 상태에 따라 다른 위젯 표시 (미션하기 버튼 or 완료 날짜)
+          const SizedBox(width: 24),
           if (isCompleted)
             Text(
               completionDate ?? '',
@@ -68,13 +70,22 @@ class MissionCard extends StatelessWidget {
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 12,
                 ),
                 elevation: 0,
               ),
-              child: const Row(
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('미션 인증하기'),
+                  Text(
+                    '미션하기',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 6),
                   Icon(Icons.arrow_forward_ios, size: 12),
                 ],
               ),
