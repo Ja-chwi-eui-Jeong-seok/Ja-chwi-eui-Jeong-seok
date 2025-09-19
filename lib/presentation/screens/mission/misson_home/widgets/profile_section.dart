@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/go_to_completed_button.dart';
 
 class ProfileSection extends StatelessWidget {
   const ProfileSection({super.key});
@@ -6,6 +7,7 @@ class ProfileSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // 캐릭터 이미지 (임시)
         Container(
@@ -32,6 +34,8 @@ class ProfileSection extends StatelessWidget {
             ),
           ],
         ),
+        const Spacer(),
+        const GoToCompletedButton(),
       ],
     );
   }
