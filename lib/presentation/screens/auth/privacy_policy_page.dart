@@ -6,7 +6,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("개인정보처리방침")),
+      appBar: AppBar(title: const Text('개인정보처리방침')),
       body: SafeArea(
         child: Column(
           children: [
@@ -48,7 +48,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context, true);
                   },
-                  child: const Text("확인"),
+                  child: const Text('동의'),
                 ),
               ),
             ),

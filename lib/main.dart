@@ -26,6 +26,5 @@ class MyApp extends StatelessWidget {
       supportedLocales: AppTheme.supportedLocales,
       locale: const Locale('ko', 'KR'),
     );
-    // return MaterialApp(home: HomeScreen());
   }
 }
