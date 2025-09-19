@@ -4,10 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_achiever.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_providers.dart';
-import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/go_to_completed_button.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
@@ -18,7 +16,14 @@ class MissionHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final achievers = ref.watch(achieversProvider);
     return Scaffold(
-      appBar: CommonAppBar(actions: [RefreshIconButton(onPressed: () {})]),
+      appBar: CommonAppBar(
+        actions: [RefreshIconButton(onPressed: () {})],
+        titleSpacing: 40.0,
+        titleTextStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -53,7 +58,7 @@ class MissionHomeScreen extends ConsumerWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           if (action != null) action,
         ],
@@ -68,7 +73,6 @@ class MissionHomeScreen extends ConsumerWidget {
         _buildSectionHeader(context, '오늘의 미션'),
         const MissionCard(title: '삼시세끼 다 먹기', tags: ['건강']),
         const SizedBox(height: 12),
-        const SizedBox(width: double.infinity, child: GoToCompletedButton()),
       ],
     );
   }
@@ -98,26 +102,65 @@ class MissionHomeScreen extends ConsumerWidget {
             ),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xD3D3D3D3),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              for (int i = 0; i < mockAllAchievers.take(3).length; i++) ...[
-                AchieverCard(
-                  level: mockAllAchievers[i].level,
-                  name: mockAllAchievers[i].name,
-                  time: mockAllAchievers[i].time,
-                  backgroundColor: Colors.white,
-                ),
-                if (i < mockAllAchievers.take(3).length - 1)
-                  const SizedBox(height: 8),
-              ],
-            ],
-          ),
+        Column(
+          children: List.generate(mockAllAchievers.take(3).length, (i) {
+            final achiever = mockAllAchievers[i];
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    child: Text(
+                      '${i + 1}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2C2C2C),
+                      shape: BoxShape.circle,
+                    ),
+                    // TODO: 실제 캐릭터 이미지로 교체
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        achiever.level,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        achiever.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Text(
+                    achiever.time,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
+              ),
+            );
+          }),
         ),
       ],
     );
