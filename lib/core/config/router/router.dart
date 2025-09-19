@@ -25,7 +25,9 @@ import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/splash',
+  initialLocation: '/profile',
+
+
   routes: [
     GoRoute(
       path: '/splash',
@@ -80,7 +82,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/community-detail',
       name: '커뮤니티 상세',
-      builder: (context, state) => const CommunityDetailScreen(),
+      builder: (context, state) => CommunityDetailScreen(),
     ),
     GoRoute(
       path: '/community-create',
