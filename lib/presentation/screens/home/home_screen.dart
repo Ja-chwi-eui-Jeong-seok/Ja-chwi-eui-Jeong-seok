@@ -3,6 +3,15 @@ import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.da
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
+//해야할 것:
+// 1 레벨 올라가는 부분,
+// 1 미션 버튼 만들고 넘어가기,
+// 2 하단 네비 연결,
+// 3 하단 그라데이션, 앱바 종아이콘,
+// 4 ai챗 버튼,
+
+//가이드 화면도 들어가기
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -41,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 58),
                 //캐릭터//json으로 걷는 애니메이션 만들고 불러오기?
-                const SizedBox(height: 20), //미세한 위치조절
+                const SizedBox(height: 20),
                 Align(
                   alignment: Alignment.topCenter,
                   child: Center(child: MonjiJump()),
