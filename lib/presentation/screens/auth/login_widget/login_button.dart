@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginButton extends StatelessWidget {
@@ -19,8 +20,9 @@ class LoginButton extends StatelessWidget {
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 14),
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24), // 둥근모서리 4dp 권장
+                  borderRadius: BorderRadius.circular(24),
                   side: const BorderSide(
                     color: Colors.grey,
                     width: 1,

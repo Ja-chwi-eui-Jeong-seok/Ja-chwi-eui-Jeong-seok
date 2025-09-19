@@ -91,7 +91,8 @@ flutter:
     - assets/images/m_profile/
     - assets/images/profile/
     - assets/config/json/
-    - assets/json/
+    - assets/images/
+
     # - assets/config/mock/
 
   # An image asset can refer to one or more resolution-specific "variants", see
