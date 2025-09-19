@@ -67,6 +67,7 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => context.pop(),
         ),
+        centerTitle: true,
         actions: [RefreshIconButton(onPressed: () {})],
       ),
       body: SingleChildScrollView(
