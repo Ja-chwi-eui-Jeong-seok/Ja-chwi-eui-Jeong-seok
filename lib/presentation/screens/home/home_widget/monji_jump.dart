@@ -10,7 +10,7 @@ class MonjiJump extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Lottie.asset(
-      'assets/json/monji_jump.json',
+      'assets/config/json/monji_jump.json',
       width: 250,
       height: 250,
       fit: BoxFit.contain,
