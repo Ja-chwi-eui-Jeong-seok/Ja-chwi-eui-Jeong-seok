@@ -11,17 +11,19 @@ class HomeCard extends StatelessWidget {
       itemCount: 1,
       itemBuilder: (context, index) {
         return Card(
-          color: Colors.grey,
+          color: Color(0xFFD9D9D9),
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 4,
           child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            title: Text('카드 $index', style: const TextStyle(fontSize: 16)),
-            subtitle: const Text('간단한 설명'),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            title: Text('오늘의 미션 $index', style: const TextStyle(fontSize: 16)),
+            subtitle: const Text('삼시세끼 다먹기'),
             trailing: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

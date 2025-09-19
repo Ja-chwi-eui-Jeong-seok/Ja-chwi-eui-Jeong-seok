@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/auth/character_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
+import 'package:ja_chwi/presentation/screens/auth/privacy_policy_page.dart';
 import 'package:ja_chwi/presentation/screens/community/community_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
@@ -26,9 +27,9 @@ import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/profile',
+  initialLocation: '/login',
 
-
+  // initialLocation: '/profile',
   routes: [
     GoRoute(
       path: '/splash',
@@ -39,6 +40,11 @@ final GoRouter router = GoRouter(
       path: '/login',
       name: '로그인',
       builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/privacy-policy',
+      name: '개인정보처리방침',
+      builder: (context, state) => const PrivacyPolicyPage(),
     ),
     GoRoute(
       path: '/character-create',
@@ -90,7 +96,7 @@ final GoRouter router = GoRouter(
       name: '프로필',
       builder: (context, state) => const ProfileScreen(),
     ),
-     GoRoute(
+    GoRoute(
       path: '/profile-detail',
       name: '프로필 상세',
       builder: (context, state) => const ProfileDetail(),
