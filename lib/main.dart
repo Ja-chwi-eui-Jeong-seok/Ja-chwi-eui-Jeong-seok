@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.white, // Scaffold 배경색과 동일하게 설정
           surfaceTintColor: Colors.transparent, // 스크롤 시 색상 변경 효과 제거
           elevation: 0, // AppBar의 그림자 제거
+          // 왜 앙대지
         ),
       ),
       routerConfig: router,
