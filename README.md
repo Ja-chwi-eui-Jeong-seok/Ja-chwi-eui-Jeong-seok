@@ -101,3 +101,13 @@ assets
         └── white.png
 
 ## 프로필 페이지 
+
+### 참고
+1.아이콘 조회 
+https://fonts.google.com/icons?icon.query=account+se&icon.size=24&icon.color=%23e3e3e3
+
+bottom 
+home 
+Assignment
+groups
+account circle 

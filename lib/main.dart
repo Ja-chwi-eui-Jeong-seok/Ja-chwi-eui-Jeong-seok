@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/core/config/router/router.dart';
-import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
-import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
-import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
+// import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
+// import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -20,6 +19,6 @@ class MyApp extends StatelessWidget {
       title: '자취의정석',
       debugShowCheckedModeBanner: false,
     );
-    // return MaterialApp(home: SplashPage());
+    // return MaterialApp(home: HomeScreen());
   }
 }
