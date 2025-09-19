@@ -58,6 +58,8 @@ dependencies:
   cloud_firestore: ^6.0.1
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.0
+  percent_indicator: ^4.2.5
+  device_info_plus: ^12.1.0
 
 
 dev_dependencies:
@@ -89,6 +91,7 @@ flutter:
     - assets/images/m_profile/
     - assets/images/profile/
     - assets/config/json/
+    - assets/json/
     # - assets/config/mock/
 
   # An image asset can refer to one or more resolution-specific "variants", see
