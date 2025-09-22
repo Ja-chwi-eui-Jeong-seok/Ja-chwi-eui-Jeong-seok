@@ -6,7 +6,6 @@ import 'package:ja_chwi/presentation/screens/community/community_create_screen.d
 import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_screen.dart';
-import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide1.dart';
 import 'package:ja_chwi/presentation/screens/home/page/home_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/mission_create_screen.dart';

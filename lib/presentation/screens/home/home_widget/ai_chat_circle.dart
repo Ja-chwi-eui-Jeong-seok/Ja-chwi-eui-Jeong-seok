@@ -27,7 +27,7 @@ class AiChatCircle extends StatelessWidget {
         child: Container(
           width: circleSize,
           height: circleSize,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.black,
           ),

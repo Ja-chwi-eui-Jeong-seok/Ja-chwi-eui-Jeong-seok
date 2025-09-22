@@ -9,8 +9,7 @@ import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-  //해야할 것:
-  // 4 ai챗 버튼,
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +59,7 @@ class HomeScreen extends StatelessWidget {
                   offsetY: 80,
                   icon: CupertinoIcons.chat_bubble_text,
                   onTap: () {
+                    print('Ai챗');
                     // 나중에 ai 채팅으로 이동
                   },
                 ),
