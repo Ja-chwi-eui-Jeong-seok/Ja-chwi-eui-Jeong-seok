@@ -88,35 +88,40 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
               ),
             ),
 
-            //Center로 가운데 정렬하고 SizedBox로 크기제한,Wrap의 자동줄바꿈 가능하게만듦
             SizedBox(
               height: 55, // 칩 높이 + 여백
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 children:
-                    ['자유', '운동', '청소', '미션', '요리'] //TODO:카테고리코드 불러오기
-                        .map((c) {
-                          final isSelected = selectedCategory == c;
+                    [
+                          '자유',
+                          '운동',
+                          '청소',
+                          '미션',
+                          '요리',
+                        ] //TODO:만들어진 리스트의 카테고리코드 불러오고 리스트로 만들기
+                        .map((mainCategory) {
+                          final isSelected = selectedCategory == mainCategory;
                           return Padding(
                             padding: EdgeInsets.only(right: 10),
                             child: ChoiceChip(
                               label: SizedBox(
                                 width: 38,
                                 height: 38,
-                                child: Center(child: Text(c)),
+                                child: Center(child: Text(mainCategory)),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15), // ✅ 수정
                               ),
                               side: const BorderSide(color: Colors.black),
-                              selected: selectedCategory == c,
+                              selected: selectedCategory == mainCategory,
                               onSelected: (_) {
                                 ref
                                     .read(selectedCategoryProvider.notifier)
                                     .state = isSelected
                                     ? null
-                                    : c; // 같은 칩 누르면 해제 옵션
+                                    : mainCategory; // 같은 칩 누르면 해제 옵션
                                 ref
                                         .read(
                                           selectedSubCategoryProvider.notifier,
@@ -126,7 +131,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                               },
                               selectedColor: Colors.black,
                               labelStyle: TextStyle(
-                                color: selectedCategory == c
+                                color: selectedCategory == mainCategory
                                     ? Colors.white
                                     : Colors.black,
                               ),
@@ -159,22 +164,24 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                 child: Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 8,
-                  children: (subCategories[selectedCategory] ?? []).map((sub) {
-                    final isSelected = selectedSubCategory == sub;
+                  children: (subCategories[selectedCategory] ?? []).map((
+                    subCategory,
+                  ) {
+                    final isSelected = selectedSubCategory == subCategory;
                     return ChoiceChip(
-                      label: SizedBox(height: 20, child: Text(sub)),
+                      label: SizedBox(height: 20, child: Text(subCategory)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadiusGeometry.circular(15),
                       ),
                       side: BorderSide(color: Colors.black),
-                      selected: selectedSubCategory == sub,
+                      selected: selectedSubCategory == subCategory,
                       onSelected: (_) {
                         ref.read(selectedSubCategoryProvider.notifier).state =
-                            isSelected ? null : sub;
+                            isSelected ? null : subCategory;
                       },
                       selectedColor: Colors.black,
                       labelStyle: TextStyle(
-                        color: selectedSubCategory == sub
+                        color: selectedSubCategory == subCategory
                             ? Colors.white
                             : Colors.black,
                       ),
@@ -251,63 +258,6 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
           ],
         ),
       ),
-      // bottomSheet: Padding(
-      //   padding: const EdgeInsets.only(left: 24, right: 24, bottom: 50),
-      //   child: SizedBox(
-      //     width: double.infinity,
-      //     child: GestureDetector(
-      //       onTap: () async {
-      //         //테스트용 프린트
-      //         print("제목: ${_titleController.text}");
-      //         print("내용: ${_contentController.text}");
-      //         print("카테고리: $selectedCategory");
-      //         print("세부 카테고리: $selectedSubCategory");
-
-      //         //유효성검증
-      //         final err = await vm.submit(
-      //           title: _titleController.text,
-      //           content: _contentController.text,
-      //           category: selectedCategory,
-      //           subCategory: selectedSubCategory,
-      //         );
-
-      //         if (!context.mounted) return;
-      //         if (err == null) {
-      //           ScaffoldMessenger.of(context).showSnackBar(
-      //             SnackBar(
-      //               content: Text('등록완료'),
-      //             ),
-      //           );
-      //           //TODO: 로딩 후 작성글한 글로 이동
-      //         } else {
-      //           ScaffoldMessenger.of(context).showSnackBar(
-      //             SnackBar(
-      //               content: Text(err),
-      //             ),
-      //           );
-      //         }
-      //       },
-      //       child: Container(
-      //         width: 300,
-      //         height: 55,
-      //         decoration: BoxDecoration(
-      //           color: Colors.white,
-      //           border: Border.all(),
-      //           borderRadius: BorderRadius.circular(25),
-      //         ),
-      //         child: Center(
-      //           child: Text(
-      //             "확인",
-      //             style: TextStyle(
-      //               fontSize: 20,
-      //               fontWeight: FontWeight.w500,
-      //             ),
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //   ),
-      // ),
     );
   }
 }
