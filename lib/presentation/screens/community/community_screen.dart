@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 
 class CommunityScreen extends StatelessWidget {
   const CommunityScreen({super.key});
@@ -9,34 +10,35 @@ class CommunityScreen extends StatelessWidget {
     return DefaultTabController(
       length: tabs.length,
       child: Scaffold(
-        appBar: AppBar(
-          titleSpacing: 10,
-          title: Row(
-            children: [
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_drop_down),
-              const SizedBox(width: 4),
-              const Text('동작구'),
-              const Spacer(),
-              IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-            ],
-          ),
-          bottom: TabBar(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            indicator: UnderlineTabIndicator(
-              //  insets: EdgeInsets.zero,
-              borderSide: BorderSide(color: Colors.black, width: 2),
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicatorColor: Colors.black,
-            labelColor: Colors.black,
-            isScrollable: false,
-            //labelPadding: EdgeInsets.symmetric(horizontal: 16),
-            indicatorWeight: 3,
-            labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            tabs: tabs.map((e) => Tab(text: e)).toList(),
-          ),
-        ),
+        appBar: CommonAppBar(),
+        //  AppBar(
+        //   titleSpacing: 10,
+        //   title: Row(
+        //     children: [
+        //       const SizedBox(width: 8),
+        //       const Icon(Icons.arrow_drop_down),
+        //       const SizedBox(width: 4),
+        //       const Text('동작구'),
+        //       const Spacer(),
+        //       IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+        //     ],
+        //   ),
+        //   bottom: TabBar(
+        //     padding: EdgeInsets.symmetric(horizontal: 16),
+        //     indicator: UnderlineTabIndicator(
+        //       //  insets: EdgeInsets.zero,
+        //       borderSide: BorderSide(color: Colors.black, width: 2),
+        //     ),
+        //     indicatorSize: TabBarIndicatorSize.tab,
+        //     indicatorColor: Colors.black,
+        //     labelColor: Colors.black,
+        //     isScrollable: false,
+        //     //labelPadding: EdgeInsets.symmetric(horizontal: 16),
+        //     indicatorWeight: 3,
+        //     labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        //     tabs: tabs.map((e) => Tab(text: e)).toList(),
+        //   ),
+        // ),
         body: Container(
           padding: EdgeInsets.only(left: 24, right: 24, top: 18),
           child: TabBarView(
