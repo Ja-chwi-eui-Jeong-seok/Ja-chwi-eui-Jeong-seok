@@ -1,11 +1,12 @@
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/screens/auth/character_create_screen.dart';
-import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
-import 'package:ja_chwi/presentation/screens/auth/privacy_policy_page.dart';
+import 'package:ja_chwi/presentation/screens/auth/page/character_create_screen.dart';
+import 'package:ja_chwi/presentation/screens/auth/page/login_screen.dart';
+import 'package:ja_chwi/presentation/screens/auth/page/privacy_policy_page.dart';
 import 'package:ja_chwi/presentation/screens/community/community_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
-import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
+import 'package:ja_chwi/presentation/screens/guide/guide_screen.dart';
+import 'package:ja_chwi/presentation/screens/home/page/home_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/mission_create_screen.dart';
 // import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
@@ -27,16 +28,19 @@ import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-
-  initialLocation: '/login',
+  initialLocation: '/Guide',
 
   // initialLocation: '/profile',
-
   routes: [
     GoRoute(
       path: '/splash',
       name: '스플레시',
       builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/Guide',
+      name: '가이드',
+      builder: (context, state) => const GuideScreen(),
     ),
     GoRoute(
       path: '/login',
