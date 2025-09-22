@@ -1,14 +1,39 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/ai_chat_circle.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_card.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkGuide();
+  }
+
+  Future<void> _checkGuide() async {
+    final prefs = await SharedPreferences.getInstance();
+    final showGuide = prefs.getBool('showGuide') ?? true;
+
+    if (showGuide) {
+      await prefs.setBool('showGuide', false); // 다음부터는 안 보이게
+      if (mounted) {
+        GoRouter.of(context).push('/guide'); // 가이드 화면으로 이동
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +56,10 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // 종 아이콘
             IconButton(
               icon: Icon(Icons.notifications),
               onPressed: () {
                 print('알림 창');
-                // 알림 버튼
               },
             ),
           ],
@@ -45,14 +67,12 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          const HomeBackground(), // 배경
-          // CharacterCircle
+          const HomeBackground(),
           Center(
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                MonjiJump(), // 캐릭터
-                // ai챗
+                MonjiJump(),
                 AiChatCircle(
                   circleSize: 40,
                   offsetX: -10,
@@ -60,22 +80,17 @@ class HomeScreen extends StatelessWidget {
                   icon: CupertinoIcons.chat_bubble_text,
                   onTap: () {
                     print('Ai챗');
-                    // 나중에 ai 채팅으로 이동
                   },
                 ),
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(10),
             child: Column(
               children: [
-                // 레벨
                 const HomeProgress(),
-
                 const SizedBox(height: 8),
-                // 미션
                 const HomeCard(),
               ],
             ),
