@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+
       routerConfig: router,
       title: '자취의 정석',
       debugShowCheckedModeBanner: false,
@@ -26,5 +27,6 @@ class MyApp extends StatelessWidget {
       supportedLocales: AppTheme.supportedLocales,
       locale: const Locale('ko', 'KR'),
     );
+
   }
 }
