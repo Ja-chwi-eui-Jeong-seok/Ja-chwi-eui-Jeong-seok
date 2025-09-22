@@ -18,7 +18,7 @@ class HomeBackground extends StatelessWidget {
           child: Container(
             height: 0.45 * screenHeight, // 높이도 비율로
             decoration: BoxDecoration(
-              color: Color(0xFFD9D9D9),
+              color: const Color(0xFFD9D9D9),
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(0.45 * screenHeight),
               ),
@@ -43,7 +43,7 @@ class HomeBackground extends StatelessWidget {
                   Colors.white,
                   Colors.white.withOpacity(0),
                 ],
-                stops: [0.3, 0.4], // 그라디언트 시작과 끝 비율
+                stops: const [0.3, 0.4], // 그라디언트 시작과 끝 비율
               ),
             ),
           ),

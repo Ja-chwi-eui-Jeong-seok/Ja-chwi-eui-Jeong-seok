@@ -15,7 +15,7 @@ class LoginScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // 센터 이미지
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Expanded(
               child: Center(
                 child: Column(
@@ -41,7 +41,7 @@ class LoginScreen extends StatelessWidget {
                 }
               },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),

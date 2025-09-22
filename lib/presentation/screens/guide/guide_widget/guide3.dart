@@ -92,7 +92,7 @@ class Guide3 extends StatelessWidget {
 class _CircleOverlayPainter extends CustomPainter {
   final Offset center;
   final double radius;
-  _CircleOverlayPainter(this.center, this.radius);
+  const _CircleOverlayPainter(this.center, this.radius);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -120,7 +120,7 @@ class _CurvedArrowPainter extends CustomPainter {
   final Offset start;
   final Offset end;
   final Offset control;
-  _CurvedArrowPainter({
+  const _CurvedArrowPainter({
     required this.start,
     required this.end,
     required this.control,
