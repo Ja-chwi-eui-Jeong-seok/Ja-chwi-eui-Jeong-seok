@@ -189,32 +189,128 @@ class CommentCard extends StatelessWidget {
       itemCount: itemCount,
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, i) {
-        return SizedBox(
-          height: 80,
-          child: Row(
-            children: [
-              SizedBox(
-                height: 45,
-                width: 45,
-                child: Image.asset('assets/images/m_profile/m_black.png'),
+        return GestureDetector(
+          onLongPressStart: (details) async {
+            //details = onLongPressStart했을떄 정보
+
+            //현재화면의 최상단 레이어(Overlay)를 찾고 그 랜더박스 정보 제공, 목적: 화면전체 크기를 얻어 메뉴 위치계산에 사용
+            final overlay =
+                Overlay.of(context).context.findRenderObject() as RenderBox;
+
+            //showMenu : 팝업 메뉴 표시
+            final selected = await showMenu<String>(
+              //꾹 눌렀을때 나오는 메뉴 모양 커스텀
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadiusGeometry.circular(15),
               ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('닉네임', style: TextStyle(fontWeight: FontWeight.w600)),
-                    Text(
-                      '댓글내용입니다 댓글을 입력해주세요',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              context: context,
+
+              //작은사각형이 큰 사각형의 어디있는지 상대좌표로 변환하여 메뉴 시작위치가 터치 지점으로 잡힘
+              position: RelativeRect.fromRect(
+                //사용자가 누른 지점을 0,0사이즈의 사각형으로 표현
+                Rect.fromLTWH(
+                  details.globalPosition.dx,
+                  details.globalPosition.dy,
+                  0,
+                  0,
                 ),
+
+                //화면 전체를 덮는 사각형
+                Offset.zero & overlay.size,
               ),
-              _HeartButton(),
-            ],
+              color: Colors.white,
+              items: [
+                PopupMenuItem(
+                  value: 'report',
+                  child: Row(
+                    children: [
+                      Text('신고하기'),
+                      SizedBox(
+                        width: 50,
+                      ),
+                      Spacer(),
+                      Icon(Icons.notifications_none),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'block',
+                  child: Row(
+                    children: [
+                      Text('차단하기'),
+                      Spacer(),
+                      Icon(Icons.do_not_disturb_on_outlined),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'share',
+                  child: Row(
+                    children: [
+                      Text('공유하기'),
+                      Spacer(),
+                      Icon(Icons.share),
+                    ],
+                  ),
+                ),
+              ],
+            );
+
+            //selected의 value에 따라 기능실행
+            switch (selected) {
+              case 'report':
+                // 신고 처리
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('신고 완료')));
+                break;
+              case 'block':
+                // 차단 처리
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('차단 완료')));
+                break;
+              case 'share':
+                // 공유 처리
+                // Share.share('공유할 내용'); // share_plus 사용 시
+                break;
+              case null:
+                // 메뉴 밖을 눌러 닫힘. 아무것도 하지 않음.
+                break;
+            }
+            ;
+          },
+          child: Container(
+            color: Colors.white,
+            height: 80,
+            child: Row(
+              children: [
+                SizedBox(
+                  height: 45,
+                  width: 45,
+                  child: Image.asset('assets/images/m_profile/m_black.png'),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '닉네임',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        '댓글내용입니다 댓글을 입력해주세요',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                _HeartButton(),
+              ],
+            ),
           ),
         );
       },
