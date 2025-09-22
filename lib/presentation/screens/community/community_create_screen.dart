@@ -208,7 +208,20 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
               );
 
               if (!context.mounted) return;
-              if (err == null) {}
+              if (err == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('등록완료'),
+                  ),
+                );
+                //TODO: 로딩 후 작성글한 글로 이동
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(err),
+                  ),
+                );
+              }
             },
             child: Container(
               width: 300,
