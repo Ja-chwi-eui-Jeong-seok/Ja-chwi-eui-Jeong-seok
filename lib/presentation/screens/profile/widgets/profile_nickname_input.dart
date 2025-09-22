@@ -9,7 +9,7 @@ class ProfileNicknameInput extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.fromLTRB(15, 10, 0, 0),
+          padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
           child: Text(
             '닉네임',
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
@@ -24,7 +24,7 @@ class ProfileNicknameInput extends StatelessWidget {
               hintText: '집먼지의 이름을 지어주세요!',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
-                borderSide: const BorderSide(color: Colors.grey, width: 3),
+                borderSide: const BorderSide(color: Colors.grey, width: 3),                
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
