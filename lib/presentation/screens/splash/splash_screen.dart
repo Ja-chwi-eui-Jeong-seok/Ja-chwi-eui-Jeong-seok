@@ -18,13 +18,11 @@ class _SplashPageState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(vsync: this);
 
-    // context가 트리에 붙은 후에 실행
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          GoRouter.of(context).go('/login');
-        }
-      });
+    // 애니메이션이 끝났을 때 화면 이동
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        GoRouter.of(context).go('/login');
+      }
     });
   }
 
@@ -62,11 +60,10 @@ class _SplashPageState extends State<SplashScreen>
                       controller: _controller,
                       onLoaded: (composition) {
                         _controller
-                          ..duration = composition.duration * 2
+                          ..duration = composition.duration
                           ..forward();
                       },
                     );
-                    // json 파일에서 에러(다시 만들어야 해서 수정이 굉장히 오래걸림)
                   } catch (e) {
                     print('Lottie load error: $e');
                     return const SizedBox();
