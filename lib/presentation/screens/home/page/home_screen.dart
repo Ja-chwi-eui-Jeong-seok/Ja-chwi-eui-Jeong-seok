@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/ai_chat_circle.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
@@ -36,6 +37,7 @@ class HomeScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.notifications),
               onPressed: () {
+                print('알림 창');
                 // 알림 버튼
               },
             ),
@@ -56,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                   circleSize: 40,
                   offsetX: -10,
                   offsetY: 80,
-                  icon: Icons.chat,
+                  icon: CupertinoIcons.chat_bubble_text,
                   onTap: () {
                     // 나중에 ai 채팅으로 이동
                   },

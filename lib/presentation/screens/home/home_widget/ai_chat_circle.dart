@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AiChatCircle extends StatelessWidget {
@@ -12,7 +13,7 @@ class AiChatCircle extends StatelessWidget {
     this.circleSize = 60,
     this.offsetX = 50,
     this.offsetY = 20,
-    this.icon = Icons.chat,
+    this.icon = CupertinoIcons.chat_bubble_text,
     this.onTap,
   });
 

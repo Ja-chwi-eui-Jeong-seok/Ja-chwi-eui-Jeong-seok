@@ -1,10 +1,97 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Guide2 extends StatelessWidget {
-  const Guide2({super.key});
+  final VoidCallback onNext;
+  const Guide2({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
-    return Text('가이드2');
+    final size = MediaQuery.of(context).size;
+
+    // 화면 비율 기준으로 강조 영역 설정
+    final highlightRect = Rect.fromLTWH(
+      size.width * 0.02, // 좌측 3%
+      size.height * 0.115, // 상단 12.5%
+      size.width * 0.96, // 너비 94%
+      size.height * 0.222, // 높이 20.2%
+    );
+
+    return GestureDetector(
+      onTap: onNext,
+      child: Stack(
+        children: [
+          // 강조 영역 + 반투명 배경
+          CustomPaint(
+            size: size,
+            painter: _OverlayPainter(highlightRect),
+          ),
+
+          // 설명 텍스트 + 화살표
+          Positioned(
+            top: highlightRect.bottom + size.height * 0.02, // 강조 영역 바로 아래
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    CupertinoIcons.arrow_turn_down_right,
+                    color: Colors.white,
+                    size: size.width * 0.07, // 화면 비율로 크기 조절
+                  ),
+                  SizedBox(
+                    width: size.width * 0.03,
+                  ),
+                  SizedBox(
+                    width: size.width * 0.7,
+                    child: const Text(
+                      '상단의 레벨을 올리기 위해 \n 미션을 클리어 해보세요!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
+}
+
+class _OverlayPainter extends CustomPainter {
+  final Rect highlightRect;
+  _OverlayPainter(this.highlightRect);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 새 레이어 생성
+    canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
+    //전체 반투명
+    final overlayPaint = Paint()
+      ..color = Colors.black54
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), overlayPaint);
+
+    // 강조 영역 완전 투명
+    final clearPaint = Paint()..blendMode = BlendMode.clear;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(highlightRect, const Radius.circular(24)),
+      clearPaint,
+    );
+
+    // 레이어 복원
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_OverlayPainter oldDelegate) => false;
 }

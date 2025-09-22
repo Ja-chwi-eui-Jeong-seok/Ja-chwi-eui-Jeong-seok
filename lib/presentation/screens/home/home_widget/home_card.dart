@@ -89,15 +89,44 @@ class HomeCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '상세보기',
+                            '미션하기',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
                           SizedBox(height: 4),
-                          // 나중에 아이콘 => 이미지로 바꿀 예정
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.amber,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Transform.translate(
+                                offset: Offset(8, 0),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Color(0xFF8F8F8F),
+                                  size: 12,
+                                ),
+                              ),
+
+                              Transform.translate(
+                                offset: Offset(0, 0),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Color(0xFF666666),
+                                  size: 12,
+                                ),
+                              ),
+                              Transform.translate(
+                                offset: Offset(-8, 0),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Color(0xFF342E37),
+                                  size: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
