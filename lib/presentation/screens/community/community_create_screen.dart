@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/community_create_screen_vm.dart';
 
-class CommunityCreateScreen extends StatefulWidget {
+class CommunityCreateScreen extends ConsumerStatefulWidget {
   const CommunityCreateScreen({super.key});
 
   @override
-  State<CommunityCreateScreen> createState() => _CommunityCreateScreenState();
+  ConsumerState<CommunityCreateScreen> createState() =>
+      _CommunityCreateScreenState();
 }
 
-class _CommunityCreateScreenState extends State<CommunityCreateScreen> {
+class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
+  CommunityCreateVm get vm => ref.read(communityCreateVmProvider);
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
@@ -29,38 +33,55 @@ class _CommunityCreateScreenState extends State<CommunityCreateScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("글쓰기")),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        //padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 제목 입력
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: "제목",
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "제목",
+                      hintStyle: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 내용 입력
+                  TextFormField(
+                    controller: _contentController,
+                    minLines: 5,
+                    maxLines: 10,
+                    decoration: InputDecoration(
+                      hintText: "게시글을 작성해주세요!",
+                      border: InputBorder.none,
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-
-            // 내용 입력
-            TextFormField(
-              controller: _contentController,
-              minLines: 5,
-              maxLines: 10,
-              decoration: InputDecoration(
-                hintText: "게시글을 작성해주세요!",
-                border: InputBorder.none,
-              ),
+            Divider(
+              height: 2,
+              thickness: 2,
             ),
-            SizedBox(height: 24),
-
             // 카테고리 선택
-            Text(
-              "카테고리를 정해주세요.",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Text(
+                "카테고리를 정해주세요.",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             ),
-            SizedBox(height: 20),
+
             //Center로 가운데 정렬하고 SizedBox로 크기제한,Wrap의 자동줄바꿈 가능하게만듦
             Center(
               child: SizedBox(
@@ -104,16 +125,20 @@ class _CommunityCreateScreenState extends State<CommunityCreateScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 30),
+            Divider(
+              height: 2,
+              thickness: 2,
+            ),
 
             // 세부 카테고리 선택
-            Center(
-              child: const Text(
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Text(
                 "세부 카테고리를 정해주세요.",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 20),
             if (selectedCategory != null) ...[
               SizedBox(
                 width: double.infinity,
@@ -150,39 +175,60 @@ class _CommunityCreateScreenState extends State<CommunityCreateScreen> {
                 ),
               ),
             ],
+            Divider(
+              height: 2,
+              thickness: 2,
+            ),
             //selectedSubCategory = sub
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
 
+            //Spacer(),
             // 확인 버튼
-            SizedBox(
-              width: double.infinity,
-              child: GestureDetector(
-                onTap: () {
-                  print("제목: ${_titleController.text}");
-                  print("내용: ${_contentController.text}");
-                  print("카테고리: $selectedCategory");
-                  print("세부 카테고리: $selectedSubCategory");
-                },
-                child: Container(
-                  width: 300,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "확인",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+          ],
+        ),
+      ),
+      bottomSheet: Padding(
+        padding: const EdgeInsets.only(left: 24, right: 24, bottom: 50),
+        child: SizedBox(
+          width: double.infinity,
+          child: GestureDetector(
+            onTap: () async {
+              //테스트용 프린트
+              print("제목: ${_titleController.text}");
+              print("내용: ${_contentController.text}");
+              print("카테고리: $selectedCategory");
+              print("세부 카테고리: $selectedSubCategory");
+
+              //유효성검증
+              final err = await vm.submit(
+                title: _titleController.text,
+                content: _contentController.text,
+                category: selectedCategory,
+                subCategory: selectedSubCategory,
+              );
+
+              if (!context.mounted) return;
+              if (err == null) {}
+            },
+            child: Container(
+              width: 300,
+              height: 55,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: Center(
+                child: Text(
+                  "확인",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
