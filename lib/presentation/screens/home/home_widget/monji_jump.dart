@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class MonjiJump extends StatelessWidget {
-  final Color bodyColor = Color(0xFF6664CE); // 직접 16진수 지정
+  static const Color bodyColor = Color(0xFF1A1A1A); // 직접 16진수 지정
   //black: 1A1A1A red: FF9696 orange: FF9977 banana: FFEA97 sky: 7FA8DA night: 6664CE
   //white랑 reinbow 는 어찌할지 고민중
 
-  MonjiJump({super.key});
+  const MonjiJump({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +21,8 @@ class MonjiJump extends StatelessWidget {
         values: [
           // body 색상
           ValueDelegate.color(const ['body', '**'], value: bodyColor),
-          // bd1 색상
+          // bd1~bd6 색상
           ValueDelegate.color(const ['bd1', '**'], value: bodyColor),
-          // bd2~bd6도 같은 방식으로 추가 가능
           ValueDelegate.color(const ['bd2', '**'], value: bodyColor),
           ValueDelegate.color(const ['bd3', '**'], value: bodyColor),
           ValueDelegate.color(const ['bd4', '**'], value: bodyColor),

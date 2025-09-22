@@ -16,6 +16,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: const Text(
                   // 아래 텍스트는 예시로 대충 만든것임
+                  // 노션 등 개인정보처리방침 페이지를 만들면 링크 걸 예정
                   '''
 개인정보처리방침
 
@@ -47,6 +48,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    print('push');
                     context.go('/home');
                   },
                   child: const Text('동의'),

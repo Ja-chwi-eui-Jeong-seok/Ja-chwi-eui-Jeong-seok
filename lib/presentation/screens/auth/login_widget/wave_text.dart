@@ -40,7 +40,7 @@ class _WaveTextState extends State<WaveText>
         return AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-            double offsetY = // 가운데 + 오른쪽부터, - 왼쪽부터 웨이브
+            double offsetY = // + 오른쪽부터, - 왼쪽부터 웨이브
                 sin((_controller.value * 2 * pi) - (index * 0.5)) * 10;
 
             return Transform.translate(
