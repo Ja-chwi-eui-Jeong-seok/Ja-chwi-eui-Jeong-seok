@@ -109,7 +109,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
 
 //헤더
 class _HeaderRow extends StatelessWidget {
-  _HeaderRow({super.key});
+  const _HeaderRow({super.key});
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -133,7 +133,7 @@ class _HeaderRow extends StatelessWidget {
 
 //게시글
 class _PostBody extends StatelessWidget {
-  _PostBody({super.key});
+  const _PostBody({super.key});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -223,7 +223,7 @@ class CommentCard extends StatelessWidget {
 }
 
 class _HeartButton extends StatefulWidget {
-  _HeartButton({super.key});
+  const _HeartButton({super.key});
   @override
   State<_HeartButton> createState() => _HeartButtonState();
 }
@@ -251,7 +251,7 @@ class _HeartButtonState extends State<_HeartButton> {
 
 // 입력창
 class CommentWrite extends StatelessWidget {
-  CommentWrite({
+  const CommentWrite({
     super.key,
     required this.commentController,
     required this.submit,
