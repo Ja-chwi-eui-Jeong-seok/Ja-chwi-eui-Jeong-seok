@@ -41,7 +41,7 @@ class HomeBackground extends StatelessWidget {
                 end: Alignment.topCenter,
                 colors: [
                   Colors.white,
-                  Colors.white.withOpacity(0),
+                  Colors.white.withValues(alpha: 0.0),
                 ],
                 stops: const [0.3, 0.4], // 그라디언트 시작과 끝 비율
               ),

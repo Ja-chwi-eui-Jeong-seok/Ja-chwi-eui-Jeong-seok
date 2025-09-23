@@ -1,5 +1,7 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/core/config/theme/app_theme.dart';
 import 'package:ja_chwi/firebase_options.dart';
@@ -11,7 +13,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  //runApp(const MyApp());
+   runApp(
+    const ProviderScope( // Riverpod의 전역 상태 관리 루트
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
