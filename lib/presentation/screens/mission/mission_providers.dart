@@ -38,6 +38,8 @@ class MissionRepository {
         '임시 코드에 해당하는 미션(코드: $tempMissionCode)을 찾을 수 없습니다. Firestore `mission` 컬렉션에 missioncode가 1인 문서가 있는지 확인해주세요.',
       );
     }
+    // Mission 모델의 fromFirestore 팩토리 생성자에서 'missiontag'를 처리하도록 수정했으므로,
+    // 해당 생성자를 다시 사용합니다. 이렇게 하면 코드 관리가 더 용이해집니다.
     return Mission.fromFirestore(missionQuery.docs.first);
     // --- 개발용 임시 코드 끝 ---
   }
