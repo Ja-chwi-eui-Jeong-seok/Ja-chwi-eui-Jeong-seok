@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
+import 'package:ja_chwi/presentation/screens/mission/mission_model.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_achiever.dart';
 import 'package:ja_chwi/presentation/screens/mission/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission_card.dart';
@@ -15,9 +16,16 @@ class MissionHomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final achievers = ref.watch(achieversProvider);
+    final todayMissionAsync = ref.watch(todayMissionProvider);
     return Scaffold(
       appBar: CommonAppBar(
-        actions: [RefreshIconButton(onPressed: () {})],
+        actions: [
+          RefreshIconButton(
+            onPressed: () {
+              ref.refresh(todayMissionProvider);
+            },
+          ),
+        ],
         titleSpacing: 40.0,
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.bold,
@@ -33,7 +41,7 @@ class MissionHomeScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               const ProfileSection(),
               const SizedBox(height: 32),
-              _buildTodayMissionSection(context),
+              _buildTodayMissionSection(context, todayMissionAsync),
               const SizedBox(height: 32),
               _buildMissionAchieversSection(context, achievers),
               const SizedBox(height: 40),
@@ -66,12 +74,27 @@ class MissionHomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTodayMissionSection(BuildContext context) {
+  Widget _buildTodayMissionSection(
+    BuildContext context,
+    AsyncValue<Mission> todayMissionAsync,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(context, '오늘의 미션'),
-        const MissionCard(title: '삼시세끼 다 먹기', tags: ['건강']),
+        todayMissionAsync.when(
+          data: (mission) => MissionCard(
+            title: mission.missiontitle,
+            tags: mission.tags,
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text(
+              '미션을 불러오는 데 실패했습니다: $error',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
         const SizedBox(height: 12),
       ],
     );
