@@ -16,10 +16,18 @@ class Mission {
     QueryDocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data();
+    final missionTagData = data['missiontag'];
+    List<String> tags = [];
+    if (missionTagData is List) {
+      tags = List<String>.from(missionTagData.map((tag) => tag.toString()));
+    } else if (missionTagData is String) {
+      tags = [missionTagData];
+    }
+
     return Mission(
       missioncode: data['missioncode'] as int? ?? 0,
       missiontitle: data['missiontitle'] as String? ?? '미션 없음',
-      tags: List<String>.from(data['tags'] as List? ?? []),
+      tags: tags,
     );
   }
 }
