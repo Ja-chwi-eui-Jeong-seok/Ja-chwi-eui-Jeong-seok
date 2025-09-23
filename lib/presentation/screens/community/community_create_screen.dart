@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ja_chwi/presentation/screens/community/widgets/community_create_screen_vm.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_create_screen_vm.dart';
 
 class CommunityCreateScreen extends ConsumerStatefulWidget {
   const CommunityCreateScreen({super.key});
@@ -24,6 +24,10 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
 
   // 카테고리별 세부 카테고리 매핑
   final Map<String, List<String>> subCategories = {
+    //Map<categorycode, List<categorydetailcode> subCategories
+    //category코드를 조회 -> categorydetailcode를 조회 -> categorydetailcode의 categorycode와 조인
+    //categorydetailcode의 categorycode = 1 이면 categorycode의 List로 등록
+    //화면에 나타낼때는 코드를 조회해서 name을 출력
     //카테고리 불러오고 , 서브카테고리 맵핑하기
     '요리': ['한식', '양식', '디저트', '자유'],
     '운동': ['크로스핏', '스트릿', '헬스', '스포츠', '자유'],
@@ -95,52 +99,50 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 children:
                     [
-                          '자유',
-                          '운동',
-                          '청소',
-                          '미션',
-                          '요리',
-                        ] //TODO:만들어진 리스트의 카테고리코드 불러오고 리스트로 만들기
-                        .map((mainCategory) {
-                          final isSelected = selectedCategory == mainCategory;
-                          return Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: ChoiceChip(
-                              label: SizedBox(
-                                width: 38,
-                                height: 38,
-                                child: Center(child: Text(mainCategory)),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15), // ✅ 수정
-                              ),
-                              side: const BorderSide(color: Colors.black),
-                              selected: selectedCategory == mainCategory,
-                              onSelected: (_) {
-                                ref
-                                    .read(selectedCategoryProvider.notifier)
-                                    .state = isSelected
-                                    ? null
-                                    : mainCategory; // 같은 칩 누르면 해제 옵션
-                                ref
-                                        .read(
-                                          selectedSubCategoryProvider.notifier,
-                                        )
-                                        .state =
-                                    null;
-                              },
-                              selectedColor: Colors.black,
-                              labelStyle: TextStyle(
-                                color: selectedCategory == mainCategory
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
-                              backgroundColor: Colors.white,
-                              showCheckmark: false,
-                            ),
-                          );
-                        })
-                        .toList(),
+                      '자유',
+                      '운동',
+                      '청소',
+                      '미션',
+                      '요리',
+                    ].map((mainCategory) {
+                      final isSelected = selectedCategory == mainCategory;
+                      return Padding(
+                        padding: EdgeInsets.only(right: 10),
+                        child: ChoiceChip(
+                          label: SizedBox(
+                            width: 38,
+                            height: 38,
+                            child: Center(child: Text(mainCategory)),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15), // ✅ 수정
+                          ),
+                          side: const BorderSide(color: Colors.black),
+                          selected: selectedCategory == mainCategory,
+                          onSelected: (_) {
+                            ref
+                                .read(selectedCategoryProvider.notifier)
+                                .state = isSelected
+                                ? null
+                                : mainCategory; // 같은 칩 누르면 해제 옵션
+                            ref
+                                    .read(
+                                      selectedSubCategoryProvider.notifier,
+                                    )
+                                    .state =
+                                null;
+                          },
+                          selectedColor: Colors.black,
+                          labelStyle: TextStyle(
+                            color: selectedCategory == mainCategory
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                          backgroundColor: Colors.white,
+                          showCheckmark: false,
+                        ),
+                      );
+                    }).toList(),
               ),
             ),
 
@@ -205,10 +207,10 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                 child: GestureDetector(
                   onTap: () async {
                     //테스트용 프린트
-                    print("제목: ${_titleController.text}");
-                    print("내용: ${_contentController.text}");
-                    print("카테고리: $selectedCategory");
-                    print("세부 카테고리: $selectedSubCategory");
+                    debugPrint("제목: ${_titleController.text}");
+                    debugPrint("내용: ${_contentController.text}");
+                    debugPrint("카테고리: $selectedCategory");
+                    debugPrint("세부 카테고리: $selectedSubCategory");
 
                     //유효성검증
                     final err = await vm.submit(

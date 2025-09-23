@@ -19,6 +19,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
     if (!mounted) return;
     final text = commentController.text.trim();
     print(text);
+    //게시글 id > firebase에 등록
   }
 
   @override
@@ -84,7 +85,9 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                   //댓글리스트
                   TabBarView(
                     children: [
+                      //최신순
                       CommentCard(itemCount: 20),
+                      //추천순
                       CommentCard(itemCount: 20),
                     ],
                   ),
@@ -192,7 +195,7 @@ class CommentCard extends StatelessWidget {
         return GestureDetector(
           onLongPressStart: (details) async {
             //details = onLongPressStart했을떄 정보
-
+            final scaffold = ScaffoldMessenger.of(context);
             //현재화면의 최상단 레이어(Overlay)를 찾고 그 랜더박스 정보 제공, 목적: 화면전체 크기를 얻어 메뉴 위치계산에 사용
             final overlay =
                 Overlay.of(context).context.findRenderObject() as RenderBox;
@@ -260,15 +263,11 @@ class CommentCard extends StatelessWidget {
             switch (selected) {
               case 'report':
                 // 신고 처리
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('신고 완료')));
+                scaffold.showSnackBar(const SnackBar(content: Text('신고 완료')));
                 break;
               case 'block':
                 // 차단 처리
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('차단 완료')));
+                scaffold.showSnackBar(const SnackBar(content: Text('차단 완료')));
                 break;
               case 'share':
                 // 공유 처리
