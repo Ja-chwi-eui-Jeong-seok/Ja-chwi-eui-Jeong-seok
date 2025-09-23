@@ -35,10 +35,15 @@ class LoginScreen extends StatelessWidget {
               onLoginSuccess: () async {
                 // 1️⃣ 개인정보 처리방침 화면으로 이동
                 final accepted = await context.push<bool>('/privacy-policy');
+                // context가 여전히 유효한지 확인
+                if (!context.mounted) return;
 
                 if (accepted == true) {
                   // 2️⃣ 프로필 화면으로 이동
                   await context.push('/profile');
+                
+                   // context가 여전히 유효한지 확인
+                    if (!context.mounted) return;
 
                   // 3️⃣ 프로필 완료 후 홈으로 이동
                   context.go('/home');
