@@ -19,11 +19,13 @@ enum BottomNavMode {
 class BottomNav extends StatelessWidget {
   final BottomNavMode mode;
   final String? confirmRoute; // confirm 모드에서 이동할 경로
+  final VoidCallback? onConfirm; // ✅ 추가
 
   const BottomNav({
     super.key,
     this.mode = BottomNavMode.tab,
     this.confirmRoute,
+    this.onConfirm,
   });
 
   @override
@@ -92,7 +94,10 @@ class BottomNav extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       child: OutlinedButton(
-        onPressed: () {
+        onPressed: () {               
+          if (onConfirm != null) {
+            onConfirm!(); // ✅ 프로필 저장 실행
+          }  
           if (confirmRoute != null) {
             context.go(confirmRoute!);
           }
