@@ -8,6 +8,7 @@ class LoginButton extends StatelessWidget {
   final VoidCallback? onLoginSuccess;
   const LoginButton({super.key, this.onLoginSuccess});
   Future<void> _signInWithGoogle(BuildContext context) async {
+    final scaffold = ScaffoldMessenger.of(context); // async 전에 저장
     try {
       //구글 로그인
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -32,7 +33,7 @@ class LoginButton extends StatelessWidget {
       }
     } catch (e) {
       print("구글 로그인 오류: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffold.showSnackBar(
         SnackBar(content: Text("로그인 실패: $e")),
       );
     }
