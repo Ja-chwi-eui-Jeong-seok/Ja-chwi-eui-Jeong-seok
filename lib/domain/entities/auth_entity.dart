@@ -1,5 +1,5 @@
 class AuthEntity {
-  final String id; //있어야 할 것 같아서 넣음
+  final String uid;
   final String accountData; //계정정보
   final String accountEmail; //이메일 정보
   final String accountType; // google/apple
@@ -13,7 +13,7 @@ class AuthEntity {
   final bool managerType; //관리자 타입
 
   AuthEntity({
-    required this.id,
+    required this.uid,
     required this.accountData,
     required this.accountEmail,
     required this.accountType,
