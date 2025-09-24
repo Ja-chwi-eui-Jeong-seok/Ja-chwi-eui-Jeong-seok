@@ -257,7 +257,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('등록완료')),
                       );
-                      // TODO: 상세 화면 이동 등
+                      // TODO: 작성한 상세 화면 이동
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(err)),
