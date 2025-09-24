@@ -16,18 +16,18 @@ class AuthModel extends AuthEntity {
     required String userDeleteNote,
     required bool managerType,
   }) : super(
-         id: '',
-         accountData: '',
-         accountEmail: '',
-         accountType: '',
-         createDevice: '',
-         privacyConsent: false,
-         agreeToTermsOfService: false,
-         userCreateDate: null,
-         userUpdateDate: null,
-         userDeleteDate: null,
-         userDeleteNote: '',
-         managerType: false,
+         id: id,
+         accountData: accountData,
+         accountEmail: accountEmail,
+         accountType: accountType,
+         createDevice: createDevice,
+         privacyConsent: privacyConsent,
+         agreeToTermsOfService: agreeToTermsOfService,
+         userCreateDate: userCreateDate,
+         userUpdateDate: userUpdateDate,
+         userDeleteDate: userDeleteDate,
+         userDeleteNote: userDeleteNote,
+         managerType: managerType,
        );
 
   factory AuthModel.fromMap(Map<String, dynamic> map, String id) {
@@ -52,6 +52,22 @@ class AuthModel extends AuthEntity {
       userDeleteNote: map['user_delete_note'] ?? '',
       managerType: map['manager_type'] ?? false,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'account_data': accountData,
+      'account_email': accountEmail,
+      'account_type': accountType,
+      'create_device': createDevice,
+      'privacy_consent': privacyConsent,
+      'agree_to_terms_of_service': agreeToTermsOfService,
+      'user_create_date': userCreateDate,
+      'user_update_date': userUpdateDate,
+      'user_delete_date': userDeleteDate,
+      'user_delete_note': userDeleteNote,
+      'manager_type': managerType,
+    };
   }
 
   AuthEntity toDomain() => AuthEntity(
@@ -83,20 +99,4 @@ class AuthModel extends AuthEntity {
     userDeleteNote: entity.userDeleteNote,
     managerType: entity.managerType,
   );
-
-  Map<String, dynamic> toMap() {
-    return {
-      'account_data': accountData,
-      'account_email': accountEmail,
-      'account_type': accountType,
-      'create_device': createDevice,
-      'privacy_consent': privacyConsent,
-      'agree_to_terms_of_service': agreeToTermsOfService,
-      'user_create_date': userCreateDate,
-      'user_update_date': userUpdateDate,
-      'user_delete_date': userDeleteDate,
-      'user_delete_note': userDeleteNote,
-      'manager_type': managerType,
-    };
-  }
 }
