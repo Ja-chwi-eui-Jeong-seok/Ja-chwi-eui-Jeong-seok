@@ -13,8 +13,8 @@ class CommunityCreateVm {
   Future<String?> submit({
     required String title,
     required String content,
-    required String? category,
-    required String? subCategory,
+    required int? category,
+    required int? subCategory,
   }) async {
     if (_submitting) return '처리 중입니다';
     final t = title.trim();
@@ -26,12 +26,17 @@ class CommunityCreateVm {
     _submitting = true;
     try {
       await FirebaseFirestore.instance.collection('communitylist').add({
-        'createuser': '이영상',
+        //커뮤니티코드 ?
+        'categorycode': category,
+        'categorydetailcode': subCategory,
         'communityname': t,
         'communitydetail': c,
-        'category': category,
-        'subCategory': subCategory,
-        'createdAt': FieldValue.serverTimestamp(),
+        'createuser': '이영상',
+        'categorycreatedate': FieldValue.serverTimestamp(),
+        'categoryupdatedate': null,
+        'categorydeletedate': null,
+        'categorydeletedateyn': false,
+        'categorydeletenote': null,
       });
       return null; // 성공
     } catch (e) {
