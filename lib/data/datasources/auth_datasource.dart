@@ -22,7 +22,7 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   // final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
 
-  static const String kAuthCollection = 'auth';
+  static const String kAuthCollection = 'user_profile';
 
   Future<String> _getDeviceName() async {
     if (Platform.isAndroid) return 'Android';
@@ -34,21 +34,21 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
   Future<AuthModel?> signInWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
-
+    print('1');
     final googleAuth = await googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-
+    print('2');
     final userCred = await _auth.signInWithCredential(credential);
     final user = userCred.user;
     if (user == null) return null;
-
+    print('3');
     final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
     final snapshot = await docRef.get();
     final deviceName = await _getDeviceName();
-
+    print('4');
     if (!snapshot.exists) {
       final newUser = AuthModel(
         uid: user.uid,
@@ -70,7 +70,12 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
       } else {
         print('기존 유저 Firestore 데이터 불러옴: ${snapshot.data()}');
       }
-      await docRef.set(newUser.toMap());
+      try {
+        await docRef.set(newUser.toMap());
+        print("✅ Firestore 저장 성공 (uid: ${user.uid})");
+      } catch (e) {
+        print("❌ Firestore 저장 실패: $e");
+      }
       return newUser;
     } else {
       return AuthModel.fromMap(snapshot.data()!, snapshot.id);
