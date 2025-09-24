@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_achiever.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_model.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.dart';
 
 /// Repository
 
@@ -43,6 +43,25 @@ class MissionRepository {
     return Mission.fromFirestore(missionQuery.docs.first);
     // --- 개발용 임시 코드 끝 ---
   }
+
+  /// 사용자의 완료된 미션 목록을 가져오는 스트림
+  Stream<List<Map<String, dynamic>>> fetchUserMissions() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      // 로그인하지 않은 사용자는 빈 목록을 반환
+      return Stream.value([]);
+    }
+
+    return _firestore
+        .collection('user_missions')
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('missioncreatedate', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => doc.data()..['id'] = doc.id).toList(),
+        );
+  }
 }
 
 /// Providers
@@ -61,4 +80,10 @@ final missionRepositoryProvider = Provider((ref) => MissionRepository());
 final todayMissionProvider = FutureProvider<Mission>((ref) {
   final repository = ref.watch(missionRepositoryProvider);
   return repository.fetchTodayMission();
+});
+
+/// 사용자의 미션 목록을 제공하는 StreamProvider
+final userMissionsProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
+  final repository = ref.watch(missionRepositoryProvider);
+  return repository.fetchUserMissions();
 });

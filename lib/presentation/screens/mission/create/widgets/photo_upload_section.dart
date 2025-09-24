@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class PhotoUploadSection extends StatelessWidget {
-  final List<String> photos;
+  final List<dynamic> photos;
   final VoidCallback onAddPhoto;
   final Function(int) onRemovePhoto;
 
@@ -27,6 +30,18 @@ class PhotoUploadSection extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: photos.length,
                 itemBuilder: (context, index) {
+                  final photo = photos[index];
+                  ImageProvider imageProvider;
+                  if (photo is XFile) {
+                    imageProvider = FileImage(File(photo.path));
+                  } else if (photo is String) {
+                    imageProvider = NetworkImage(photo);
+                  } else {
+                    // 예외 처리 또는 기본 이미지
+                    imageProvider = const AssetImage(
+                      'assets/images/placeholder.png',
+                    );
+                  }
                   return Container(
                     margin: const EdgeInsets.only(right: 8),
                     child: Stack(
@@ -37,7 +52,7 @@ class PhotoUploadSection extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             image: DecorationImage(
-                              image: NetworkImage(photos[index]),
+                              image: imageProvider,
                               fit: BoxFit.cover,
                             ),
                           ),
