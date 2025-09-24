@@ -11,16 +11,26 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthEntity?> signInWithGoogle() async {
     final model = await remoteDataSource.signInWithGoogle();
+    if (model is AuthModel) {
+      return model.toDomain();
+    }
+    return model;
   }
 
   @override
   Future<AuthEntity?> signInWithApple() async {
     final model = await remoteDataSource.signInWithApple();
+    if (model == null) return null;
+    if (model is AuthModel) return model.toDomain();
+    return model;
   }
 
   @override
   Future<AuthEntity?> getCurrentUser() async {
     final model = await remoteDataSource.fetchCurrentUser();
+    if (model == null) return null;
+    if (model is AuthModel) return model.toDomain();
+    return model;
   }
 
   @override
