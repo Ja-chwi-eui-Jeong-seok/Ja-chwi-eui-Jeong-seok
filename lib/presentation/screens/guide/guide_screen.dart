@@ -27,9 +27,7 @@ class _GuideScreenState extends State<GuideScreen> {
       (next) => Guide1(onNext: next),
       (next) => Guide2(onNext: next),
       (next) => Guide3(onNext: next),
-      (next) => Guide4(
-        onNext: next,
-      ),
+      (next) => Guide4(onNext: next),
       (next) => Guide5(onNext: next),
     ];
   }
