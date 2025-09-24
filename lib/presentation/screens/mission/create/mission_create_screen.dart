@@ -1,5 +1,11 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/description_input_field.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/photo_upload_section.dart';
@@ -15,40 +21,175 @@ class MissionCreateScreen extends StatefulWidget {
 class _MissionCreateScreenState extends State<MissionCreateScreen> {
   String _missionTitle = '';
   bool _isPublic = true;
-  List<String> _photos = [];
+  List<dynamic> _photos = []; // String (URL) or XFile (local)
   final TextEditingController _descriptionController = TextEditingController();
   bool _isInitialized = false;
   bool _isEditing = false;
+  bool _isSubmitting = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // 위젯 트리에서 여러 번 호출될 수 있으므로, 초기화는 한 번만 수행
     if (_isInitialized) return;
+    _initializeFromExtra();
+    _isInitialized = true;
+  }
 
+  void _initializeFromExtra() {
     final extra = GoRouterState.of(context).extra;
     if (extra is Map<String, dynamic>) {
       // 수정 모드
       _isEditing = true;
       final missionData = extra;
-      _missionTitle = missionData['title'] as String? ?? '';
-      _isPublic = missionData['isPublic'] as bool? ?? true;
-      _photos = List<String>.from(missionData['photos'] as List? ?? []);
-      _descriptionController.text = missionData['description'] as String? ?? '';
+      setState(() {
+        _missionTitle = missionData['title'] as String? ?? '';
+        _isPublic = missionData['isPublic'] as bool? ?? true;
+        _photos = List<dynamic>.from(missionData['photos'] as List? ?? []);
+        _descriptionController.text =
+            missionData['description'] as String? ?? '';
+      });
     } else if (extra is String) {
       // 생성 모드 (템플릿 제목 전달)
       _missionTitle = extra;
-    } else {
-      // 기본 생성 모드 (임시)
-      _missionTitle = '삼시세끼 다 먹기';
     }
-    _isInitialized = true;
   }
 
   @override
   void dispose() {
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _addPhotos() async {
+    if (_photos.length >= 5) return;
+    final picker = ImagePicker();
+    final pickedFiles = await picker.pickMultiImage(
+      imageQuality: 80,
+    );
+
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        int availableSlots = 5 - _photos.length;
+        _photos.addAll(pickedFiles.take(availableSlots));
+      });
+    }
+  }
+
+  Future<List<String>> _uploadPhotos(List<dynamic> photos) async {
+    final List<String> photoUrls = [];
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null)
+      throw Exception("User not authenticated for photo upload.");
+
+    for (var photo in photos) {
+      if (photo is String) {
+        // 이미 업로드된 사진 (URL)
+        photoUrls.add(photo);
+      } else if (photo is XFile) {
+        // 새로 추가된 사진 (XFile)
+        final file = File(photo.path);
+        final fileName = '$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('mission_photos')
+            .child(fileName);
+        final uploadTask = ref.putFile(file);
+        final snapshot = await uploadTask.whenComplete(() => {});
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+        photoUrls.add(downloadUrl);
+      }
+    }
+    return photoUrls;
+  }
+
+  String _generateDocId(String uid) {
+    final today = DateTime.now();
+    return '${uid}_${today.year}-${today.month}-${today.day}';
+  }
+
+  Future<void> _submitMission() async {
+    if (_isSubmitting) return;
+    setState(() => _isSubmitting = true);
+
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      // 사용자가 로그인하지 않은 경우, 익명으로 로그인합니다.
+      if (user == null) {
+        debugPrint('사용자가 로그인하지 않았습니다. 익명으로 로그인합니다.');
+        final userCredential = await FirebaseAuth.instance.signInAnonymously();
+        user = userCredential.user;
+      }
+      if (user == null) throw Exception("Authentication failed.");
+
+      // 오늘 날짜로 이미 완료한 미션이 있는지 확인 (수정 모드가 아닐 때만)
+      if (!_isEditing) {
+        final docId = _generateDocId(user.uid);
+        final doc = await FirebaseFirestore.instance
+            .collection('user_missions')
+            .doc(docId)
+            .get();
+
+        if (doc.exists) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('오늘의 미션은 이미 완료했습니다!')),
+            );
+          }
+          return; // 여기서 함수 종료
+        }
+      }
+
+      final photoUrls = await _uploadPhotos(_photos);
+
+      final docId = _generateDocId(user.uid);
+
+      if (_isEditing) {
+        // 수정 모드: update 사용
+        final missionUpdateData = {
+          'title': _missionTitle,
+          'isPublic': _isPublic,
+          'photos': photoUrls,
+          'description': _descriptionController.text,
+          'tags': [], // TODO: 태그 수정 기능 구현 시 이 부분도 수정 필요
+        };
+        await FirebaseFirestore.instance
+            .collection('user_missions')
+            .doc(docId)
+            .update(missionUpdateData);
+      } else {
+        // 생성 모드: set 사용
+        final missionCreateData = {
+          'title': _missionTitle,
+          'isPublic': _isPublic,
+          'photos': photoUrls,
+          'description': _descriptionController.text,
+          'tags': [],
+          'missioncreatedate': FieldValue.serverTimestamp(),
+          'userId': user.uid,
+        };
+        await FirebaseFirestore.instance
+            .collection('user_missions')
+            .doc(docId)
+            .set(missionCreateData);
+      }
+
+      if (mounted) {
+        context.pop();
+      }
+    } catch (e) {
+      // 에러 처리 (예: 스낵바 표시)
+      debugPrint('미션 제출 오류: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('업로드에 실패했습니다: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   @override
@@ -86,13 +227,7 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
 
               PhotoUploadSection(
                 photos: _photos,
-                onAddPhoto: () {
-                  setState(() {
-                    _photos.add(
-                      'https://picsum.photos/200/300?random=${DateTime.now().millisecondsSinceEpoch}',
-                    );
-                  });
-                },
+                onAddPhoto: _addPhotos,
                 onRemovePhoto: (index) {
                   setState(() {
                     _photos.removeAt(index);
@@ -116,10 +251,7 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         child: ElevatedButton(
-          onPressed: () {
-            // TODO: 미션 완료 데이터 처리 로직
-            context.pop();
-          },
+          onPressed: _isSubmitting ? null : _submitMission,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
@@ -130,10 +262,12 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
             side: BorderSide(color: Colors.grey.shade300),
             elevation: 0,
           ),
-          child: Text(
-            _isEditing ? '수정하기' : '확인',
-            style: const TextStyle(fontSize: 18),
-          ),
+          child: _isSubmitting
+              ? const CircularProgressIndicator()
+              : Text(
+                  _isEditing ? '수정하기' : '확인',
+                  style: const TextStyle(fontSize: 18),
+                ),
         ),
       ),
     );
