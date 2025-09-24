@@ -48,12 +48,38 @@ class Guide2 extends StatelessWidget {
                   ),
                   SizedBox(
                     width: size.width * 0.7,
-                    child: const Text(
-                      '상단의 레벨을 올리기 위해 \n 미션을 클리어 해보세요!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '상단의 ',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          TextSpan(
+                            text: '레벨',
+                            style: TextStyle(
+                              fontSize: 22, // 더 크게 강조
+                            ),
+                          ),
+                          TextSpan(
+                            text: '을 올리기 위해\n',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          TextSpan(
+                            text: '미션',
+                            style: TextStyle(
+                              fontSize: 20, // 크기 다르게
+                            ),
+                          ),
+                          TextSpan(
+                            text: '을 클리어 해보세요!',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -75,13 +101,24 @@ class _OverlayPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // 새 레이어 생성
     canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
-    //전체 반투명
+
+    // 전체 반투명 배경
     final overlayPaint = Paint()
       ..color = Colors.black54
       ..style = PaintingStyle.fill;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), overlayPaint);
 
-    // 강조 영역 완전 투명
+    // 강조 영역 빛나는 효과 (Glow)
+    final glowPaint = Paint()
+      ..maskFilter =
+          const MaskFilter.blur(BlurStyle.outer, 20) // 블러 크기 조절
+      ..color = Colors.white;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(highlightRect, const Radius.circular(24)),
+      glowPaint,
+    );
+
+    // 강조 영역 완전 투명 처리
     final clearPaint = Paint()..blendMode = BlendMode.clear;
     canvas.drawRRect(
       RRect.fromRectAndRadius(highlightRect, const Radius.circular(24)),

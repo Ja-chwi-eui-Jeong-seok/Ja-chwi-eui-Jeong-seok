@@ -2,40 +2,44 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ja_chwi/domain/usecases/auth_usecase.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginButton extends StatelessWidget {
+  final SignInWithGoogleUseCase googleUseCase;
+  final SignInWithAppleUseCase appleUseCase;
+
   final VoidCallback? onLoginSuccess;
-  const LoginButton({super.key, this.onLoginSuccess});
+  const LoginButton({
+    super.key,
+    required this.googleUseCase,
+    required this.appleUseCase,
+    this.onLoginSuccess,
+  });
+
   Future<void> _signInWithGoogle(BuildContext context) async {
-    final scaffold = ScaffoldMessenger.of(context); // async 전에 저장
+    final scaffold = ScaffoldMessenger.of(context);
+
     try {
-      //구글 로그인
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // 로그인 취소됨
-
-      //구글 인증 정보 가져오기
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      //Firebase Auth 크레덴셜 생성
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      //Firebase Auth 로그인
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      //로그인 성공 → 개인정보처리방침으로 이동
-      if (context.mounted) {
-        context.go('/privacy-policy');
+      final user = await googleUseCase.execute();
+      if (user != null && context.mounted) {
+        onLoginSuccess?.call(); // 로그인 성공 후 콜백
       }
     } catch (e) {
-      print("구글 로그인 오류: $e");
-      scaffold.showSnackBar(
-        SnackBar(content: Text("로그인 실패: $e")),
-      );
+      scaffold.showSnackBar(SnackBar(content: Text("Google 로그인 실패: $e")));
+    }
+  }
+
+  Future<void> _signInWithApple(BuildContext context) async {
+    final scaffold = ScaffoldMessenger.of(context);
+
+    try {
+      final user = await appleUseCase.execute();
+      if (user != null && context.mounted) {
+        onLoginSuccess?.call(); // 로그인 성공 후 콜백
+      }
+    } catch (e) {
+      scaffold.showSnackBar(SnackBar(content: Text("Apple 로그인 실패: $e")));
     }
   }
 
