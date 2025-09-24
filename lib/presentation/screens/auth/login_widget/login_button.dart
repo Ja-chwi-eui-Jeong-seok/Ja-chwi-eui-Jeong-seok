@@ -7,6 +7,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 class LoginButton extends StatelessWidget {
   final VoidCallback? onLoginSuccess;
   const LoginButton({super.key, this.onLoginSuccess});
+
   Future<void> _signInWithGoogle(BuildContext context) async {
     final scaffold = ScaffoldMessenger.of(context); // async 전에 저장
     try {
@@ -35,6 +36,38 @@ class LoginButton extends StatelessWidget {
       print("구글 로그인 오류: $e");
       scaffold.showSnackBar(
         SnackBar(content: Text("로그인 실패: $e")),
+      );
+    }
+  }
+
+  Future<void> _signInWithApple(BuildContext context) async {
+    final scaffold = ScaffoldMessenger.of(context);
+    try {
+      // Apple ID 인증
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      // OAuthCredential 생성
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+
+      // Firebase 로그인
+      await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+      // 로그인 성공 시 화면 이동
+      if (context.mounted) {
+        context.go('/privacy-policy');
+      }
+    } catch (e) {
+      debugPrint('Apple Sign-In failed: $e');
+      scaffold.showSnackBar(
+        SnackBar(content: Text("Apple 로그인 실패: $e")),
       );
     }
   }
@@ -103,24 +136,7 @@ class LoginButton extends StatelessWidget {
                 child: SignInWithAppleButton(
                   style: SignInWithAppleButtonStyle.white, // 흰색 버튼, Apple 권장
                   borderRadius: BorderRadius.circular(24), // 내부 버튼 모서리와 동일하게
-                  onPressed: () async {
-                    // Firebase Auth 등 연동
-                    try {
-                      await SignInWithApple.getAppleIDCredential(
-                        scopes: [
-                          AppleIDAuthorizationScopes.email,
-                          AppleIDAuthorizationScopes.fullName,
-                        ],
-                      );
-                      if (context.mounted) {
-                        // 로그인 성공 시 프로필 설정 화면으로 이동
-                        context.go('/profile');
-                      }
-                    } catch (e) {
-                      // 사용자가 취소하는 등 에러 처리
-                      debugPrint('Apple Sign-In failed: $e');
-                    }
-                  },
+                  onPressed: () => _signInWithApple(context),
                 ),
               ),
             ),
