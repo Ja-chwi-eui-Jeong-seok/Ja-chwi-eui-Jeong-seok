@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/data/datasources/auth_datasource.dart';
+import 'package:ja_chwi/data/datasources/auth_datasource_impl.dart';
+import 'package:ja_chwi/domain/usecases/auth_usecase.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/login_button.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/wave_text.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
+
+  // 한 번만 생성하고 재사용
+  final repository = AuthRepositoryImpl(
+    remoteDataSource: AuthRemoteDataSourceImpl(),
+  );
+
+  late final googleUseCase = SignInWithGoogleUseCase(repository);
+  late final appleUseCase = SignInWithAppleUseCase(repository);
 
   @override
   Widget build(BuildContext context) {
@@ -32,20 +43,15 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             LoginButton(
+              googleUseCase: googleUseCase,
+              appleUseCase: appleUseCase,
               onLoginSuccess: () async {
-                // 1️⃣ 개인정보 처리방침 화면으로 이동
                 final accepted = await context.push<bool>('/privacy-policy');
-                // context가 여전히 유효한지 확인
                 if (!context.mounted) return;
 
                 if (accepted == true) {
-                  // 2️⃣ 프로필 화면으로 이동
                   await context.push('/profile');
-                
-                   // context가 여전히 유효한지 확인
-                    if (!context.mounted) return;
-
-                  // 3️⃣ 프로필 완료 후 홈으로 이동
+                  if (!context.mounted) return;
                   context.go('/home');
                 }
               },

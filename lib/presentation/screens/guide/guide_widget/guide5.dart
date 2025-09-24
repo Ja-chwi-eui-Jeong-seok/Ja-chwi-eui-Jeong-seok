@@ -13,35 +13,84 @@ class Guide5 extends StatelessWidget {
     final circleCenter = Offset(size.width * 0.613, size.height * 0.918);
     final circleRadius = size.width * 0.07;
 
-    // 설명 텍스트 문자열
-    const guideText = "다른 이웃들과 \n자취 꿀팁을 나누고 소통해봐요!";
-    const textStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
+    // 텍스트 위치
+    final textLeft = size.width * 0.23;
+    final textTop = size.height * 0.7;
+
+    // TextSpan으로 제각각 크기
+    final guideTextSpan = TextSpan(
+      children: [
+        TextSpan(
+          text: '다른 ',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        TextSpan(
+          text: '이웃들과\n',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        TextSpan(
+          text: '자취 ',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        TextSpan(
+          text: '꿀팁',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        TextSpan(
+          text: '을 나누고 ',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        TextSpan(
+          text: '소통',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        TextSpan(
+          text: '해봐요!',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
 
-    // 텍스트 크기 측정
+    // TextPainter로 화살표 위치 계산
     final textPainter = TextPainter(
-      text: const TextSpan(text: guideText, style: textStyle),
+      text: guideTextSpan,
       textDirection: TextDirection.ltr,
     )..layout();
 
-    final textWidth = textPainter.width;
-    final textHeight = textPainter.height;
-
-    // 텍스트 배치 위치 (왼쪽 상단 기준)
-    final textLeft = size.width * 0.29;
-    final textTop = size.height * 0.7;
-
-    // 화살표 끝점 = 텍스트 하단 중앙
-    const arrowMargin = 12.0;
     final arrowTarget = Offset(
-      textLeft + textWidth / 2 + 30,
-      textTop + textHeight + arrowMargin,
+      textLeft + textPainter.width / 2 + 30,
+      textTop + textPainter.height + 12,
     );
 
-    // 휘어짐 강도
+    // 곡선 화살표 제어점
     const curveStrength = 0.3;
     final control = Offset(
       (circleCenter.dx + arrowTarget.dx) / 1 -
@@ -54,10 +103,10 @@ class Guide5 extends StatelessWidget {
       onTap: onNext,
       child: Stack(
         children: [
-          // 강조 원 + 반투명 배경
+          // 강조 원 + Glow
           CustomPaint(
             size: size,
-            painter: _CircleOverlayPainter(circleCenter, circleRadius),
+            painter: _GlowCirclePainter(circleCenter, circleRadius),
           ),
 
           // 곡선 화살표
@@ -70,13 +119,12 @@ class Guide5 extends StatelessWidget {
             ),
           ),
 
-          // 설명 텍스트
+          // 텍스트
           Positioned(
             left: textLeft,
             top: textTop,
-            child: const Text(
-              guideText,
-              style: textStyle,
+            child: RichText(
+              text: guideTextSpan,
               textAlign: TextAlign.center,
             ),
           ),
@@ -86,11 +134,11 @@ class Guide5 extends StatelessWidget {
   }
 }
 
-/// 강조 원 + 반투명 배경
-class _CircleOverlayPainter extends CustomPainter {
+/// 강조 원 + Glow 효과
+class _GlowCirclePainter extends CustomPainter {
   final Offset center;
   final double radius;
-  const _CircleOverlayPainter(this.center, this.radius);
+  const _GlowCirclePainter(this.center, this.radius);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -101,6 +149,15 @@ class _CircleOverlayPainter extends CustomPainter {
       ..color = Colors.black54
       ..style = PaintingStyle.fill;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), overlayPaint);
+
+    // Glow 효과
+    final glowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [Colors.white, Colors.transparent],
+      ).createShader(Rect.fromCircle(center: center, radius: radius * 3))
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius * 1.5, glowPaint);
 
     // 강조 원 (투명)
     final clearPaint = Paint()..blendMode = BlendMode.clear;
@@ -113,7 +170,7 @@ class _CircleOverlayPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// 곡선 화살표
+/// 기존 곡선 화살표
 class _CurvedArrowPainter extends CustomPainter {
   final Offset start;
   final Offset end;
@@ -127,7 +184,6 @@ class _CurvedArrowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 곡선 그리기
     final paint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
@@ -138,12 +194,10 @@ class _CurvedArrowPainter extends CustomPainter {
     path.quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
     canvas.drawPath(path, paint);
 
-    // 기존 삼각형 화살표 대신 > 모양으로 위로 세운 화살표
-    final arrowLength = 16.0; // 화살표 길이
-    final arrowAngle = pi / 4; // 45도 각도로 벌어지게
+    final arrowLength = 16.0;
+    final arrowAngle = pi / 4;
     final direction = (end - control).direction;
 
-    // V자 모양 그리기
     final line1End = Offset(
       end.dx - arrowLength * cos(direction - arrowAngle),
       end.dy - arrowLength * sin(direction - arrowAngle),
