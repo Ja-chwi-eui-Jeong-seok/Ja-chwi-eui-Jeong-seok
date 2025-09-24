@@ -72,7 +72,7 @@ class CommunityDto {
   //수정
   Map<String, dynamic> toUpdateMap({
     String? communityName,
-    String? comunityDetail,
+    String? communityDetail,
     String? location,
   }) {
     return {
