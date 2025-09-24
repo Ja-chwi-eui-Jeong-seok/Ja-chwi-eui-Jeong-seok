@@ -1,6 +1,6 @@
 import 'package:ja_chwi/data/datasources/auth_datasource.dart';
 import 'package:ja_chwi/domain/entities/auth_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
+import 'package:ja_chwi/domain/repositories/auth_repository.dart';
 import '../models/auth_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -11,19 +11,16 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthEntity?> signInWithGoogle() async {
     final model = await remoteDataSource.signInWithGoogle();
-    return model;
   }
 
   @override
   Future<AuthEntity?> signInWithApple() async {
     final model = await remoteDataSource.signInWithApple();
-    return model;
   }
 
   @override
   Future<AuthEntity?> getCurrentUser() async {
     final model = await remoteDataSource.fetchCurrentUser();
-    return model;
   }
 
   @override

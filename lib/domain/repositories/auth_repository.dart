@@ -5,6 +5,6 @@ abstract class AuthRepository {
   Future<AuthEntity?> signInWithApple();
   Future<void> signOut();
   Future<AuthEntity?> getCurrentUser();
-  Future<void> updateUser(AuthEntity account);
+  Future<void> updateUser(AuthEntity user);
   Future<void> deleteUser(String userId, {String? reason});
 }
