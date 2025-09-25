@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 
 // VM 상태(provider) import
-import 'package:ja_chwi/presentation/screens/community/vm/community_create_screen_vm.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_vm.dart';
 // ↑ 내부에서 categoryVMProvider를 외부 공개하고 있어야 함
 //   (앞서 만든 CategoryVM, CategoryState 구조 전제)
 
@@ -248,8 +248,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                     final err = await vm.submit(
                       title: _titleController.text,
                       content: _contentController.text,
-                      category: code,
-                      subCategory: subCode,
+                      categoryCode: code,
+                      subCategoryCode: subCode,
                     );
 
                     if (!context.mounted) return;
