@@ -102,14 +102,14 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: parents.map((p) {
-                    final isSelected = selectedCode == p.categorycode;
+                    final isSelected = selectedCode == p.categoryCode;
                     return Padding(
                       padding: const EdgeInsets.only(right: 10),
                       child: ChoiceChip(
                         label: SizedBox(
                           width: 38,
                           height: 38,
-                          child: Center(child: Text(p.categoryname)),
+                          child: Center(child: Text(p.categoryName)),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -118,7 +118,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                         selected: isSelected,
                         onSelected: (_) async {
                           // 같은 칩 재클릭 시 해제
-                          final next = isSelected ? null : p.categorycode;
+                          final next = isSelected ? null : p.categoryCode;
                           ref
                                   .read(selectedCategoryCodeProvider.notifier)
                                   .state =
@@ -188,11 +188,11 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                         spacing: 8,
                         children: subs.map((s) {
                           final isSelected =
-                              selectedDetailCode == s.categorydetailcode;
+                              selectedDetailCode == s.categoryDetailCode;
                           return ChoiceChip(
                             label: SizedBox(
                               height: 20,
-                              child: Text(s.categorydetailname),
+                              child: Text(s.categoryDetailName),
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -206,7 +206,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                   )
                                   .state = isSelected
                                   ? null
-                                  : s.categorydetailcode;
+                                  : s.categoryDetailCode;
                             },
                             selectedColor: Colors.black,
                             labelStyle: TextStyle(
