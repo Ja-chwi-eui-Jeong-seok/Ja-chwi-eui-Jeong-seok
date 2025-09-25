@@ -26,8 +26,9 @@ class SelectedDayMissionView extends StatelessWidget {
 
     if (missionData != null) {
       final String title = missionData['title'] as String;
-      final List<String> tags =
-          (missionData['tags'] as List?)?.cast<String>() ?? [];
+      final List<String> tags = List<String>.from(
+        missionData['tags'] as List? ?? [],
+      );
       final List<String> photos =
           (missionData['photos'] as List?)?.cast<String>() ?? [];
       final bool isPublic = missionData['isPublic'] as bool? ?? false;
@@ -49,7 +50,7 @@ class SelectedDayMissionView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(
                     right: 70.0,
-                  ), // 공개/비공개 아이콘 공간 확보
+                  ),
                   child: Text(
                     title,
                     style: const TextStyle(
@@ -107,7 +108,7 @@ class SelectedDayMissionView extends StatelessWidget {
               ],
             ),
             Positioned(
-              top: 4, // 아이콘과 텍스트의 높이를 고려하여 약간의 패딩을 줍니다.
+              top: 4,
               right: 0,
               child: Row(
                 children: [
@@ -133,7 +134,7 @@ class SelectedDayMissionView extends StatelessWidget {
       return Container(
         constraints: const BoxConstraints(
           minHeight: 200,
-        ), // 높이를 늘려 다른 카드와 유사한 느낌을 줍니다.
+        ),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: const Color(0xFFF5F5F5),

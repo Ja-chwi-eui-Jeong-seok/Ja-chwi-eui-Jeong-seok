@@ -1,60 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/calendar_view.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/completed_mission_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class MissionSavedListScreen extends StatefulWidget {
+class MissionSavedListScreen extends ConsumerStatefulWidget {
   const MissionSavedListScreen({super.key});
 
   @override
-  State<MissionSavedListScreen> createState() => _MissionSavedListScreenState();
+  ConsumerState<MissionSavedListScreen> createState() =>
+      _MissionSavedListScreenState();
 }
 
-class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
+class _MissionSavedListScreenState
+    extends ConsumerState<MissionSavedListScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  // 임시 데이터
-  final int _totalCompletedMissions = 10;
-  final int _consecutiveSuccessDays = 4;
-
-  // 날짜별 완료된 미션 데이터 (임시)
-  final Map<DateTime, Map<String, dynamic>> _completedMissions = {
-    DateTime.utc(DateTime.now().year, 9, 12): {
-      'title': '삼시세끼 다 먹기',
-      'tags': ['건강', '요리'],
-      'photos': [
-        'https://picsum.photos/200/300?random=1',
-        'https://picsum.photos/200/300?random=2',
-        'https://picsum.photos/200/300?random=3',
-      ],
-      'isPublic': true,
-      'description':
-          '오늘은 직접 요리해서 삼시세끼를 모두 챙겨 먹었습니다. 점심에는 김치찌개, 저녁에는 된장찌개를 만들었어요. 아주 뿌듯한 하루입니다! 앞으로도 꾸준히 실천해야겠어요.',
-    },
-    DateTime.utc(DateTime.now().year, 9, 10): {
-      'title': '아침 9시 기상',
-      'tags': ['생활패턴'],
-      'photos': ['https://picsum.photos/200/300?random=4'],
-      'isPublic': false,
-      'description': '겨우 일어났다. 너무 피곤하다.',
-    },
-  };
-
-  List<dynamic> _getEventsForDay(DateTime day) {
-    // table_calendar는 local time으로 날짜를 전달하므로, UTC로 변환하여 Map의 키와 비교
-    final date = DateTime.utc(day.year, day.month, day.day);
-    if (_completedMissions.containsKey(date)) {
-      return [_completedMissions[date]!]; // 점을 표시하기 위해 리스트에 아이템을 추가
-    }
-    return [];
-  }
-
   @override
   Widget build(BuildContext context) {
+    final userMissionsAsync = ref.watch(userMissionsProvider);
     final daysInMonth = DateTime(
       _focusedDay.year,
       _focusedDay.month + 1,
@@ -68,7 +37,9 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
           onPressed: () => context.pop(),
         ),
         centerTitle: true,
-        actions: [RefreshIconButton(onPressed: () {})],
+        actions: [
+          RefreshIconButton(onPressed: () => ref.refresh(userMissionsProvider)),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -76,65 +47,17 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CalendarView(
-                focusedDay: _focusedDay,
-                selectedDay: _selectedDay,
-                totalCompletedMissions: _totalCompletedMissions,
-                daysInMonth: daysInMonth,
-                consecutiveSuccessDays: _consecutiveSuccessDays,
-                onDaySelected: (selectedDay, focusedDay) {
-                  if (!isSameDay(_selectedDay, selectedDay)) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  }
-                },
-                eventLoader: _getEventsForDay,
-                builders: CalendarBuilders(
-                  selectedBuilder: (context, day, focusedDay) {
-                    return Container(
-                      margin: const EdgeInsets.all(4.0),
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        day.day.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  },
-                  markerBuilder: (context, day, events) {
-                    if (events.isNotEmpty) {
-                      // 선택된 날짜에 이벤트 마커가 있으면 색상을 흰색으로 변경하여 가시성 확보
-                      final isSelected = isSameDay(_selectedDay, day);
-                      return Positioned(
-                        top: 2,
-                        left: 4,
-                        right: 0,
-                        child: Center(
-                          child: Text(
-                            '✓', // 바꿀예정
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.red,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return null;
-                  },
+              if (userMissionsAsync.isLoading)
+                const Center(child: CircularProgressIndicator())
+              else if (userMissionsAsync.hasError)
+                Center(
+                  child: Text('데이터를 불러올 수 없습니다: ${userMissionsAsync.error}'),
+                )
+              else
+                _buildCalendarAndMissionSection(
+                  userMissionsAsync.value ?? [],
+                  daysInMonth,
                 ),
-              ),
-              const SizedBox(height: 24),
-              CompletedMissionSection(
-                selectedDay: _selectedDay,
-                completedMissions: _completedMissions,
-              ),
             ],
           ),
         ),
@@ -142,9 +65,130 @@ class _MissionSavedListScreenState extends State<MissionSavedListScreen> {
     );
   }
 
+  Widget _buildCalendarAndMissionSection(
+    List<Map<String, dynamic>> missions,
+    int daysInMonth,
+  ) {
+    final completedMissions = _mapMissionsToCalendarEvents(missions);
+
+    return Column(
+      children: [
+        CalendarView(
+          focusedDay: _focusedDay,
+          selectedDay: _selectedDay,
+          totalCompletedMissions: missions.length,
+          daysInMonth: daysInMonth,
+          consecutiveSuccessDays: _calculateConsecutiveDays(
+            completedMissions.keys,
+          ),
+          onDaySelected: (selectedDay, focusedDay) {
+            if (!isSameDay(_selectedDay, selectedDay)) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+            }
+          },
+          eventLoader: (day) {
+            final date = DateTime.utc(day.year, day.month, day.day);
+            return completedMissions[date] != null
+                ? [completedMissions[date]]
+                : [];
+          },
+          builders: CalendarBuilders(
+            selectedBuilder: (context, day, focusedDay) {
+              return Container(
+                margin: const EdgeInsets.all(4.0),
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  day.day.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            },
+            markerBuilder: (context, day, events) {
+              if (events.isNotEmpty) {
+                final isSelected = isSameDay(_selectedDay, day);
+                return Positioned(
+                  top: 2,
+                  left: 4,
+                  right: 0,
+                  child: Center(
+                    child: Text(
+                      '✓',
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return null;
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
+        CompletedMissionSection(
+          selectedDay: _selectedDay,
+          completedMissions: completedMissions,
+        ),
+      ],
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
+  }
+
+  Map<DateTime, Map<String, dynamic>> _mapMissionsToCalendarEvents(
+    List<Map<String, dynamic>> missions,
+  ) {
+    final Map<DateTime, Map<String, dynamic>> eventMap = {};
+    for (var mission in missions) {
+      final completedAt = mission['missioncreatedate']?.toDate();
+      if (completedAt != null) {
+        final date = DateTime.utc(
+          completedAt.year,
+          completedAt.month,
+          completedAt.day,
+        );
+
+        eventMap[date] = mission;
+      }
+    }
+    return eventMap;
+  }
+
+  int _calculateConsecutiveDays(Iterable<DateTime> dates) {
+    if (dates.isEmpty) return 0;
+
+    final sortedDates = dates.toList()..sort((a, b) => b.compareTo(a));
+    int consecutiveDays = 1;
+    DateTime lastDate = sortedDates.first;
+
+    // 오늘 날짜가 포함되어 있는지 확인
+    final today = DateTime.now();
+    if (!isSameDay(lastDate, today) &&
+        !isSameDay(lastDate, today.subtract(const Duration(days: 1)))) {
+      return 0; // 마지막 성공일이 어제나 오늘이 아니면 연속 성공 아님
+    }
+
+    for (int i = 1; i < sortedDates.length; i++) {
+      if (lastDate.difference(sortedDates[i]).inDays == 1) {
+        consecutiveDays++;
+        lastDate = sortedDates[i];
+      } else {
+        break;
+      }
+    }
+    return consecutiveDays;
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/core/config/theme/app_theme.dart';
 import 'package:ja_chwi/firebase_options.dart';
@@ -14,8 +13,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   //runApp(const MyApp());
-   runApp(
-    const ProviderScope( // Riverpod의 전역 상태 관리 루트
+  runApp(
+    const ProviderScope(
+      // Riverpod의 전역 상태 관리 루트
       child: MyApp(),
     ),
   );
@@ -28,7 +28,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-
       routerConfig: router,
       title: '자취의 정석',
       debugShowCheckedModeBanner: false,
@@ -39,6 +38,5 @@ class MyApp extends StatelessWidget {
       supportedLocales: AppTheme.supportedLocales,
       locale: const Locale('ko', 'KR'),
     );
-
   }
 }
