@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/screens/auth/auth_view_model.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/apple_login_button.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:ja_chwi/presentation/screens/auth/auth_provider.dart';
 
 class GoogleLoginButton extends ConsumerWidget {
@@ -38,15 +37,16 @@ class GoogleLoginButton extends ConsumerWidget {
                   ? null
                   : () async {
                       await authNotifier.signInWithGoogle();
+                      // 비동기 작업 후에는 context가 여전히 유효한지 확인하는 것이 좋습니다.
                       if (!context.mounted) return;
-                      if (authNotifier.state.status == AuthStatus.success) {
+
+                      // signInWithGoogle() 호출 후 최신 상태를 다시 읽어옵니다.
+                      final latestAuthState = ref.read(authNotifierProvider);
+                      if (latestAuthState.status == AuthStatus.success) {
                         if (onLoginSuccess != null) await onLoginSuccess!();
-                      } else if (authNotifier.state.status ==
-                          AuthStatus.error) {
+                      } else if (latestAuthState.status == AuthStatus.error) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(authNotifier.state.errorMessage),
-                          ),
+                          SnackBar(content: Text(latestAuthState.errorMessage)),
                         );
                       }
                     },
