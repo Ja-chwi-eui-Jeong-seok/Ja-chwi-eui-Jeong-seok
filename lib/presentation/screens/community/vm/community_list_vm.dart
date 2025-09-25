@@ -25,28 +25,31 @@ class CommunityListState {
     items: items ?? this.items,
     isLoading: isLoading ?? this.isLoading,
     hasMore: hasMore ?? this.hasMore,
-    lastDoc: lastDoc,
+    lastDoc: lastDoc ?? this.lastDoc,
   );
 }
 
 class CommunityListVM extends Notifier<CommunityListState> {
-  CommunityListVM(this.categoryCode, this.detailCode);
+  CommunityListVM(this.categoryCode, this.detailCode, this.location);
 
   final int categoryCode;
   final int detailCode;
+  final String? location;
 
   @override
   CommunityListState build() => const CommunityListState();
   //UI에서 스피너 조건 st.isLoading && st.hasMore 로 변경, 전에는 isLoading만 있어서수정함
   Future<void> loadInitial(WidgetRef ref) async {
     if (state.isLoading) return;
-    state = state.copyWith(isLoading: true);
+    //state = state.copyWith(isLoading: true); 2025.09.25 17시 이전 코드
+    state = const CommunityListState(isLoading: true);
     try {
       final (items, lastDoc, hasMore) = await ref
           .read(fetchCommunitiesProvider)
           .call(
             categoryCode: categoryCode,
             categoryDetailCode: detailCode,
+            location: location,
             limit: 10,
             startAfter: null,
             desc: true,
@@ -67,14 +70,16 @@ class CommunityListVM extends Notifier<CommunityListState> {
         .call(
           categoryCode: categoryCode,
           categoryDetailCode: detailCode,
+          location: location, // null 가능
           limit: 10,
           startAfter: state.lastDoc,
           desc: true,
         );
+
     state = CommunityListState(
       items: [...state.items, ...items],
-      lastDoc: lastDoc,
-      hasMore: hasMore,
+      lastDoc: lastDoc ?? state.lastDoc,
+      hasMore: hasMore && items.isNotEmpty, //빈 페이지면 종료
       isLoading: false,
     );
   }
@@ -84,8 +89,9 @@ class CommunityListVM extends Notifier<CommunityListState> {
 NotifierProvider<CommunityListVM, CommunityListState> communityListVmProvider({
   required int categoryCode,
   required int detailCode,
+  String? location,
 }) {
   return NotifierProvider<CommunityListVM, CommunityListState>(
-    () => CommunityListVM(categoryCode, detailCode),
+    () => CommunityListVM(categoryCode, detailCode, location),
   );
 }

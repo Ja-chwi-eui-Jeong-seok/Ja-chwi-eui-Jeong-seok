@@ -47,13 +47,13 @@ class CommunityScreen extends ConsumerWidget {
                 isScrollable: true,
                 indicatorColor: Colors.black,
                 labelColor: Colors.black,
-                tabs: parents.map((p) => Tab(text: p.categoryname)).toList(),
+                tabs: parents.map((p) => Tab(text: p.categoryName)).toList(),
               ),
             ),
             body: TabBarView(
               // 상위 탭 선택 시, 하위 탭(_SecondDepthTabs)으로 이동
               children: parents.map((p) {
-                return _SecondDepthTabs(parentCode: p.categorycode);
+                return _SecondDepthTabs(parentCode: p.categoryCode);
               }).toList(),
             ),
             floatingActionButton: FloatingActionButton.small(
@@ -126,7 +126,7 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
                   indicatorColor: Colors.black,
                   labelColor: Colors.black,
                   tabs: subs
-                      .map((s) => Tab(text: s.categorydetailname))
+                      .map((s) => Tab(text: s.categoryDetailName))
                       .toList(),
                 ),
               ),
@@ -136,8 +136,8 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
                   children: subs.map((s) {
                     return _PostsPlaceholder(
                       parentCode: widget.parentCode,
-                      detailCode: s.categorydetailcode,
-                      detailName: s.categorydetailname,
+                      detailCode: s.categoryDetailCode,
+                      detailName: s.categoryDetailName,
                     );
                   }).toList(),
                 ),
@@ -187,12 +187,13 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
 
     return NotificationListener<ScrollNotification>(
       onNotification: (n) {
-        // 스크롤이 끝에서 90% 이상 내려갔을 때 다음 페이지 로드
+        if (!st.hasMore || st.isLoading) return false; // 가드
         if (n.metrics.pixels >= n.metrics.maxScrollExtent * 0.9) {
           ref.read(provider.notifier).loadMore(ref);
         }
         return false;
       },
+
       child: Column(
         children: [
           const SizedBox(height: 12),

@@ -23,14 +23,27 @@ class CategoryDetailDto {
 
   factory CategoryDetailDto.fromFirebase(Map<String, dynamic> data) {
     return CategoryDetailDto(
-      categorycode: data['categorycode'],
-      categorydetailcode: data['categorydetailcode'],
-      categorydetailname: data['categorydetailname'],
-      categorycreate: data['categorycreate'],
-      categoryupdate: data['categoryupdate'] as Timestamp?,
-      categorydelete: data['categorydelete'] as Timestamp?,
-      categorydeleteyn: data['categorydeleteyn'],
-      categorydeletenote: data['categorydeletenote'] as String?,
+      categorycode: data['category_code'],
+      categorydetailcode: data['category_detail_code'],
+      categorydetailname: data['category_detail_name'],
+      categorycreate: data['category_create'],
+      categoryupdate: data['category_update'] as Timestamp?,
+      categorydelete: data['category_delete'] as Timestamp?,
+      categorydeleteyn: data['category_delete_yn'],
+      categorydeletenote: data['category_delete_note'] as String?,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'category_code': categorycode,
+      'category_detail_code': categorydetailcode,
+      'category_detail_name': categorydetailname,
+      'category_create': categorycreate,
+      'category_update': categoryupdate,
+      'category_delete': categorydelete,
+      'category_delete_yn': categorydeleteyn,
+      'category_delete_note': categorydeletenote,
+    };
   }
 }
