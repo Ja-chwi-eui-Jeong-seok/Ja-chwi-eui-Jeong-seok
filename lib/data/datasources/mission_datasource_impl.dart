@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ja_chwi/data/datasources/mission_datasource.dart';
+import 'package:ja_chwi/data/datasources/mission_date_util.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.dart';
 
 class MissionDataSourceImpl implements MissionDataSource {
@@ -79,20 +80,53 @@ class MissionDataSourceImpl implements MissionDataSource {
   }
 
   @override
-  Future<Mission> fetchTodayMission() async {
-    // --- 개발용 임시 코드 ---
-    // 로그인 여부와 관계없이 UI 확인을 위해 미션 코드 1번을 강제로 가져옵니다.
-    // TODO: 로그인 기능이 완성되면 이 코드를 삭제하고 아래 주석 처리된 원본 코드를 복구해야 합니다.
-    const int tempMissionCode = 1;
+  Future<Mission> fetchTodayMission(
+    String userId, {
+    DateTime? debugNow, // 테스트를 위한 시간 주입용 파라미터
+  }) async {
+    // 1. Firestore에서 사용자 프로필을 가져와 가입일을 확인합니다.
+    final userProfileDoc = await _firestore
+        .collection('user_profile')
+        .doc(userId)
+        .get();
+
+    if (!userProfileDoc.exists) {
+      throw Exception(
+        '사용자 프로필(uid: $userId)을 찾을 수 없습니다. Firestore `user_profile` 컬렉션을 확인해주세요.',
+      );
+    }
+
+    final userProfileData = userProfileDoc.data()!;
+    final Timestamp userCreateDateTimestamp =
+        userProfileData['userCreateDate'] ?? Timestamp.now();
+
+    // 2. 전체 미션 개수를 가져옵니다. (미션 코드가 순환하기 위해 필요)
+    final missionConfigDoc = await _firestore
+        .collection('daily_mission_config')
+        .doc('config')
+        .get();
+    if (!missionConfigDoc.exists) {
+      throw Exception('미션 설정(`daily_mission_config/config`) 문서를 찾을 수 없습니다.');
+    }
+    final int totalMissions = missionConfigDoc.data()?['total_missions'] ?? 1;
+
+    // 3. 유틸리티 함수를 사용하여 오늘의 미션 코드를 계산합니다.
+    final int todayMissionCode = calculateTodayMissionCode(
+      userCreateDateTimestamp: userCreateDateTimestamp,
+      totalMissions: totalMissions,
+      now: debugNow,
+    );
+
+    // 4. 계산된 코드로 오늘의 미션을 가져옵니다.
     final missionQuery = await _firestore
         .collection('mission')
-        .where('missioncode', isEqualTo: tempMissionCode)
+        .where('missioncode', isEqualTo: todayMissionCode)
         .limit(1)
         .get();
 
     if (missionQuery.docs.isEmpty) {
       throw Exception(
-        '임시 코드에 해당하는 미션(코드: $tempMissionCode)을 찾을 수 없습니다. Firestore `mission` 컬렉션에 missioncode가 1인 문서가 있는지 확인해주세요.',
+        '오늘의 미션(코드: $todayMissionCode)을 찾을 수 없습니다. Firestore `mission` 컬렉션을 확인해주세요.',
       );
     }
     return Mission.fromFirestore(missionQuery.docs.first);

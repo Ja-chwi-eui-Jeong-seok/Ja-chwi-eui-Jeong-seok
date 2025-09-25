@@ -35,8 +35,11 @@ class MissionRepositoryImpl implements MissionRepository {
   }
 
   @override
-  Future<Mission> fetchTodayMission() {
-    return dataSource.fetchTodayMission();
+  Future<Mission> fetchTodayMission(
+    String userId, {
+    DateTime? debugNow,
+  }) {
+    return dataSource.fetchTodayMission(userId, debugNow: debugNow);
   }
 
   @override
