@@ -1,183 +1,198 @@
+// presentation/screens/community/community_screen.dart
 import 'package:flutter/material.dart';
-import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 
-class CommunityScreen extends StatelessWidget {
+class CommunityScreen extends ConsumerWidget {
   const CommunityScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<String> tabs = ['자유', '요리', '청소', '운동', '미션', '산책'];
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
-        appBar:
-            //CommonAppBar(),
-            AppBar(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catState = ref.watch(categoryVMProvider);
+
+    return catState.parents.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        body: Center(child: Text('카테고리 오류: $e')),
+      ),
+      data: (parents) {
+        if (parents.isEmpty) {
+          return const Scaffold(body: Center(child: Text('카테고리가 없습니다')));
+        }
+
+        return DefaultTabController(
+          length: parents.length,
+          child: Scaffold(
+            appBar: AppBar(
               titleSpacing: 10,
-              title: Row(
+              title: const Row(
                 children: [
-                  const SizedBox(width: 8),
-                  const Icon(Icons.arrow_drop_down),
-                  const SizedBox(width: 4),
-                  const Text('동작구'),
-                  const Spacer(),
-                  IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_drop_down),
+                  SizedBox(width: 4),
+                  Text('동작구'),
+                  Spacer(),
                 ],
               ),
               bottom: TabBar(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                indicator: UnderlineTabIndicator(
-                  //  insets: EdgeInsets.zero,
-                  borderSide: BorderSide(color: Colors.black, width: 2),
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
+                isScrollable: true,
                 indicatorColor: Colors.black,
                 labelColor: Colors.black,
-                isScrollable: false,
-                //labelPadding: EdgeInsets.symmetric(horizontal: 16),
-                indicatorWeight: 3,
-                labelStyle: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-                tabs: tabs.map((e) => Tab(text: e)).toList(),
+                tabs: parents.map((p) => Tab(text: p.categoryname)).toList(),
               ),
             ),
-        body: Container(
-          padding: EdgeInsets.only(left: 24, right: 24, top: 18),
-          child: TabBarView(
-            children:
-                //TODO:카테고리템 이름, 게시글 리스트
-                //TODO: 카테고리별 게시글정보들 어떻게 넣을것인지
-                tabs.map((e) {
-                  return _CategoryTab(e);
-                }).toList(),
-          ),
-        ),
-        floatingActionButton: SizedBox(
-          width: 55,
-          height: 55,
-          child: FloatingActionButton.small(
-            onPressed: () {},
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
+            body: TabBarView(
+              children: parents.map((p) {
+                // 상위 탭별 하위 탭(2 depth) 영역
+                return _SecondDepthTabs(parentCode: p.categorycode);
+              }).toList(),
             ),
-            child: const Icon(Icons.edit),
+            floatingActionButton: FloatingActionButton.small(
+              onPressed: () {},
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.edit),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
-class _CategoryTab extends StatelessWidget {
-  const _CategoryTab(this.title);
-  final String title;
+/// 상위 탭 하나의 내용: 하위 카테고리를 탭으로 표시
+class _SecondDepthTabs extends ConsumerStatefulWidget {
+  const _SecondDepthTabs({required this.parentCode, super.key});
+  final int parentCode;
+
+  @override
+  ConsumerState<_SecondDepthTabs> createState() => _SecondDepthTabsState();
+}
+
+class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
+  bool _requested = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 최초 한 번만 children 로드
+    if (!_requested) {
+      _requested = true;
+      Future.microtask(
+        () => ref
+            .read(categoryVMProvider.notifier)
+            .loadChildren(widget.parentCode),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(categoryVMProvider);
+    final av = state.children[widget.parentCode];
+
+    if (av == null || av.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return av.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('하위 카테고리 오류: $e')),
+      data: (subs) {
+        if (subs.isEmpty) {
+          return const Center(child: Text('하위 카테고리가 없습니다'));
+        }
+        return DefaultTabController(
+          length: subs.length,
+          child: Column(
+            children: [
+              // 하위 탭바
+              Material(
+                color: Colors.white,
+                child: TabBar(
+                  isScrollable: true,
+                  indicatorColor: Colors.black,
+                  labelColor: Colors.black,
+                  tabs: subs
+                      .map((s) => Tab(text: s.categorydetailname))
+                      .toList(),
+                ),
+              ),
+              // 하위 탭뷰: 각 하위 카테고리의 게시글 리스트 영역(placeholder)
+              Expanded(
+                child: TabBarView(
+                  children: subs.map((s) {
+                    return _PostsPlaceholder(
+                      parentCode: widget.parentCode,
+                      detailCode: s.categorydetailcode,
+                      detailName: s.categorydetailname,
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 하위 탭 선택 시 실제 게시글 리스트가 들어갈 자리
+/// 우선 자리표시자. 이후 페이징 VM 붙이면 교체.
+class _PostsPlaceholder extends StatelessWidget {
+  const _PostsPlaceholder({
+    required this.parentCode,
+    required this.detailCode,
+    required this.detailName,
+    super.key,
+  });
+  final int parentCode;
+  final int detailCode;
+  final String detailName;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 1),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
               Text(
-                title,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                '$detailName',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
-              _SortChip(text: '최신순', selected: true),
-              const SizedBox(width: 8),
-              _SortChip(text: '추천순', selected: false),
+              const Text('최신순', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text('  |  ', style: TextStyle(color: Colors.grey)),
+              const Text('추천순', style: TextStyle(color: Colors.grey)),
             ],
           ),
         ),
         const SizedBox(height: 12),
         Expanded(
           child: ListView.separated(
-            padding: EdgeInsets.only(top: 8),
-            itemCount: 10,
-            itemBuilder: (BuildContext context, int index) {
-              return _PlaceholderCard();
-            },
-            separatorBuilder: (context, index) {
-              return const SizedBox(height: 12); // 아이템 사이 간격
-            },
+            padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+            itemCount: 8,
+            itemBuilder: (_, i) => Container(
+              height: 96,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2F2F2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Text('parent=$parentCode  detail=$detailCode  index=$i'),
+            ),
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
           ),
         ),
       ],
     );
   }
 }
-
-class _SortChip extends StatelessWidget {
-  final String text;
-  final bool selected;
-  const _SortChip({required this.text, required this.selected});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? Colors.black : Colors.grey;
-    return Row(
-      children: [
-        Text(
-          text,
-          style: TextStyle(
-            color: color,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
-        if (text == '최신순')
-          const Text('  |  ', style: TextStyle(color: Colors.grey)),
-      ],
-    );
-  }
-}
-
-class _PlaceholderCard extends StatelessWidget {
-  const _PlaceholderCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 96,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2F2F2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-    );
-  }
-}
-
-// class _AddCard extends StatelessWidget {
-//   const _AddCard();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       onTap: () {},
-//       borderRadius: BorderRadius.circular(12),
-//       child: Container(
-//         height: 88,
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(12),
-//           border: Border.all(color: const Color(0xFFD9D9D9)),
-//         ),
-//         child: const Center(
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               Icon(Icons.add, size: 20, color: Colors.grey),
-//               SizedBox(height: 4),
-//               Text('대화방을 추가해주세요', style: TextStyle(color: Colors.grey)),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
