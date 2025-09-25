@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ja_chwi/presentation/screens/mission/mission_achiever.dart';
-import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_card.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/achiever_card.dart';
 
 class AchieversList extends StatelessWidget {
   final List<MissionAchiever> achievers;
