@@ -3,7 +3,7 @@ import 'package:ja_chwi/domain/entities/auth_entity.dart';
 
 class AuthModel extends AuthEntity {
   AuthModel({
-    required String id,
+    required String uid,
     required String accountData,
     required String accountEmail,
     required String accountType,
@@ -16,7 +16,7 @@ class AuthModel extends AuthEntity {
     required String userDeleteNote,
     required bool managerType,
   }) : super(
-         id: id,
+         uid: uid,
          accountData: accountData,
          accountEmail: accountEmail,
          accountType: accountType,
@@ -31,7 +31,8 @@ class AuthModel extends AuthEntity {
        );
 
   factory AuthModel.fromMap(Map<String, dynamic> map, String id) {
-    DateTime _toDate(dynamic v) {
+    DateTime? _toDate(dynamic v) {
+      if (v == null) return null;
       if (v is Timestamp) return v.toDate();
       if (v is DateTime) return v;
       if (v is String) return DateTime.tryParse(v) ?? DateTime.now();
@@ -39,7 +40,7 @@ class AuthModel extends AuthEntity {
     }
 
     return AuthModel(
-      id: id,
+      uid: id,
       accountData: map['account_data'] ?? '',
       accountEmail: map['account_email'] ?? '',
       accountType: map['account_type'] ?? '',
@@ -54,24 +55,8 @@ class AuthModel extends AuthEntity {
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'account_data': accountData,
-      'account_email': accountEmail,
-      'account_type': accountType,
-      'create_device': createDevice,
-      'privacy_consent': privacyConsent,
-      'agree_to_terms_of_service': agreeToTermsOfService,
-      'user_create_date': userCreateDate,
-      'user_update_date': userUpdateDate,
-      'user_delete_date': userDeleteDate,
-      'user_delete_note': userDeleteNote,
-      'manager_type': managerType,
-    };
-  }
-
   AuthEntity toDomain() => AuthEntity(
-    id: id,
+    uid: uid,
     accountData: accountData,
     accountEmail: accountEmail,
     accountType: accountType,
@@ -86,7 +71,7 @@ class AuthModel extends AuthEntity {
   );
 
   factory AuthModel.fromDomain(AuthEntity entity) => AuthModel(
-    id: entity.id,
+    uid: entity.uid,
     accountData: entity.accountData,
     accountEmail: entity.accountEmail,
     accountType: entity.accountType,
@@ -99,4 +84,21 @@ class AuthModel extends AuthEntity {
     userDeleteNote: entity.userDeleteNote,
     managerType: entity.managerType,
   );
+
+  Map<String, dynamic> toMap() {
+    return {
+      'uid': uid,
+      'account_data': accountData,
+      'account_email': accountEmail,
+      'account_type': accountType,
+      'create_device': createDevice,
+      'privacy_consent': privacyConsent,
+      'agree_to_terms_of_service': agreeToTermsOfService,
+      'user_create_date': userCreateDate,
+      'user_update_date': userUpdateDate,
+      'user_delete_date': userDeleteDate,
+      'user_delete_note': userDeleteNote,
+      'manager_type': managerType,
+    };
+  }
 }

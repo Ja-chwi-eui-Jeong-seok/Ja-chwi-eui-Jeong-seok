@@ -42,14 +42,14 @@ class _GuideScreenState extends State<GuideScreen> {
     });
   }
 
-  Future<void> _closeGuide({bool dontShowAgain = false}) async {
-    if (dontShowAgain) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('dontShowGuide', true);
-    }
-    if (!mounted) return; // 🔒 context 안전성 확보
-    GoRouter.of(context).go('/home');
-  }
+  // Future<void> _closeGuide({bool dontShowAgain = false}) async {
+  //   if (dontShowAgain) {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     await prefs.setBool('dontShowGuide', true);
+  //   }
+  //   if (!mounted) return; // 🔒 context 안전성 확보
+  //   GoRouter.of(context).go('/home');
+  // }
 
   @override
   Widget build(BuildContext context) {
