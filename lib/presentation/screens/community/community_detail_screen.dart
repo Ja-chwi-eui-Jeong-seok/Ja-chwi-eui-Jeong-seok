@@ -1,14 +1,34 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
+import 'package:ja_chwi/data/datasources/comment_data_source.dart';
 
-class CommunityDetailScreen extends StatefulWidget {
-  const CommunityDetailScreen({super.key});
+class CommunityDetailScreen extends ConsumerStatefulWidget {
+  // ✅ 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
+  const CommunityDetailScreen({super.key, required this.id});
+  final String id;
+
   @override
-  State<CommunityDetailScreen> createState() => _CommunityDetailScreenState();
+  ConsumerState<CommunityDetailScreen> createState() =>
+      _CommunityDetailScreenState();
 }
 
-class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
+class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   final commentController = TextEditingController();
+
+  // ✅ 상세 VM 프로바이더 인스턴스 보관
+  late final provider = communityDetailVmProvider(widget.id);
+
+  @override
+  void initState() {
+    super.initState();
+    // 첫 진입 시 단건 게시글 + 댓글 초기 로드
+    Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+  }
+
   @override
   void dispose() {
     commentController.dispose();
@@ -18,12 +38,27 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
   void submit() {
     if (!mounted) return;
     final text = commentController.text.trim();
-    print(text);
+    if (text.isEmpty) return;
     //게시글 id > firebase에 등록
+    // TODO: 댓글 생성 UseCase 연결 (닉네임/uid 주입)
+    if (kDebugMode) {
+      print('create comment to post=${widget.id}, text=$text');
+    }
+    commentController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    final st = ref.watch(provider);
+
+    // 화면 헤더 데이터 구성
+    final title = st.post?.communityName ?? '제목';
+    final author = st.post?.createUser ?? '작성자';
+    final created = st.post == null
+        ? '09.17 17:47'
+        : DateFormat('MM.dd HH:mm').format(st.post!.communityCreateDate);
+    final body = st.post?.communityDetail ?? '게시글내용';
+
     return DefaultTabController(
       // TabBar/TabBarView 연결
       length: 2,
@@ -41,23 +76,30 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '제목',
-                          style: TextStyle(
+                          title,
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Divider(thickness: 2, color: Color(0xFFEBEBEB)),
-                        _HeaderRow(),
-                        Divider(thickness: 2, color: Color(0xFFEBEBEB)),
-                        _PostBody(),
+                        const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                        _HeaderRow(
+                          // 기존 주석 유지
+                          author: author,
+                          created: created,
+                        ),
+                        const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                        _PostBody(
+                          // 기존 주석 유지
+                          body: body,
+                        ),
                       ],
                     ),
                   ),
                 ),
 
                 //SliverToBoxAdapter 제목,헤더,게시글 끝
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: Divider(thickness: 10, color: Color(0xFFEBEBEB)),
                 ),
                 //
@@ -68,12 +110,19 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                   pinned: true,
                   delegate: _TabBarDelegate(
                     TabBar(
-                      indicator: UnderlineTabIndicator(
+                      // 탭 변경 시 정렬 스위치
+                      onTap: (i) {
+                        final ord = i == 0
+                            ? CommentOrder.latest
+                            : CommentOrder.popular;
+                        ref.read(provider.notifier).refreshComments(ref, ord);
+                      },
+                      indicator: const UnderlineTabIndicator(
                         borderSide: BorderSide(color: Colors.black, width: 2),
                       ),
                       labelColor: Colors.black,
                       unselectedLabelColor: Colors.grey,
-                      tabs: [
+                      tabs: const [
                         Tab(text: '최신순'),
                         Tab(text: '추천순'),
                       ],
@@ -86,9 +135,21 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
                   TabBarView(
                     children: [
                       //최신순
-                      CommentCard(itemCount: 20),
+                      _CommentList(
+                        itemCount: st.comments.length,
+                        likeCountOf: (i) => st.comments[i].likeCount,
+                        nickOf: (i) => st.comments[i].nickName,
+                        textOf: (i) => st.comments[i].noteDetail,
+                        loading: st.loadingComments,
+                      ),
                       //추천순
-                      CommentCard(itemCount: 20),
+                      _CommentList(
+                        itemCount: st.comments.length,
+                        likeCountOf: (i) => st.comments[i].likeCount,
+                        nickOf: (i) => st.comments[i].nickName,
+                        textOf: (i) => st.comments[i].noteDetail,
+                        loading: st.loadingComments,
+                      ),
                     ],
                   ),
             ),
@@ -112,7 +173,10 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen> {
 
 //헤더
 class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({super.key});
+  const _HeaderRow({required this.author, required this.created});
+  final String author;
+  final String created;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -124,10 +188,10 @@ class _HeaderRow extends StatelessWidget {
             width: 35,
             child: Image.asset('assets/images/m_profile/m_black.png'),
           ),
-          SizedBox(width: 8),
-          Text('작성자'),
-          Spacer(),
-          Text('09.17 17:47'),
+          const SizedBox(width: 8),
+          Text(author),
+          const Spacer(),
+          Text(created),
         ],
       ),
     );
@@ -136,18 +200,21 @@ class _HeaderRow extends StatelessWidget {
 
 //게시글
 class _PostBody extends StatelessWidget {
-  const _PostBody({super.key});
+  const _PostBody({required this.body});
+  final String body;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 300,
+      // height 고정 대신 최소 높이 보장
+      constraints: const BoxConstraints(minHeight: 160),
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFB8B8B8), width: 1),
         borderRadius: BorderRadius.circular(16),
       ),
-      padding: EdgeInsets.all(8),
-      child: Text('오늘 청소하는데 얼룩이 잘 안지워지더라구요...'),
+      padding: const EdgeInsets.all(8),
+      child: Text(body),
     );
   }
 }
@@ -180,18 +247,37 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 // --- 댓글 리스트 ---
-class CommentCard extends StatelessWidget {
-  const CommentCard({super.key, required this.itemCount});
+// 기존 CommentCard의 주석과 형태를 유지하되, VM 데이터로 교체
+class _CommentList extends StatelessWidget {
+  const _CommentList({
+    required this.itemCount,
+    required this.nickOf,
+    required this.textOf,
+    required this.likeCountOf,
+    required this.loading,
+  });
+
   final int itemCount;
+  final String Function(int) nickOf;
+  final String Function(int) textOf;
+  final int Function(int) likeCountOf;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
     // 중요: 스크롤은 ListView가 맡게 (shrinkWrap/physics 건드리지 않기)
     return ListView.separated(
-      padding: EdgeInsets.symmetric(horizontal: 24),
-      itemCount: itemCount,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      itemCount: itemCount + (loading ? 1 : 0),
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, i) {
+        if (i >= itemCount) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
         return GestureDetector(
           onLongPressStart: (details) async {
             //details = onLongPressStart했을떄 정보
@@ -226,11 +312,9 @@ class CommentCard extends StatelessWidget {
                 PopupMenuItem(
                   value: 'report',
                   child: Row(
-                    children: [
+                    children: const [
                       Text('신고하기'),
-                      SizedBox(
-                        width: 50,
-                      ),
+                      SizedBox(width: 50),
                       Spacer(),
                       Icon(Icons.notifications_none),
                     ],
@@ -239,7 +323,7 @@ class CommentCard extends StatelessWidget {
                 PopupMenuItem(
                   value: 'block',
                   child: Row(
-                    children: [
+                    children: const [
                       Text('차단하기'),
                       Spacer(),
                       Icon(Icons.do_not_disturb_on_outlined),
@@ -249,7 +333,7 @@ class CommentCard extends StatelessWidget {
                 PopupMenuItem(
                   value: 'share',
                   child: Row(
-                    children: [
+                    children: const [
                       Text('공유하기'),
                       Spacer(),
                       Icon(Icons.share),
@@ -277,7 +361,6 @@ class CommentCard extends StatelessWidget {
                 // 메뉴 밖을 눌러 닫힘. 아무것도 하지 않음.
                 break;
             }
-            ;
           },
           child: Container(
             color: Colors.white,
@@ -287,27 +370,29 @@ class CommentCard extends StatelessWidget {
                 SizedBox(
                   height: 45,
                   width: 45,
-                  child: Image.asset('assets/images/m_profile/m_black.png'),
+                  child: Image.asset(
+                    'assets/images/m_profile/m_black.png',
+                  ), //댓글 작성자 프로필정보(현재는 더미이미지사용)
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '닉네임',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                        nickOf(i),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        '댓글내용입니다 댓글을 입력해주세요',
+                        textOf(i),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                _HeartButton(),
+                _HeartButton(count: likeCountOf(i)),
               ],
             ),
           ),
@@ -318,27 +403,42 @@ class CommentCard extends StatelessWidget {
 }
 
 class _HeartButton extends StatefulWidget {
-  const _HeartButton({super.key});
+  const _HeartButton({required this.count});
+  final int count;
+
   @override
   State<_HeartButton> createState() => _HeartButtonState();
 }
 
 class _HeartButtonState extends State<_HeartButton> {
   bool isLiked = false;
+  late int likeCount = widget.count;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 32,
+      width: 52, // 카운트 공간 확보
       height: 32,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints(),
-        onPressed: () => setState(() => isLiked = !isLiked),
-        icon: Icon(
-          isLiked ? Icons.favorite : Icons.favorite_border,
-          color: isLiked ? Colors.red : Colors.black,
-          size: 20,
-        ),
+      child: Row(
+        children: [
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () {
+              setState(() {
+                isLiked = !isLiked;
+                likeCount += isLiked ? 1 : -1;
+              });
+              // TODO: repo.incLike(commentId, isLiked ? +1 : -1) 연결
+            },
+            icon: Icon(
+              isLiked ? Icons.favorite : Icons.favorite_border,
+              color: isLiked ? Colors.red : Colors.black,
+              size: 20,
+            ),
+          ),
+          Text('$likeCount'),
+        ],
       ),
     );
   }
@@ -373,7 +473,7 @@ class CommentWrite extends StatelessWidget {
               // 상단 그라데이션 (필요시 높이 조절)
               Container(
                 height: 60,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -383,7 +483,10 @@ class CommentWrite extends StatelessWidget {
               ),
               Container(
                 color: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 25,
+                  vertical: 20,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -392,7 +495,7 @@ class CommentWrite extends StatelessWidget {
                       width: 36,
                       child: Image.asset('assets/images/m_profile/m_black.png'),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -406,7 +509,7 @@ class CommentWrite extends StatelessWidget {
                                 controller: commentController,
                                 minLines: 1,
                                 maxLines: 6,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   border: InputBorder.none,
                                   hintText: '댓글을 입력하세요',
                                   isDense: true,
@@ -426,7 +529,7 @@ class CommentWrite extends StatelessWidget {
                               ),
                               child: GestureDetector(
                                 onTap: submit,
-                                child: Center(
+                                child: const Center(
                                   child: Text(
                                     '확인',
                                     style: TextStyle(color: Colors.white),
