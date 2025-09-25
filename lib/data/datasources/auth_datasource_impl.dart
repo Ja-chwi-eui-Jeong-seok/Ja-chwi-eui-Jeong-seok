@@ -10,6 +10,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthEntity?> signInWithGoogle() async =>
       (await remoteDataSource.signInWithGoogle());
+
   @override
   Future<AuthEntity?> signInWithApple() async =>
       (await remoteDataSource.signInWithApple());

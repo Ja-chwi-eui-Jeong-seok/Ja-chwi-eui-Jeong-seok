@@ -1,63 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 
+  Future<void> _setConsent(bool consent, BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('privacy_consent', consent);
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(
+        {'privacy_consent': consent},
+        SetOptions(merge: true), // 기존 필드 유지
+      );
+    }
+
+    context.go('/guide'); // 동의 여부 저장 후 이동
+  }
+
   @override
   Widget build(BuildContext context) {
+    final controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(
+        Uri.parse("https://www.notion.so/278e795aec4c8002bca1df539c27f6cd"),
+      );
+
     return Scaffold(
       appBar: AppBar(title: const Text('개인정보처리방침')),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: const Text(
-                  // 아래 텍스트는 예시로 대충 만든것임
-                  // 노션 등 개인정보처리방침 페이지를 만들면 링크 걸 예정
-                  '''
-개인정보처리방침
-
-1. 수집하는 개인정보 항목
-   - 이메일, 이름, 기기 정보
-
-2. 개인정보 수집 목적
-   - 로그인 및 서비스 제공
-
-3. 보관 및 이용 기간
-   - 탈퇴 시 즉시 삭제
-
-4. 제3자 제공 여부
-   - Firebase, Google 등
-
-5. 이용자의 권리
-   - 열람, 수정, 삭제 가능
-
-6. 문의처
-   - email 넣기
-                  ''',
-                  style: TextStyle(fontSize: 16, height: 1.5),
-                ),
-              ),
+              child: WebViewWidget(controller: controller),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    print('push');
-                    context.go('/home');
-                  },
-                  child: const Text('동의'),
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _setConsent(true, context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.black),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text('동의'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+Future<void> _checkConsent(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  final consent = prefs.getBool('privacy_agreed');
+
+  if (consent == true) {
+    // 이미 동의했으면 바로 가이드 페이지로 이동
+    Future.microtask(() => context.go('/guide'));
   }
 }
