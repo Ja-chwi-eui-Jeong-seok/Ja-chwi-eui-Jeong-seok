@@ -20,20 +20,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _checkGuide();
+    // _checkguide();
   }
 
-  Future<void> _checkGuide() async {
-    final prefs = await SharedPreferences.getInstance();
-    final showGuide = prefs.getBool('showGuide') ?? true;
+  // Future<void> _checkguide() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final showguide = prefs.getBool('showguide') ?? true;
 
-    if (showGuide) {
-      await prefs.setBool('showGuide', false); // 다음부터는 안 보이게
-      if (mounted) {
-        GoRouter.of(context).push('/guide'); // 가이드 화면으로 이동
-      }
-    }
-  }
+  //   // if (showguide) {
+  //   //   await prefs.setBool('showguide', false); // 다음부터는 안 보이게
+  //   if (mounted) {
+  //     GoRouter.of(context).push('/guide'); // 가이드 화면으로 이동
+  //   }
+  //   // }
+  // }
 
   @override
   Widget build(BuildContext context) {
