@@ -12,15 +12,15 @@ final categoryDataSourceProvider = Provider<CategoryDataSource>(
 );
 
 //repository
-final CategoryRepositoryProvider = Provider<CategoryRepository>(
+final categoryRepositoryProvider = Provider<CategoryRepository>(
   (ref) => CategoryRepositoryImpl(ref.read(categoryDataSourceProvider)),
 );
 
 //usecase
 final getCategoryProvider = Provider<GetCategory>(
-  (ref) => GetCategory(ref.read(CategoryRepositoryProvider)),
+  (ref) => GetCategory(ref.read(categoryRepositoryProvider)),
 );
 
 final getCategoryDetailsProvider = Provider<GetCategoryDetails>(
-  (ref) => GetCategoryDetails(ref.read(CategoryRepositoryProvider)),
+  (ref) => GetCategoryDetails(ref.read(categoryRepositoryProvider)),
 );

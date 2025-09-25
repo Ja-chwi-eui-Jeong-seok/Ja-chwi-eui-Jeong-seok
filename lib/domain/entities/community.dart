@@ -40,15 +40,15 @@ class Community {
       id: id,
       categoryCode: categoryCode,
       categoryDetailCode: categoryDetailCode,
-      communityName: name ?? this.communityName,
-      communityDetail: detail ?? this.communityDetail,
+      communityName: name ?? communityName,
+      communityDetail: detail ?? communityDetail,
       createUser: createUser,
       location: location ?? this.location,
       communityCreateDate: communityCreateDate,
-      communityUpdateDate: updatedAt ?? this.communityUpdateDate,
-      communityDeleteDate: deletedAt ?? this.communityDeleteDate,
-      communityDeleteYn: isDeleted ?? this.communityDeleteYn,
-      communityDeleteNote: deleteNote ?? this.communityDeleteNote,
+      communityUpdateDate: updatedAt ?? communityUpdateDate,
+      communityDeleteDate: deletedAt ?? communityDeleteDate,
+      communityDeleteYn: isDeleted ?? communityDeleteYn,
+      communityDeleteNote: deleteNote ?? communityDeleteNote,
     );
   }
 }

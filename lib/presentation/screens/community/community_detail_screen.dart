@@ -370,7 +370,9 @@ class _CommentList extends StatelessWidget {
                 SizedBox(
                   height: 45,
                   width: 45,
-                  child: Image.asset('assets/images/m_profile/m_black.png'),
+                  child: Image.asset(
+                    'assets/images/m_profile/m_black.png',
+                  ), //댓글 작성자 프로필정보(현재는 더미이미지사용)
                 ),
                 const SizedBox(width: 8),
                 Expanded(
