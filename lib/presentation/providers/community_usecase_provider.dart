@@ -6,6 +6,7 @@ import 'package:ja_chwi/data/datasources/community_data_source_impl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ja_chwi/domain/usecases/create_community.dart';
 import 'package:ja_chwi/domain/usecases/fetch_communities.dart';
+import 'package:ja_chwi/domain/usecases/get_community_by_id.dart';
 import 'package:ja_chwi/domain/usecases/soft_delete_community.dart';
 import 'package:ja_chwi/domain/usecases/update_community.dart';
 
@@ -30,4 +31,8 @@ final updateCommunityProvider = Provider(
 );
 final softDeleteCommunityProvider = Provider(
   (ref) => SoftDeleteCommunity(ref.read(communityRepoProvider)),
+);
+
+final getCommunityByIdProvider = Provider(
+  (ref) => GetCommunityById(ref.read(communityRepoProvider)),
 );

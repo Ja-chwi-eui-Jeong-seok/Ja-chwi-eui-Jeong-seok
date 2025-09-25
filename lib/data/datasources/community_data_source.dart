@@ -14,6 +14,9 @@ abstract interface class CommunityDataSource {
   //게시글생성
   Future<String> createCommunity(CommunityDto dto);
 
+  //게시글 조회
+  Future<CommunityDto?> getCommunityById(String id);
+
   //업데이트
   Future<void> updateCommunity({
     required String communityCode, //doc.id

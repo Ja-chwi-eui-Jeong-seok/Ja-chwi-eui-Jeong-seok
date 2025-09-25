@@ -45,7 +45,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/login',
       name: '로그인',
-      builder: (context, state) => LoginScreen(),
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: '/privacy-policy',

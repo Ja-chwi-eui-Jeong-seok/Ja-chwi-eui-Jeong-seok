@@ -5,8 +5,6 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:ja_chwi/data/datasources/category_data_source_impl.dart';
-import 'package:ja_chwi/data/dto/category_code_dto.dart';
-import 'package:ja_chwi/data/dto/category_detail_dto.dart';
 
 @GenerateNiceMocks([
   MockSpec<FirebaseFirestore>(),
@@ -22,7 +20,6 @@ void main() {
   late MockCollectionReference mockCol;
   late MockQuerySnapshot mockSnap;
   late MockQueryDocumentSnapshot mockDoc;
-  late MockQuery mockQuery;
   late CategoryDataSourceImpl dataSource;
 
   setUp(() {
@@ -30,7 +27,6 @@ void main() {
     mockCol = MockCollectionReference();
     mockSnap = MockQuerySnapshot();
     mockDoc = MockQueryDocumentSnapshot();
-    mockQuery = MockQuery();
     dataSource = CategoryDataSourceImpl(mockFirestore);
   });
 

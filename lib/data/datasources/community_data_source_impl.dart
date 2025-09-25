@@ -10,14 +10,22 @@ class CommunityDataSourceImpl implements CommunityDataSource {
   CollectionReference<Map<String, dynamic>> get col =>
       fs.collection('communitylist');
 
-  //게시글생성
+  // 생성
   @override
   Future<String> createCommunity(CommunityDto dto) async {
     final ref = await col.add(dto.toCreateMap());
     return ref.id;
   }
 
-  //게시글 불러오기
+  //조회(상세피이지)
+  @override
+  Future<CommunityDto?> getCommunityById(String id) async {
+    final doc = await col.doc(id).get();
+    if (!doc.exists) return null;
+    return CommunityDto.fromFirebase(doc.id, doc.data()!);
+  }
+
+  // 조회(페이징)
   @override
   Future<PagedResult<CommunityDto>> fetchCommunities({
     required int categoryCode,
@@ -28,14 +36,23 @@ class CommunityDataSourceImpl implements CommunityDataSource {
     bool orderDesc = true,
   }) async {
     Query<Map<String, dynamic>> q = col
-        .where('categoryCode', isEqualTo: categoryCode)
-        .where('categoryDetailCode', isEqualTo: categoryDetailCode)
-        .where('communityDeleteYn', isEqualTo: false)
-        .orderBy('communityCreateDate', descending: orderDesc)
+        .where('category_code', isEqualTo: categoryCode)
+        .where('category_detail_code', isEqualTo: categoryDetailCode)
+        .where('community_delete_yn', isEqualTo: false);
+
+    //날짜 임시로 동작구
+    if (location != null && location.isNotEmpty) {
+      q = q.where('location', isEqualTo: location);
+    }
+
+    // 1차: 날짜, 2차: 문서ID로 안정 정렬
+    q = q
+        .orderBy('community_create_date', descending: orderDesc)
+        .orderBy(FieldPath.documentId, descending: orderDesc)
         .limit(limit);
 
     if (startAfterDoc != null) {
-      q = q.startAfterDocument(startAfterDoc); //다음페이지
+      q = q.startAfterDocument(startAfterDoc);
     }
 
     final snap = await q.get();
@@ -47,24 +64,24 @@ class CommunityDataSourceImpl implements CommunityDataSource {
     return PagedResult(
       items: items,
       lastDoc: lastDoc,
-      hasMore: snap.docs.length == limit, //최대에 도달하면 true
+      hasMore: snap.docs.length == limit,
     );
   }
 
-  //삭제처리
+  // 소프트 삭제
   @override
   Future<void> softDeleteCommunity({
     required String communityCode,
     String? note,
   }) {
     return col.doc(communityCode).update({
-      'communityDeleteYn': true,
-      'communityDeleteNote': note,
-      'communityDeleteDate': FieldValue.serverTimestamp(),
+      'community_delete_yn': true,
+      'community_delete_note': note,
+      'community_delete_date': FieldValue.serverTimestamp(),
     });
   }
 
-  //업데이트
+  // 부분 업데이트
   @override
   Future<void> updateCommunity({
     required String communityCode,
