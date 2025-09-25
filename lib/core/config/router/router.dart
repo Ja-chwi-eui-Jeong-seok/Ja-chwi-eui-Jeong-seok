@@ -38,7 +38,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
-      path: '/Guide',
+      path: '/guide',
       name: '가이드',
       builder: (context, state) => const GuideScreen(),
     ),

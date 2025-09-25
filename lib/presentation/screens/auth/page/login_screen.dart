@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/screens/auth/login_widget/login_button.dart';
+import 'package:ja_chwi/presentation/screens/auth/login_widget/google_login_button.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/wave_text.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -31,7 +31,7 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
             ),
-            LoginButton(
+            GoogleLoginButton(
               onLoginSuccess: () async {
                 final accepted = await context.push<bool>('/privacy-policy');
                 if (!context.mounted) return;

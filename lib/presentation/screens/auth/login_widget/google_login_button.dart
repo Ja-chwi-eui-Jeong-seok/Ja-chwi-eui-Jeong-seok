@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/screens/auth/auth_view_model.dart';
+import 'package:ja_chwi/presentation/screens/auth/login_widget/apple_login_button.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:ja_chwi/presentation/screens/auth/auth_provider.dart';
 
-class LoginButton extends ConsumerWidget {
+class GoogleLoginButton extends ConsumerWidget {
   final Future<void> Function()? onLoginSuccess;
 
-  const LoginButton({super.key, this.onLoginSuccess});
+  const GoogleLoginButton({super.key, this.onLoginSuccess});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,22 +64,7 @@ class LoginButton extends ConsumerWidget {
 
           const SizedBox(height: 12),
 
-          /// Apple 로그인 버튼 디자인만
-          Container(
-            height: 48,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey, width: 1),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: SignInWithAppleButton(
-                style: SignInWithAppleButtonStyle.white,
-                onPressed: () {}, // 디자인만, 동작 없음
-              ),
-            ),
-          ),
+          AppleLoginButton(),
         ],
       ),
     );
