@@ -1,24 +1,22 @@
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/description_input_field.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/photo_upload_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/public_toggle_switch.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart'; // missionRepositoryProvider를 위해 추가
 
-class MissionCreateScreen extends StatefulWidget {
+class MissionCreateScreen extends ConsumerStatefulWidget {
   const MissionCreateScreen({super.key});
 
   @override
-  State<MissionCreateScreen> createState() => _MissionCreateScreenState();
+  ConsumerState<MissionCreateScreen> createState() =>
+      _MissionCreateScreenState();
 }
 
-class _MissionCreateScreenState extends State<MissionCreateScreen> {
+class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
   String _missionTitle = '';
   bool _isPublic = true;
   List<dynamic> _photos = []; // String (URL) or XFile (local)
@@ -63,10 +61,8 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
 
   Future<void> _addPhotos() async {
     if (_photos.length >= 5) return;
-    final picker = ImagePicker();
-    final pickedFiles = await picker.pickMultiImage(
-      imageQuality: 80,
-    );
+    final pickImagesUseCase = ref.read(pickImagesUseCaseProvider);
+    final pickedFiles = await pickImagesUseCase.execute();
 
     if (pickedFiles.isNotEmpty) {
       setState(() {
@@ -76,102 +72,55 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
     }
   }
 
-  Future<List<String>> _uploadPhotos(List<dynamic> photos) async {
-    final List<String> photoUrls = [];
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null)
-      throw Exception("User not authenticated for photo upload.");
-
-    for (var photo in photos) {
-      if (photo is String) {
-        // 이미 업로드된 사진 (URL)
-        photoUrls.add(photo);
-      } else if (photo is XFile) {
-        // 새로 추가된 사진 (XFile)
-        final file = File(photo.path);
-        final fileName = '$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('mission_photos')
-            .child(fileName);
-        final uploadTask = ref.putFile(file);
-        final snapshot = await uploadTask.whenComplete(() => {});
-        final downloadUrl = await snapshot.ref.getDownloadURL();
-        photoUrls.add(downloadUrl);
-      }
-    }
-    return photoUrls;
-  }
-
-  String _generateDocId(String uid) {
-    final today = DateTime.now();
-    return '${uid}_${today.year}-${today.month}-${today.day}';
-  }
-
   Future<void> _submitMission() async {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
 
+    final missionRepository = ref.read(missionRepositoryProvider);
+
     try {
       User? user = FirebaseAuth.instance.currentUser;
-      // 사용자가 로그인하지 않은 경우, 익명으로 로그인합니다.
+      // 앱 정책상 사용자는 항상 로그인 되어 있어야 합니다.
+      // user가 null인 경우는 예외적인 상황으로 간주하고 에러를 발생시킵니다.
       if (user == null) {
-        debugPrint('사용자가 로그인하지 않았습니다. 익명으로 로그인합니다.');
-        final userCredential = await FirebaseAuth.instance.signInAnonymously();
-        user = userCredential.user;
+        throw Exception("사용자 인증 정보가 없습니다. 다시 로그인해주세요.");
       }
-      if (user == null) throw Exception("Authentication failed.");
 
       // 오늘 날짜로 이미 완료한 미션이 있는지 확인 (수정 모드가 아닐 때만)
       if (!_isEditing) {
-        final docId = _generateDocId(user.uid);
-        final doc = await FirebaseFirestore.instance
-            .collection('user_missions')
-            .doc(docId)
-            .get();
-
-        if (doc.exists) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('오늘의 미션은 이미 완료했습니다!')),
-            );
-          }
-          return; // 여기서 함수 종료
+        if (await missionRepository.hasCompletedMissionToday(user.uid)) {
+          _showSnackBar('오늘의 미션은 이미 완료했습니다!');
+          if (mounted) setState(() => _isSubmitting = false);
+          return;
         }
       }
 
-      final photoUrls = await _uploadPhotos(_photos);
-
-      final docId = _generateDocId(user.uid);
+      final photoUrls = await missionRepository.uploadPhotos(user.uid, _photos);
 
       if (_isEditing) {
         // 수정 모드: update 사용
-        final missionUpdateData = {
-          'title': _missionTitle,
-          'isPublic': _isPublic,
-          'photos': photoUrls,
-          'description': _descriptionController.text,
-          'tags': [], // TODO: 태그 수정 기능 구현 시 이 부분도 수정 필요
-        };
-        await FirebaseFirestore.instance
-            .collection('user_missions')
-            .doc(docId)
-            .update(missionUpdateData);
+        await missionRepository.updateMission(
+          userId: user.uid,
+          missionData: {
+            'title': _missionTitle,
+            'isPublic': _isPublic,
+            'photos': photoUrls,
+            'description': _descriptionController.text,
+            'tags': [], // TODO : 태그 수정 기능 구현 시 이 부분도 수정 필요
+          },
+        );
       } else {
         // 생성 모드: set 사용
-        final missionCreateData = {
-          'title': _missionTitle,
-          'isPublic': _isPublic,
-          'photos': photoUrls,
-          'description': _descriptionController.text,
-          'tags': [],
-          'missioncreatedate': FieldValue.serverTimestamp(),
-          'userId': user.uid,
-        };
-        await FirebaseFirestore.instance
-            .collection('user_missions')
-            .doc(docId)
-            .set(missionCreateData);
+        await missionRepository.createMission(
+          userId: user.uid,
+          missionData: {
+            'title': _missionTitle,
+            'isPublic': _isPublic,
+            'photos': photoUrls,
+            'description': _descriptionController.text,
+            'tags': [],
+          },
+        );
       }
 
       if (mounted) {
@@ -180,15 +129,19 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
     } catch (e) {
       // 에러 처리 (예: 스낵바 표시)
       debugPrint('미션 제출 오류: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('업로드에 실패했습니다: ${e.toString()}')),
-        );
-      }
+      _showSnackBar('업로드에 실패했습니다: ${e.toString()}');
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
+    }
+  }
+
+  void _showSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
     }
   }
 
@@ -215,16 +168,13 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-
               const Text(
                 '미션을 수행하고 인증 사진을 남겨주세요!',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 24),
-
               const Divider(color: Colors.grey),
               const SizedBox(height: 24),
-
               PhotoUploadSection(
                 photos: _photos,
                 onAddPhoto: _addPhotos,
@@ -235,7 +185,6 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
                 },
               ),
               const SizedBox(height: 24),
-
               PublicToggleSwitch(
                 isPublic: _isPublic,
                 onToggle: () => setState(() => _isPublic = !_isPublic),
