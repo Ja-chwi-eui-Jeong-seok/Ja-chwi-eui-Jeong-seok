@@ -114,13 +114,11 @@ class _MissionCreateScreenState extends State<MissionCreateScreen> {
 
     try {
       User? user = FirebaseAuth.instance.currentUser;
-      // 사용자가 로그인하지 않은 경우, 익명으로 로그인합니다.
+      // 앱 정책상 사용자는 항상 로그인 되어 있어야 합니다.
+      // user가 null인 경우는 예외적인 상황으로 간주하고 에러를 발생시킵니다.
       if (user == null) {
-        debugPrint('사용자가 로그인하지 않았습니다. 익명으로 로그인합니다.');
-        final userCredential = await FirebaseAuth.instance.signInAnonymously();
-        user = userCredential.user;
+        throw Exception("사용자 인증 정보가 없습니다. 다시 로그인해주세요.");
       }
-      if (user == null) throw Exception("Authentication failed.");
 
       // 오늘 날짜로 이미 완료한 미션이 있는지 확인 (수정 모드가 아닐 때만)
       if (!_isEditing) {
