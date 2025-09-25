@@ -25,8 +25,6 @@ final List<MissionAchiever> _mockAllAchievers = [
   MissionAchiever(name: '여섯번째 달성자', time: '13:00 완료', level: 'Lv.2'),
 ];
 
-// 기존 MissionRepository 클래스 제거
-
 /// Providers
 
 /// 오늘의 미션 달성자 목록을 제공하는 Provider
@@ -52,8 +50,21 @@ final pickImagesUseCaseProvider = Provider<PickImagesUseCase>((ref) {
 
 /// 오늘의 미션 데이터를 비동기적으로 가져오는 FutureProvider
 final todayMissionProvider = FutureProvider<Mission>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    // 로그인한 사용자가 없으면 미션을 가져올 수 없으므로 예외를 발생시킵니다.
+    // UI에서는 이 예외를 처리하여 로그인 화면으로 유도하거나 에러 메시지를 보여줄 수 있습니다.
+    throw Exception('로그인한 사용자가 없습니다.');
+  }
   final repository = ref.watch(missionRepositoryProvider);
-  return repository.fetchTodayMission();
+
+  // --- 테스트 코드 적용 위치 ---
+  // 아래 코드의 주석을 해제하여 특정 날짜의 미션을 테스트할 수 있습니다.
+  return repository.fetchTodayMission(
+    user.uid,
+    debugNow: DateTime.now().add(const Duration(days: 1)),
+  ); // 내일 미션 테스트
+  // return repository.fetchTodayMission(user.uid); // 원래 코드
 });
 
 /// 사용자의 미션 목록을 제공하는 StreamProvider
