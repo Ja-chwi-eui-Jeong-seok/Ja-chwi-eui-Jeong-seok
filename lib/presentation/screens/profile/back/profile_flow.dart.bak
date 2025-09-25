@@ -1,0 +1,99 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ja_chwi/presentation/screens/profile/widgets/nickname_input.dart';
+import 'package:ja_chwi/presentation/screens/profile/widgets/profile_grid.dart';
+import 'package:ja_chwi/presentation/screens/profile/widgets/profile_header.dart';
+import 'package:ja_chwi/presentation/screens/profile/widgets/selected_preview.dart';
+import 'package:ja_chwi/domain/entities/profile_entity.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:ja_chwi/presentation/providers/profile_providers.dart';
+import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
+
+class ProfileFlowPage extends ConsumerStatefulWidget {
+  const ProfileFlowPage({super.key});
+
+  @override
+  ConsumerState<ProfileFlowPage> createState() => _ProfileFlowPageState();
+}
+
+class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
+  String? dongName;
+
+  Future<void> fetchDongName() async {
+    final key = dotenv.env['VWORLD_API_KEY'];
+    final lat = 37.5665;
+    final lon = 126.9780;
+
+    final url =
+        'https://api.vworld.kr/req/address?service=address&request=getAddress&version=2.0&point=$lon,$lat&type=PARCEL&key=$key';
+    final res = await http.get(Uri.parse(url));
+    if (res.statusCode == 200) {
+      final json = jsonDecode(res.body);
+      setState(() {
+        dongName = json['response']?['result']?[0]?['text'] ?? '';
+      });
+    }
+  }
+
+  Future<void> saveProfile() async {
+    final nickname = ref.read(nicknameProvider);
+    final selectedImage = ref.read(selectedImageProvider);
+    final userId = "exampleUserId"; // 실제 Firebase Auth UID로 대체
+
+    if (nickname != null && selectedImage != null && dongName != null) {
+      final profile = Profile(
+          nickname: nickname,
+          imageFullUrl: selectedImage.fullUrl,
+          dongName: dongName!);
+
+      await ref.read(profileRepositoryProvider).saveProfile(profile, userId);
+      //await 뒤에 위젯이 dispose될 수도 있는데, 여전히 context를 쓰고 있음 → 런타임 에러 위험.
+      //통 StatefulWidget 안에서라면 if (!mounted) return; 체크
+      if (!mounted) return; // ✅ context 사용 전에 체크
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("프로필 저장 완료 (Firebase)")),
+        );
+    } else {
+       if (!mounted) return; // ✅ context 사용 전에 체크
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("모든 항목을 선택해주세요")),
+        );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDongName();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Profile Flow (Firebase)")),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const ProfileHeader(),
+            const NicknameInput(),
+            const SizedBox(height: 16),
+            const ProfileGrid(),
+            const SizedBox(height: 16),
+            const SelectedPreview(),
+            const SizedBox(height: 16),
+            Text(dongName != null ? "현재 동명: $dongName" : "동명 불러오는 중..."),
+            const SizedBox(height: 16),
+         //  ElevatedButton(onPressed: saveProfile, child: const Text("저장하기")),
+          ],
+        ),
+      ),     
+        bottomNavigationBar:BottomNav(
+           mode: BottomNavMode.confirm,
+           confirmRoute: '/home',
+           onConfirm: saveProfile, // ✅ 버튼 대신 여기로 기능 연결
+         ) // 불러오기만 하면 됨
+    );
+  }
+}

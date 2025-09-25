@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/providers/image_provider.dart';
 
 class ProfileHeader extends ConsumerWidget {
-  const ProfileHeader({super.key});
+  final int step; // ✅ step 파라미터 추가
+
+  const ProfileHeader({super.key, required this.step});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,14 +37,24 @@ class ProfileHeader extends ConsumerWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
-              '집먼지를 선택해 주세요..',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+             child: Text(
+                // Replace 'step' with your actual step variable or logic
+                (() {
+                  // You need to define 'step' somewhere above, e.g., final step = ...;
+                  if (step == 0) {
+                    return '집먼지 이름을 입력해주세요';
+                  } else if (step == 1) {
+                    return '집먼지를 꾸며주세요';
+                  } else {
+                    return '집먼지의 집을 찾아주세요';
+                  }
+                })(),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.black,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
           ),
         ),
       ],

@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/core/config/theme/app_theme.dart';
+import 'package:ja_chwi/core/utils/xss.dart';
 import 'package:ja_chwi/firebase_options.dart';
-// import 'package:ja_chwi/presentation/screens/auth/login_screen.dart';
-// import 'package:ja_chwi/presentation/screens/home/home_screen.dart';
 
-void main() async {
+
+
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  //runApp(const MyApp());
+  // Firebase 초기화
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // 금지어 CSV 로딩
+  await XssFilter.loadBannedWordsFromCSV();
+  // api key 
+  await dotenv.load(fileName: "assets/config/env/setting.env");
+  //
   runApp(
     const ProviderScope(
       // Riverpod의 전역 상태 관리 루트
