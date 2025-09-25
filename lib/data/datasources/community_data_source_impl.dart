@@ -31,7 +31,8 @@ class CommunityDataSourceImpl implements CommunityDataSource {
         .where('categoryCode', isEqualTo: categoryCode)
         .where('categoryDetailCode', isEqualTo: categoryDetailCode)
         .where('communityDeleteYn', isEqualTo: false)
-        .orderBy('communityCreateDate', descending: orderDesc);
+        .orderBy('communityCreateDate', descending: orderDesc)
+        .limit(limit);
 
     if (startAfterDoc != null) {
       q = q.startAfterDocument(startAfterDoc); //다음페이지
