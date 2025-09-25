@@ -10,7 +10,7 @@ class FetchCommunities {
   call({
     required int categoryCode,
     required int categoryDetailCode,
-    String? location, // ← 추가
+    required String location,
     int limit = 10,
     DocumentSnapshot? startAfter,
     bool desc = true,
@@ -18,7 +18,7 @@ class FetchCommunities {
     final page = await repo.fetch(
       categoryCode: categoryCode,
       categoryDetailCode: categoryDetailCode,
-      location: location, // ← 그대로 전달
+      location: location,
       limit: limit,
       startAfter: startAfter,
       desc: desc,

@@ -9,7 +9,7 @@ class CommentRepositoryImpl implements CommentRepository {
   CommentRepositoryImpl(this.ds);
 
   Comment _toEntity(CommentDto d) => Comment(
-    id: d.id,
+    id: d.commentId,
     communityId: d.communityId,
     uid: d.uid,
     nickName: d.nickName,
@@ -26,7 +26,7 @@ class CommentRepositoryImpl implements CommentRepository {
   @override
   Future<String> create(Comment input) {
     final dto = CommentDto(
-      id: '',
+      commentId: '',
       communityId: input.communityId,
       uid: input.uid,
       nickName: input.nickName,

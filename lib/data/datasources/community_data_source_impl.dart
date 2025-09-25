@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:ja_chwi/data/common/page_result.dart';
 import 'package:ja_chwi/data/datasources/community_data_source.dart';
 import 'package:ja_chwi/data/dto/community_dto.dart';
@@ -30,7 +31,7 @@ class CommunityDataSourceImpl implements CommunityDataSource {
   Future<PagedResult<CommunityDto>> fetchCommunities({
     required int categoryCode,
     required int categoryDetailCode,
-    String? location,
+    required String location,
     int limit = 10,
     DocumentSnapshot<Object?>? startAfterDoc,
     bool orderDesc = true,
@@ -42,7 +43,14 @@ class CommunityDataSourceImpl implements CommunityDataSource {
 
     //날짜 임시로 동작구
     if (location != null && location.isNotEmpty) {
+      if (kDebugMode) {
+        print('위치 : $location');
+      }
       q = q.where('location', isEqualTo: location);
+    } else {
+      if (kDebugMode) {
+        print('위치 : $location');
+      }
     }
 
     // 1차: 날짜, 2차: 문서ID로 안정 정렬
