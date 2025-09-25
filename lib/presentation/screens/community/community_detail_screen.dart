@@ -57,7 +57,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final created = st.post == null
         ? '09.17 17:47'
         : DateFormat('MM.dd HH:mm').format(st.post!.communityCreateDate);
-    final body = st.post?.communityDetail ?? '오늘 청소하는데 얼룩이 잘 안지워지더라구요...';
+    final body = st.post?.communityDetail ?? '게시글내용';
 
     return DefaultTabController(
       // TabBar/TabBarView 연결
