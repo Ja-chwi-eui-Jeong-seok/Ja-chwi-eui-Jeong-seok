@@ -37,7 +37,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
       createUser: e.createUser,
       communityName: e.communityName,
       location: e.location,
-      communityCreateDate: Timestamp.now(), // 서버 timestamp로 덮임
+      communityCreateDate: Timestamp.now(),
       communityDeleteYn: false,
       communityUpdateDate: null,
       communityDeleteDate: null,
@@ -77,7 +77,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
   Future<PagedCommunity> fetch({
     required int categoryCode,
     required int categoryDetailCode,
-    String? location, // ← 추가
+    required String location,
     int limit = 10,
     DocumentSnapshot? startAfter,
     bool desc = true,

@@ -2,7 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommentDto {
-  final String id;
+  final String commentId;
   final String communityId;
   final String uid;
   final String nickName;
@@ -16,7 +16,7 @@ class CommentDto {
   final bool deleteYn;
 
   CommentDto({
-    required this.id,
+    required this.commentId,
     required this.communityId,
     required this.uid,
     required this.nickName,
@@ -30,9 +30,10 @@ class CommentDto {
     required this.deleteYn,
   });
 
+  //TODO: 컬렉션 속성 명 변경
   factory CommentDto.fromFirebase(String id, Map<String, dynamic> d) {
     return CommentDto(
-      id: id,
+      commentId: id,
       communityId: d['community_id'],
       uid: d['uid'],
       nickName: d['nick_name'],
