@@ -57,6 +57,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
   Future<PagedCommunity> fetch({
     required int categoryCode,
     required int categoryDetailCode,
+    String? location, // ← 추가
     int limit = 10,
     DocumentSnapshot? startAfter,
     bool desc = true,
@@ -64,6 +65,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
     final page = await ds.fetchCommunities(
       categoryCode: categoryCode,
       categoryDetailCode: categoryDetailCode,
+      location: location, //동작구 넣기 ui에서
       limit: limit,
       startAfterDoc: startAfter,
       orderDesc: desc,
