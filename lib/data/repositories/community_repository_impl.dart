@@ -45,6 +45,26 @@ class CommunityRepositoryImpl implements CommunityRepository {
     );
   }
 
+  @override
+  Future<Community?> getById(String id) async {
+    final d = await ds.getCommunityById(id);
+    if (d == null) return null;
+    return Community(
+      id: d.communityCode,
+      categoryCode: d.categoryCode,
+      categoryDetailCode: d.categoryDetailCode,
+      communityName: d.communityName,
+      communityDetail: d.communityDetail,
+      createUser: d.createUser,
+      location: d.location,
+      communityCreateDate: d.communityCreateDate.toDate(),
+      communityUpdateDate: d.communityUpdateDate?.toDate(),
+      communityDeleteDate: d.communityDeleteDate?.toDate(),
+      communityDeleteYn: d.communityDeleteYn,
+      communityDeleteNote: d.communityDeleteNote,
+    );
+  }
+
   //게시글생성
   @override
   Future<String> create(Community input) async {
