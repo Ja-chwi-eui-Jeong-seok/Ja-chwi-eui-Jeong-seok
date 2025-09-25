@@ -40,7 +40,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/guide',
       name: '가이드',
-      builder: (context, state) => const GuideScreen(),
+      builder: (context, state) => const GuideScreen(accountData: ''),
     ),
     GoRoute(
       path: '/login',
