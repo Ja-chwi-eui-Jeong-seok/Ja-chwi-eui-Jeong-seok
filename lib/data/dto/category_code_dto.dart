@@ -22,26 +22,27 @@ class CategoryCodeDto {
 
   factory CategoryCodeDto.fromFirebase(Map<String, dynamic> data) {
     return CategoryCodeDto(
-      categorycode: data['categorycode'],
-      categoryname: data['categoryname'],
-      categorycreate: data['categorycreate'],
-      categoryupdate: data['categoryupdate'] as Timestamp?,
-      categorydelete: data['categorydelete'] as Timestamp?,
-      categorydeleteyn: data['categorydeleteyn'],
-      categorydeletenote: data['categorydeletenote'] as String?,
+      categorycode: data['category_code'],
+      categoryname: data['category_name'],
+      categorycreate: data['category_create'],
+      categoryupdate: data['category_update'] as Timestamp?,
+      categorydelete: data['category_delete'] as Timestamp?,
+      categorydeleteyn: data['category_delete_yn'],
+      categorydeletenote: data['category_delete_note'] as String?,
     );
   }
 
   //업데이트,삭제
   CategoryCodeDto copyWithFirebase(Map<String, dynamic> data) {
     return CategoryCodeDto(
-      categorycode: data['code'] as int? ?? categorycode,
-      categoryname: data['name'] as String? ?? categoryname,
-      categorycreate: data['createAt'] as Timestamp? ?? categorycreate,
-      categoryupdate: data['updateAt'] as Timestamp? ?? categoryupdate,
-      categorydelete: data['deletedAt'] as Timestamp? ?? categorydelete,
-      categorydeleteyn: data['delete'] as bool? ?? categorydeleteyn,
-      categorydeletenote: data['deleteNote'] as String? ?? categorydeletenote,
+      categorycode: data['category_code'] as int? ?? categorycode,
+      categoryname: data['category_name'] as String? ?? categoryname,
+      categorycreate: data['category_create'] as Timestamp? ?? categorycreate,
+      categoryupdate: data['category_update'] as Timestamp? ?? categoryupdate,
+      categorydelete: data['category_delete'] as Timestamp? ?? categorydelete,
+      categorydeleteyn: data['category_delete_yn'] as bool? ?? categorydeleteyn,
+      categorydeletenote:
+          data['category_delete_note'] as String? ?? categorydeletenote,
     );
   }
 }

@@ -1,58 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ja_chwi/presentation/providers/image_provider.dart';
-
+import 'package:ja_chwi/presentation/providers/profile_providers.dart';
 
 class ProfileGrid extends ConsumerWidget {
   const ProfileGrid({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncImages = ref.watch(imageListProvider);
+    final imagesAsync = ref.watch(profileImagesProvider);
+    final selectedImage = ref.watch(selectedImageProvider);
 
-    return asyncImages.when(
-      data: (images) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(15, 5, 0, 0),
-            child: Text(
-              '캐릭터',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-            ),
-          ),
-          SizedBox(
-            height: 250,
-            child: GridView.builder(
-              padding: const EdgeInsets.all(15),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-              ),
-              itemCount: images.length,
-              itemBuilder: (context, index) {
-                final img = images[index];
-                return GestureDetector(
-                  onTap: () {
-                    ref.read(selectedImageProvider.notifier).state = img.fullUrl;
-                  },
-                 // child: Image.asset(img.thumbUrl, fit: BoxFit.cover),
-                 child: Center(
-                  child: SizedBox(
-                    width: 70,
-                    height: 70,
-                    child: Image.asset(img.thumbUrl, fit: BoxFit.cover),
-                  ),
+    return imagesAsync.when(
+      data: (images) => GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        itemCount: images.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+        ),
+        itemBuilder: (context, index) {
+          final img = images[index];
+          final isSelected = selectedImage?.id == img.id;
+
+          return GestureDetector(
+            onTap: () => ref.read(selectedImageProvider.notifier).state = img,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: isSelected ? Colors.blue : Colors.transparent,
+                  width: 2,
                 ),
-                );
-              },
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Image.asset(img.thumbUrl),
             ),
-          ),
-        ],
+          );
+        },
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text('Error: $err')),
+      loading: () => const CircularProgressIndicator(),
+      error: (e, _) => Text("Error: $e"),
     );
   }
 }

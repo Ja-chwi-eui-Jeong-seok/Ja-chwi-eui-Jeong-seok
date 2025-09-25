@@ -45,6 +45,26 @@ class CommunityRepositoryImpl implements CommunityRepository {
     );
   }
 
+  @override
+  Future<Community?> getById(String id) async {
+    final d = await ds.getCommunityById(id);
+    if (d == null) return null;
+    return Community(
+      id: d.communityCode,
+      categoryCode: d.categoryCode,
+      categoryDetailCode: d.categoryDetailCode,
+      communityName: d.communityName,
+      communityDetail: d.communityDetail,
+      createUser: d.createUser,
+      location: d.location,
+      communityCreateDate: d.communityCreateDate.toDate(),
+      communityUpdateDate: d.communityUpdateDate?.toDate(),
+      communityDeleteDate: d.communityDeleteDate?.toDate(),
+      communityDeleteYn: d.communityDeleteYn,
+      communityDeleteNote: d.communityDeleteNote,
+    );
+  }
+
   //게시글생성
   @override
   Future<String> create(Community input) async {
@@ -57,6 +77,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
   Future<PagedCommunity> fetch({
     required int categoryCode,
     required int categoryDetailCode,
+    String? location, // ← 추가
     int limit = 10,
     DocumentSnapshot? startAfter,
     bool desc = true,
@@ -64,6 +85,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
     final page = await ds.fetchCommunities(
       categoryCode: categoryCode,
       categoryDetailCode: categoryDetailCode,
+      location: location, //동작구 넣기 ui에서
       limit: limit,
       startAfterDoc: startAfter,
       orderDesc: desc,
