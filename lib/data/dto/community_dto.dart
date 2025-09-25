@@ -1,11 +1,9 @@
-// data/dto/community_dto.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommunityDto {
   final int categoryCode;
   final int categoryDetailCode;
-  // 문서 ID(doc.id)를 communityCode로 사용 (데이터 필드로는 저장하지 않음)
-  final String communityCode;
+  final String communityCode; // doc.id
   final String communityDetail;
   final String createUser;
   final String communityName;
@@ -31,64 +29,58 @@ class CommunityDto {
     this.communityDeleteNote,
   });
 
-  // firebase -> dto
+  /// Firestore → DTO 변환
   factory CommunityDto.fromFirebase(String id, Map<String, dynamic> d) {
     return CommunityDto(
-      categoryCode: d['categoryCode'],
-      categoryDetailCode: d['categoryDetailCode'],
+      categoryCode: d['category_code'],
+      categoryDetailCode: d['category_detail_code'],
       communityCode: id,
-      communityDetail: d['communityDetail'],
-      createUser: d['createUser'],
-      communityName: d['communityName'],
+      communityDetail: d['community_detail'],
+      createUser: d['create_user'],
+      communityName: d['community_name'],
       location: d['location'],
-      communityCreateDate: d['communityCreateDate'],
-      communityUpdateDate: d['communityUpdateDate'],
-      communityDeleteDate: d['communityDeleteDate'],
-      communityDeleteYn: d['communityDeleteYn'],
-      communityDeleteNote: d['communityDeleteNote'],
+      communityCreateDate: d['community_create_date'],
+      communityUpdateDate: d['community_update_date'],
+      communityDeleteDate: d['community_delete_date'],
+      communityDeleteYn: d['community_delete_yn'],
+      communityDeleteNote: d['community_delete_note'],
     );
   }
 
-  // 생성
-  // 생성시간은 serverTimestamp
+  /// Firestore 저장용 (생성)
   Map<String, dynamic> toCreateMap() {
     return {
-      'categoryCode': categoryCode,
-      'categoryDetailCode': categoryDetailCode,
-      'communityDetail': communityDetail,
-      'createUser': createUser,
-      'communityName': communityName,
+      'category_code': categoryCode,
+      'category_detail_code': categoryDetailCode,
+      'community_detail': communityDetail,
+      'create_user': createUser,
+      'community_name': communityName,
       'location': location,
-      'communityCreateDate': FieldValue.serverTimestamp(),
-      'communityDeleteYn': false,
-      //Timestamp.now()는 기기시간
-      //'communityCode': communityCode, // doc.id 사용
-      //'communityUpdateDate': communityUpdateDate,
-      //'communityDeleteDate': communityDeleteDate,
-      //'communityDeleteNote': communityDeleteNote,
+      'community_create_date': FieldValue.serverTimestamp(),
+      'community_delete_yn': false,
     };
   }
 
-  //수정
+  /// Firestore 수정용
   Map<String, dynamic> toUpdateMap({
     String? communityName,
     String? communityDetail,
     String? location,
   }) {
     return {
-      if (communityName != null) 'communityName': communityName,
-      if (communityDetail != null) 'communityDetail': communityDetail,
+      if (communityName != null) 'community_name': communityName,
+      if (communityDetail != null) 'community_detail': communityDetail,
       if (location != null) 'location': location,
-      'communityUpdateDate': FieldValue.serverTimestamp(),
+      'community_update_date': FieldValue.serverTimestamp(),
     };
   }
 
-  /// 삭제
+  /// Firestore 삭제 처리용
   Map<String, dynamic> toDeleteMap({String? note}) {
     return {
-      'communityDeleteYn': true,
-      'communityDeleteNote': note,
-      'communityDeleteDate': FieldValue.serverTimestamp(),
+      'community_delete_yn': true,
+      'community_delete_note': note,
+      'community_delete_date': FieldValue.serverTimestamp(),
     };
   }
 }
