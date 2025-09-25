@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/domain/entities/community.dart';
 import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
@@ -19,12 +18,15 @@ class CommunityCreateVm {
     required String content,
     required int? categoryCode,
     required int? subCategoryCode,
+    required String createUser,
+    required String location,
   }) async {
     if (_submitting) return '처리 중입니다';
     if (title.trim().isEmpty) return '제목을 입력하세요';
     if (content.trim().isEmpty) return '내용을 입력하세요';
-    if (categoryCode == null || subCategoryCode == null)
+    if (categoryCode == null || subCategoryCode == null) {
       return '카테고리와 세부 카테고리를 선택하세요';
+    }
 
     _submitting = true;
     try {
@@ -34,8 +36,8 @@ class CommunityCreateVm {
         categoryDetailCode: subCategoryCode,
         communityName: title.trim(),
         communityDetail: content.trim(),
-        createUser: '이영상',
-        location: '동작구',
+        createUser: createUser, //임시
+        location: location, //임시
         communityCreateDate: DateTime.now(),
         communityUpdateDate: null,
         communityDeleteDate: null,

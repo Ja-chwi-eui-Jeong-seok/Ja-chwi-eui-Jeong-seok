@@ -17,6 +17,14 @@ class CommunityDataSourceImpl implements CommunityDataSource {
     return ref.id;
   }
 
+  //조회(상세피이지)
+  @override
+  Future<CommunityDto?> getCommunityById(String id) async {
+    final doc = await col.doc(id).get();
+    if (!doc.exists) return null;
+    return CommunityDto.fromFirebase(doc.id, doc.data()!);
+  }
+
   // 조회(페이징)
   @override
   Future<PagedResult<CommunityDto>> fetchCommunities({

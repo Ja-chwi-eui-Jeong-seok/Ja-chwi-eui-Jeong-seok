@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/providers/user_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 
 // VM 상태(provider) import
-import 'package:ja_chwi/presentation/screens/community/vm/community_vm.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_create_vm.dart';
 // ↑ 내부에서 categoryVMProvider를 외부 공개하고 있어야 함
 //   (앞서 만든 CategoryVM, CategoryState 구조 전제)
 
@@ -43,6 +45,19 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
     // 선택 상태 구독: 선택된 상위코드와 하위이름
     final selectedCode = ref.watch(selectedCategoryCodeProvider);
     final selectedDetailCode = ref.watch(selectedSubCategoryCodeProvider);
+    //uid 확인
+    final uid = GoRouterState.of(context).extra as String?;
+    //uid없을때 뱉기
+    if (uid == null) {
+      return Scaffold(
+        body: Center(
+          child: Text('잘못된 접근입니다.(회원정보 없음)'),
+        ),
+      );
+    }
+    //uid 기반 프로필정보 로드(유저정보,위치정보)
+    final profileAv = ref.watch(userProfileProvider(uid));
+    final gpsAv = ref.watch(userGpsProvider(uid));
 
     return Scaffold(
       appBar: AppBar(title: const Text("글쓰기")),
@@ -55,6 +70,31 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
+                  Text('작성정보'),
+                  // 프로필 표시
+                  profileAv.when(
+                    loading: () => const Text('작성자 불러오는 중...'),
+                    error: (e, _) => Text('작성자 오류: $e'),
+                    data: (p) => Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 16,
+                          // 더미: 프로필 없으면 이니셜
+                          child: Text(p.nickname.characters.first),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('${p.nickname} (uid: ${p.uid})'),
+                      ],
+                    ),
+                  ),
+                  // 위치 표시
+                  gpsAv.when(
+                    loading: () => const Text('위치 불러오는 중...'),
+                    error: (e, _) => Text('위치 오류: $e'),
+                    data: (g) => Text(
+                      '현재 위치: ${g.location} (lat:${g.lat}, lng:${g.lng})',
+                    ),
+                  ),
                   TextFormField(
                     controller: _titleController,
                     decoration: const InputDecoration(
@@ -237,12 +277,38 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                     // 선택값 읽기
                     final code = ref.read(selectedCategoryCodeProvider);
                     final subCode = ref.read(selectedSubCategoryCodeProvider);
+                    // 프로필/GPS 데이터 꺼내기 (이미 위에서 watch 했으므로 값 체크)
+                    final profile = ref
+                        .read(userProfileProvider(uid))
+                        .maybeWhen(
+                          data: (p) => p,
+                          orElse: () => null,
+                        );
+                    final gps = ref
+                        .read(userGpsProvider(uid))
+                        .maybeWhen(
+                          data: (g) => g,
+                          orElse: () => null,
+                        );
+                    // 예외처리
+                    if (profile == null || gps == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            '작성자/위치 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
 
                     // 디버그 출력
                     debugPrint("제목: ${_titleController.text}");
                     debugPrint("내용: ${_contentController.text}");
                     debugPrint("상위코드: $code");
                     debugPrint("하위코드: $subCode");
+                    debugPrint("작성자: ${profile.nickname}");
+                    debugPrint("하위코드: ${gps.location}");
 
                     // 서버 제출: VM에 위임
                     final err = await vm.submit(
@@ -250,6 +316,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                       content: _contentController.text,
                       categoryCode: code,
                       subCategoryCode: subCode,
+                      createUser: profile.uid,
+                      location: gps.location,
                     );
 
                     if (!context.mounted) return;
@@ -257,7 +325,6 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('등록완료')),
                       );
-                      // TODO: 작성한 상세 화면 이동
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(err)),
