@@ -65,11 +65,7 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
         managerType: false,
       );
       print('로그인 성공: ${user.email}');
-      if (!snapshot.exists) {
-        print('신규 유저 Firestore 저장: ${newUser.toMap()}');
-      } else {
-        print('기존 유저 Firestore 데이터 불러옴: ${snapshot.data()}');
-      }
+      print('신규 유저 Firestore 저장: ${newUser.toMap()}'); // 신규 유저 정보 출력
       try {
         await docRef.set(newUser.toMap());
         print("✅ Firestore 저장 성공 (uid: ${user.uid})");
@@ -78,6 +74,7 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
       }
       return newUser;
     } else {
+      // 기존 유저인 경우 Firestore에서 데이터를 불러옴
       return AuthModel.fromMap(snapshot.data()!, snapshot.id);
     }
   }
