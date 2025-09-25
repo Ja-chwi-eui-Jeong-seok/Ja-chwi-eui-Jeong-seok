@@ -38,15 +38,32 @@ class CommunityScreen extends ConsumerWidget {
                   SizedBox(width: 8),
                   Icon(Icons.arrow_drop_down),
                   SizedBox(width: 4),
-                  Text('동작구'),
+                  Text('동작구'), //유저 위치 표시해야함
                   Spacer(),
                 ],
               ),
               bottom: TabBar(
                 //텝 스크롤
-                isScrollable: true,
-                indicatorColor: Colors.black,
+                isScrollable:
+                    false, //true로 하면 동일한 가로너비로 되지 않게됌. 스크롤불가능으로해야 스타일이 맞음
+                unselectedLabelStyle: const TextStyle(fontSize: 14),
+                unselectedLabelColor: Colors.grey,
+                labelStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+
                 labelColor: Colors.black,
+
+                //
+                //밑줄 커스텀
+                indicator: const UnderlineTabIndicator(
+                  borderSide: BorderSide(color: Colors.black, width: 3),
+                  insets: EdgeInsets.symmetric(horizontal: 16),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab, // 탭 전체 밑줄
+                indicatorColor: Colors.black,
+                //1차탭
                 tabs: parents.map((p) => Tab(text: p.categoryName)).toList(),
               ),
             ),
@@ -123,11 +140,46 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
                 color: Colors.white,
                 child: TabBar(
                   isScrollable: true,
-                  indicatorColor: Colors.black,
-                  labelColor: Colors.black,
-                  tabs: subs
-                      .map((s) => Tab(text: s.categoryDetailName))
-                      .toList(),
+                  // 선택된 탭 배경(검정) + 둥근 모서리
+                  indicator: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  // 인디케이터가 탭 안쪽으로 예쁘게 들어오도록 여백
+                  indicatorPadding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 4,
+                  ),
+
+                  // 글자색: 선택/비선택
+                  labelColor: Colors.white, // 선택된 탭 글자색
+                  unselectedLabelColor: Colors.black, // 비선택 탭 글자색
+                  // 기본 밑줄 인디케이터 색상은 의미 없지만 넣어도 무방
+                  indicatorColor: Colors.transparent,
+
+                  tabs: subs.map((s) {
+                    return Tab(
+                      child: Container(
+                        //height: 25,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          // 비선택/선택 모두 회색 테두리를 항상 그림
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Text(
+                          s.categoryDetailName,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
               // 하위 탭뷰: 각 하위 카테고리의 게시글 리스트 영역(placeholder)
