@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 
 class RouteTitles {
   static const Map<String, String> map = {
+    '/splash': '스플레시',
     '/login': '로그인',
+    '/guide': '가이드',
+    '/privacy-policy': '개인정보처리방침',
     '/character-create': '캐릭터 생성',
     '/home': '메인',
     '/mission': '미션',
