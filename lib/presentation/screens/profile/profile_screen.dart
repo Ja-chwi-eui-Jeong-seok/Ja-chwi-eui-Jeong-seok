@@ -15,7 +15,7 @@ class ProfileScreen extends ConsumerWidget {
       body: SingleChildScrollView(
         child: Column(
           children: const [
-            ProfileHeader(),
+            ProfileHeader(step: 0,),
             ProfileNicknameInput(),
             ProfileGrid(),
           ],

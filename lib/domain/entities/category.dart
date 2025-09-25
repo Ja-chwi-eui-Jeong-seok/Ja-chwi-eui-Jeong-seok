@@ -1,82 +1,99 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-//parant카테코리
+// parent 카테고리
 class Category {
-  final int categorycode;
-  final String categoryname;
-  final Timestamp categorycreate;
-  final Timestamp? categoryupdate;
-  final Timestamp? categorydelete;
-  final bool categorydeleteyn;
-  final String? categorydeletenote;
+  final int categoryCode;
+  final String categoryName;
+  final Timestamp categoryCreate;
+  final Timestamp? categoryUpdate;
+  final Timestamp? categoryDelete;
+  final bool categoryDeleteYn;
+  final String? categoryDeleteNote;
 
   Category({
-    required this.categorycode,
-    required this.categoryname,
-    required this.categorycreate,
-    this.categoryupdate,
-    this.categorydelete,
-    required this.categorydeleteyn,
-    this.categorydeletenote,
+    required this.categoryCode,
+    required this.categoryName,
+    required this.categoryCreate,
+    this.categoryUpdate,
+    this.categoryDelete,
+    required this.categoryDeleteYn,
+    this.categoryDeleteNote,
   });
 
+  // Firestore → Entity
   factory Category.fromFirebase(Map<String, dynamic> data) {
     return Category(
-      categorycode: data['categorycode'],
-      categoryname: data['categoryname'],
-      categorycreate: data['categorycreate'],
-      categoryupdate: data['categoryupdate'] as Timestamp?,
-      categorydelete: data['categorydelete'] as Timestamp?,
-      categorydeleteyn: data['categorydeleteyn'],
-      categorydeletenote: data['categorydeletenote'] as String?,
+      categoryCode: data['category_code'],
+      categoryName: data['category_name'],
+      categoryCreate: data['category_create'],
+      categoryUpdate: data['category_update'] as Timestamp?,
+      categoryDelete: data['category_delete'] as Timestamp?,
+      categoryDeleteYn: data['category_delete_yn'],
+      categoryDeleteNote: data['category_delete_note'] as String?,
     );
   }
 
-  //업데이트,삭제
-  Category copyWithFirebase(Map<String, dynamic> data) {
-    return Category(
-      categorycode: data['code'] as int? ?? categorycode,
-      categoryname: data['name'] as String? ?? categoryname,
-      categorycreate: data['createAt'] as Timestamp? ?? categorycreate,
-      categoryupdate: data['updateAt'] as Timestamp? ?? categoryupdate,
-      categorydelete: data['deletedAt'] as Timestamp? ?? categorydelete,
-      categorydeleteyn: data['delete'] as bool? ?? categorydeleteyn,
-      categorydeletenote: data['deleteNote'] as String? ?? categorydeletenote,
-    );
+  // Firestore 저장용
+  Map<String, dynamic> toMap() {
+    return {
+      'category_code': categoryCode,
+      'category_name': categoryName,
+      'category_create': categoryCreate,
+      'category_update': categoryUpdate,
+      'category_delete': categoryDelete,
+      'category_delete_yn': categoryDeleteYn,
+      'category_delete_note': categoryDeleteNote,
+    };
   }
 }
 
+// child 카테고리
 class CategoryDetail {
-  final int categorycode;
-  final int categorydetailcode;
-  final String categorydetailname;
-  final Timestamp categorycreate;
-  final Timestamp? categoryupdate;
-  final Timestamp? categorydelete;
-  final bool categorydeleteyn;
-  final String? categorydeletenote;
+  final int categoryCode;
+  final int categoryDetailCode;
+  final String categoryDetailName;
+  final Timestamp categoryCreate;
+  final Timestamp? categoryUpdate;
+  final Timestamp? categoryDelete;
+  final bool categoryDeleteYn;
+  final String? categoryDeleteNote;
 
   CategoryDetail({
-    required this.categorycode,
-    required this.categorydetailcode,
-    required this.categorydetailname,
-    required this.categorycreate,
-    this.categoryupdate,
-    this.categorydelete,
-    required this.categorydeleteyn,
-    this.categorydeletenote,
+    required this.categoryCode,
+    required this.categoryDetailCode,
+    required this.categoryDetailName,
+    required this.categoryCreate,
+    this.categoryUpdate,
+    this.categoryDelete,
+    required this.categoryDeleteYn,
+    this.categoryDeleteNote,
   });
 
+  // Firestore → Entity
   factory CategoryDetail.fromFirebase(Map<String, dynamic> data) {
     return CategoryDetail(
-      categorycode: data['categorycode'],
-      categorydetailcode: data['categorydetailcode'],
-      categorydetailname: data['categorydetailname'],
-      categorycreate: data['categorycreate'],
-      categoryupdate: data['categoryupdate'] as Timestamp?,
-      categorydelete: data['categorydelete'] as Timestamp?,
-      categorydeleteyn: data['categorydeleteyn'],
-      categorydeletenote: data['categorydeletenote'] as String?,
+      categoryCode: data['category_code'],
+      categoryDetailCode: data['category_detail_code'],
+      categoryDetailName: data['category_detail_name'],
+      categoryCreate: data['category_create'],
+      categoryUpdate: data['category_update'] as Timestamp?,
+      categoryDelete: data['category_delete'] as Timestamp?,
+      categoryDeleteYn: data['category_delete_yn'],
+      categoryDeleteNote: data['category_delete_note'] as String?,
     );
+  }
+
+  // Firestore 저장용
+  Map<String, dynamic> toMap() {
+    return {
+      'category_code': categoryCode,
+      'category_detail_code': categoryDetailCode,
+      'category_detail_name': categoryDetailName,
+      'category_create': categoryCreate,
+      'category_update': categoryUpdate,
+      'category_delete': categoryDelete,
+      'category_delete_yn': categoryDeleteYn,
+      'category_delete_note': categoryDeleteNote,
+    };
   }
 }

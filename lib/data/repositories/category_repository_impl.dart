@@ -16,13 +16,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
     return source
         .map(
           (dto) => Category(
-            categorycode: dto.categorycode,
-            categoryname: dto.categoryname,
-            categorycreate: dto.categorycreate,
-            categoryupdate: dto.categoryupdate,
-            categorydelete: dto.categorydelete,
-            categorydeleteyn: dto.categorydeleteyn,
-            categorydeletenote: dto.categorydeletenote,
+            categoryCode: dto.categorycode,
+            categoryName: dto.categoryname,
+            categoryCreate: dto.categorycreate,
+            categoryUpdate: dto.categoryupdate,
+            categoryDelete: dto.categorydelete,
+            categoryDeleteYn: dto.categorydeleteyn,
+            categoryDeleteNote: dto.categorydeletenote,
           ),
         )
         .toList();
@@ -35,14 +35,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
     return source
         .map(
           (dto) => CategoryDetail(
-            categorycode: dto.categorycode,
-            categorycreate: dto.categorycreate,
-            categoryupdate: dto.categoryupdate,
-            categorydelete: dto.categorydelete,
-            categorydeleteyn: dto.categorydeleteyn,
-            categorydeletenote: dto.categorydeletenote,
-            categorydetailcode: dto.categorydetailcode,
-            categorydetailname: dto.categorydetailname,
+            categoryCode: dto.categorycode,
+            categoryCreate: dto.categorycreate,
+            categoryUpdate: dto.categoryupdate,
+            categoryDelete: dto.categorydelete,
+            categoryDeleteYn: dto.categorydeleteyn,
+            categoryDeleteNote: dto.categorydeletenote,
+            categoryDetailCode: dto.categorydetailcode,
+            categoryDetailName: dto.categorydetailname,
           ),
         )
         .toList();

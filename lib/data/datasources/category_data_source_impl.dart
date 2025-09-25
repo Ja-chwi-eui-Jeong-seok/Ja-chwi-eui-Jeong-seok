@@ -22,7 +22,7 @@ class CategoryDataSourceImpl implements CategoryDataSource {
   Future<List<CategoryDetailDto>> fetchCategoryDetails(int categoryCode) async {
     final snapshot = await firestore
         .collection('categorydetail')
-        .where('categorycode', isEqualTo: categoryCode)
+        .where('category_code', isEqualTo: categoryCode)
         .get();
 
     return snapshot.docs
