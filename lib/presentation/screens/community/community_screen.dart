@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:ja_chwi/domain/entities/category.dart';
+import 'package:ja_chwi/presentation/common/utils/string_utils.dart';
+import 'package:ja_chwi/presentation/providers/user_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
+import 'package:go_router/go_router.dart';
 
 //커뮤니티 화면 (카테고리 탭 2단구조 + 게시글 패치)
 class CommunityScreen extends ConsumerWidget {
@@ -68,6 +72,7 @@ class CommunityScreen extends ConsumerWidget {
               ),
             ),
             body: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
               // 상위 탭 선택 시, 하위 탭(_SecondDepthTabs)으로 이동
               children: parents.map((p) {
                 return _SecondDepthTabs(parentCode: p.categoryCode);
@@ -75,7 +80,21 @@ class CommunityScreen extends ConsumerWidget {
             ),
             floatingActionButton: FloatingActionButton.small(
               //글쓰기 버튼 자리
-              onPressed: () {},
+              onPressed: () {
+                //로그인처리확인
+                //더미유저데이터
+                final uid = ref.read(currentUidProvider);
+                if (uid == null) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(
+                    SnackBar(content: Text('로그인이 필요합니다.')),
+                  );
+                  return;
+                }
+                //uid를 extra로 넘김, 넘긴후 글쓰기 화면에서 uid로 위치조회
+                context.push('/community-create', extra: uid);
+              },
               backgroundColor: Colors.black,
               foregroundColor: Colors.white,
               child: const Icon(Icons.edit),
@@ -89,7 +108,7 @@ class CommunityScreen extends ConsumerWidget {
 
 /// 상위 탭(부모 카테고리) → 하위 탭(세부 카테고리)을 표시하는 위젯
 class _SecondDepthTabs extends ConsumerStatefulWidget {
-  const _SecondDepthTabs({required this.parentCode, super.key});
+  const _SecondDepthTabs({required this.parentCode});
   final int parentCode;
 
   @override
@@ -136,55 +155,11 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
           child: Column(
             children: [
               //두번째 탭바
-              Material(
-                color: Colors.white,
-                child: TabBar(
-                  isScrollable: true,
-                  // 선택된 탭 배경(검정) + 둥근 모서리
-                  indicator: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  // 인디케이터가 탭 안쪽으로 예쁘게 들어오도록 여백
-                  indicatorPadding: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 4,
-                  ),
-
-                  // 글자색: 선택/비선택
-                  labelColor: Colors.white, // 선택된 탭 글자색
-                  unselectedLabelColor: Colors.black, // 비선택 탭 글자색
-                  // 기본 밑줄 인디케이터 색상은 의미 없지만 넣어도 무방
-                  indicatorColor: Colors.transparent,
-
-                  tabs: subs.map((s) {
-                    return Tab(
-                      child: Container(
-                        //height: 25,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          // 비선택/선택 모두 회색 테두리를 항상 그림
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Text(
-                          s.categoryDetailName,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
+              _CategoryDetailChips(subs: subs),
               // 하위 탭뷰: 각 하위 카테고리의 게시글 리스트 영역(placeholder)
               Expanded(
                 child: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
                   children: subs.map((s) {
                     return _PostsPlaceholder(
                       parentCode: widget.parentCode,
@@ -208,7 +183,6 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
     required this.parentCode,
     required this.detailCode,
     required this.detailName,
-    super.key,
   });
   final int parentCode;
   final int detailCode;
@@ -236,7 +210,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
   @override
   Widget build(BuildContext context) {
     final st = ref.watch(provider);
-
     return NotificationListener<ScrollNotification>(
       onNotification: (n) {
         if (!st.hasMore || st.isLoading) return false; // 가드
@@ -248,9 +221,8 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
 
       child: Column(
         children: [
-          const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
               children: [
                 Text(
@@ -276,7 +248,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
           // 게시글 리스트
           Expanded(
             child: ListView.separated(
-              padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
               itemCount:
                   st.items.length + ((st.isLoading && st.hasMore) ? 1 : 0),
 
@@ -297,66 +269,75 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                 // likeCount 필드가 아직 없으면 0으로 표시
                 final likeCount = 0;
 
-                return Container(
-                  height: 96,
-                  //테두리
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Color(0xFFF2F2F2), width: 3),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 좌측 텍스트
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  // 제목
-                                  x.communityName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
+                return InkWell(
+                  onTap: () => context.push(
+                    '/community-detail',
+                    extra: x.id,
+                  ), // x: Community
+                  child: Container(
+                    height: 96,
+                    //테두리
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Color(0xFFF2F2F2), width: 3),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 좌측 텍스트
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    // 제목
+                                    StringUtils.truncateWithEllipsis(
+                                      15,
+                                      x.communityName,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Spacer(),
-                                Text(
-                                  //날짜
-                                  date,
-                                  // style: const TextStyle(color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                            Spacer(),
+                                  Spacer(),
+                                  Text(
+                                    //날짜
+                                    date,
+                                    // style: const TextStyle(color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                              Spacer(),
 
-                            Row(
-                              children: [
-                                Text(
-                                  //작성자(현재 임시)
-                                  x.createUser,
-                                  //style: const TextStyle(color: Colors.grey),
-                                ),
-                                Spacer(),
-                                const Icon(Icons.favorite_border, size: 18),
-                                const SizedBox(width: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    //작성자(현재 임시)
+                                    x.createUser,
+                                    //style: const TextStyle(color: Colors.grey),
+                                  ),
+                                  Spacer(),
+                                  const Icon(Icons.favorite_border, size: 18),
+                                  const SizedBox(width: 4),
 
-                                Text('$likeCount'),
-                              ],
-                            ),
-                          ],
+                                  Text('$likeCount'),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      // 우측 하트
-                      Row(
-                        children: [],
-                      ),
-                    ],
+                        // 우측 하트
+                        Row(
+                          children: [],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -364,6 +345,60 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CategoryDetailChips extends StatelessWidget {
+  const _CategoryDetailChips({required this.subs});
+  final List<CategoryDetail> subs;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = DefaultTabController.of(context); //!제거함
+
+    return AnimatedBuilder(
+      animation: controller.animation!,
+      builder: (context, _) {
+        final current = controller.index;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: List.generate(subs.length, (i) {
+              final s = subs[i];
+              final selected = (current == i);
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(50),
+                  onTap: () => controller.animateTo(i),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected ? Colors.black : Colors.white, // 선택 배경
+                      border: Border.all(color: Colors.grey), // 항상 테두리
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Text(
+                      s.categoryDetailName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: selected ? Colors.white : Colors.black, // 선택 글자색
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }
