@@ -35,10 +35,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required this.updateUserUseCase,
   }) : super(AuthState());
 
-  Future<void> signInWithGoogle() async {
+  Future<void> _signInWithProvider(
+    Future<AuthEntity?> Function() loginFn,
+  ) async {
     state = state.copyWith(status: AuthStatus.loading);
     try {
-      final user = await googleUseCase.execute();
+      final user = await loginFn();
       if (user == null) {
         state = state.copyWith(
           status: AuthStatus.error,
@@ -55,25 +57,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> signInWithApple() async {
-    state = state.copyWith(status: AuthStatus.loading);
-    try {
-      final user = await appleUseCase.execute();
-      if (user == null) {
-        state = state.copyWith(
-          status: AuthStatus.error,
-          errorMessage: "사용자 정보 없음",
-        );
-        return;
-      }
-      state = state.copyWith(user: user, status: AuthStatus.success);
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: e.toString(),
-      );
-    }
-  }
+  Future<void> signInWithApple() async =>
+      _signInWithProvider(() => appleUseCase.execute());
+
+  Future<void> signInWithGoogle() async =>
+      _signInWithProvider(() => googleUseCase.execute());
 
   Future<void> updateUser(AuthEntity entity) async {
     state = state.copyWith(status: AuthStatus.loading);
