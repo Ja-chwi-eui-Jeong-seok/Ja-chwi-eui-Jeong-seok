@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/ai_chat/page/ai_chat.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/character_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/login_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/privacy_policy_page.dart';
@@ -61,6 +62,11 @@ final GoRouter router = GoRouter(
       path: '/home',
       name: '메인',
       builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/ai-chat',
+      name: 'ai채팅',
+      builder: (context, state) => const AiChat(),
     ),
     GoRoute(
       path: '/mission',
