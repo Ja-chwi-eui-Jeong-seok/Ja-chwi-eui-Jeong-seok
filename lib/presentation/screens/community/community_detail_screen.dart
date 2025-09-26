@@ -430,30 +430,29 @@ class _HeartButtonState extends State<_HeartButton> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 52, // 카운트 공간 확보
-      height: 32,
-      child: Row(
-        children: [
-          IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            onPressed: () {
-              setState(() {
-                isLiked = !isLiked;
-                likeCount += isLiked ? 1 : -1;
-              });
-              // TODO: repo.incLike(commentId, isLiked ? +1 : -1) 연결
-            },
-            icon: Icon(
-              isLiked ? Icons.favorite : Icons.favorite_border,
-              color: isLiked ? Colors.red : Colors.black,
-              size: 20,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            // TODO: repo.incLike(commentId, isLiked ? +1 : -1) 연결
+          },
+          icon: Icon(
+            isLiked ? Icons.favorite : Icons.favorite_border,
+            color: isLiked ? Colors.red : Colors.black,
+            size: 18,
           ),
-          Text('$likeCount'),
-        ],
-      ),
+        ),
+        Text(
+          // NumberFormat.compact().format(likeCount), //TODO??:압축 표기(1.2K)
+          '$likeCount',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          softWrap: false,
+        ),
+      ],
     );
   }
 }
