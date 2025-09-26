@@ -35,6 +35,10 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
 
   @override
   Future<AuthModel?> signInWithGoogle() async {
+    // 항상 계정 선택창을 표시하기 위해 기존 로그인을 해제합니다.
+    // 이전에 로그인한 사용자가 있으면 silent sign-in이 되어 계정 선택창이 뜨지 않는 것을 방지합니다.
+    await _googleSignIn.signOut();
+
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
     final googleAuth = await googleUser.authentication;
