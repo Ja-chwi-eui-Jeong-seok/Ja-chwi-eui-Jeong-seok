@@ -20,7 +20,7 @@ class PrivacyPolicyPage extends StatelessWidget {
       );
     }
 
-    context.go('/guide'); // 동의 여부 저장 후 이동
+    context.go('/profile'); // 동의 여부 저장 후 이동
   }
 
   @override
@@ -70,7 +70,7 @@ Future<void> _checkConsent(BuildContext context) async {
   final consent = prefs.getBool('privacy_agreed');
 
   if (consent == true) {
-    // 이미 동의했으면 바로 가이드 페이지로 이동
-    Future.microtask(() => context.go('/guide'));
+    // 이미 동의했으면 바로 프로필 페이지로 이동
+    Future.microtask(() => context.go('/profile'));
   }
 }
