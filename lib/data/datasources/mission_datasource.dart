@@ -21,7 +21,10 @@ abstract class MissionDataSource {
   });
 
   /// 오늘의 미션 데이터를 가져옵니다.
-  Future<Mission> fetchTodayMission();
+  Future<Mission> fetchTodayMission(
+    String userId, {
+    DateTime? debugNow,
+  });
 
   /// 사용자의 완료된 미션 목록을 가져오는 스트림입니다.
   Stream<List<Map<String, dynamic>>> fetchUserMissions(String userId);

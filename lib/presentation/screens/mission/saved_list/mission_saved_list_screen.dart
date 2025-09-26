@@ -113,18 +113,16 @@ class _MissionSavedListScreenState
             markerBuilder: (context, day, events) {
               if (events.isNotEmpty) {
                 final isSelected = isSameDay(_selectedDay, day);
-                return Positioned(
-                  top: 2,
-                  left: 4,
-                  right: 0,
-                  child: Center(
-                    child: Text(
-                      '✓',
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.red,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    height: 7,
+                    width: 7,
+                    margin: const EdgeInsets.only(top: 6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      // 선택된 날짜에는 흰색 점, 아닐 경우 빨간 점
+                      color: isSelected ? Colors.white : Colors.red,
                     ),
                   ),
                 );
