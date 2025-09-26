@@ -15,8 +15,8 @@ class AchieversList extends StatelessWidget {
       itemBuilder: (context, index) {
         final achiever = achievers[index];
         return AchieverCard(
+          rank: index + 1, // 등수는 1부터 시작하므로 index + 1
           name: achiever.name,
-          time: achiever.time,
           level: achiever.level,
         );
       },

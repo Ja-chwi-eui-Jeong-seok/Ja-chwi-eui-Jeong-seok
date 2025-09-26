@@ -22,10 +22,19 @@ final List<MissionAchiever> _mockAllAchievers = [
   MissionAchiever(name: '뿌뿌로', time: '10:12 완료', level: 'Lv.5'),
   MissionAchiever(name: '네번째 달성자', time: '11:00 완료', level: 'Lv.4'),
   MissionAchiever(name: '다섯번째 달성자', time: '12:00 완료', level: 'Lv.3'),
-  MissionAchiever(name: '여섯번째 달성자', time: '13:00 완료', level: 'Lv.2'),
+  MissionAchiever(name: '여섯번째 달성자', time: '13:00 완료', level: 'Lv.5'),
+  MissionAchiever(name: '일곱번째 달성자', time: '14:00 완료', level: 'Lv.2'),
+  MissionAchiever(name: '여덟번째 달성자', time: '09:00 완료', level: 'Lv.1'),
+  MissionAchiever(name: '아홉번째 달성자', time: '11:30 완료', level: 'Lv.2'),
+  MissionAchiever(name: '열번째 달성자', time: '15:00 완료', level: 'Lv.1'),
+  MissionAchiever(name: '열한번째 달성자', time: '16:00 완료', level: 'Lv.3'),
+  MissionAchiever(name: '열두번째 달성자', time: '17:00 완료', level: 'Lv.4'),
+  MissionAchiever(name: '열세번째 달성자', time: '20:00 완료', level: 'Lv.4'),
+  MissionAchiever(name: '열네번째 달성자', time: '12:00 완료', level: 'Lv.5'),
+  MissionAchiever(name: '열다섯번째 달성자', time: '21:00 완료', level: 'Lv.6'),
+  MissionAchiever(name: '열여섯번째 달성자', time: '22:00 완료', level: 'Lv.10'),
+  MissionAchiever(name: '열일곱번째 달성자', time: '23:00 완료', level: 'Lv.5'),
 ];
-
-// 기존 MissionRepository 클래스 제거
 
 /// Providers
 
@@ -52,8 +61,18 @@ final pickImagesUseCaseProvider = Provider<PickImagesUseCase>((ref) {
 
 /// 오늘의 미션 데이터를 비동기적으로 가져오는 FutureProvider
 final todayMissionProvider = FutureProvider<Mission>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    // 로그인한 사용자가 없으면 미션을 가져올 수 없으므로 예외를 발생시킵니다.
+    // UI에서는 이 예외를 처리하여 로그인 화면으로 유도하거나 에러 메시지를 보여줄 수 있습니다.
+    throw Exception('로그인한 사용자가 없습니다.');
+  }
   final repository = ref.watch(missionRepositoryProvider);
-  return repository.fetchTodayMission();
+
+  // --- 테스트 코드 적용 위치 ---
+  // 아래 코드의 주석을 해제하여 특정 날짜의 미션을 테스트할 수 있습니다.
+  // return repository.fetchTodayMission(user.uid, debugNow: DateTime.now().add(const Duration(days: 1))); // 내일 미션 테스트
+  return repository.fetchTodayMission(user.uid); // 원래 코드
 });
 
 /// 사용자의 미션 목록을 제공하는 StreamProvider
