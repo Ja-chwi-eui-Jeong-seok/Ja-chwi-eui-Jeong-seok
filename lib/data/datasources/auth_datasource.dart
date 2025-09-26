@@ -37,21 +37,22 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
   Future<AuthModel?> signInWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
-    print('1');
     final googleAuth = await googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    print('2');
     final userCred = await _auth.signInWithCredential(credential);
+
     final user = userCred.user;
+
     if (user == null) return null;
-    print('3');
     final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
+
     final snapshot = await docRef.get();
+
     final deviceName = await _getDeviceName();
-    print('4');
+
     if (!snapshot.exists) {
       final newUser = AuthModel(
         uid: user.uid,
@@ -67,6 +68,7 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
         userDeleteNote: '',
         managerType: false,
       );
+
       print('로그인 성공: ${user.email}');
       print('신규 유저 Firestore 저장: ${newUser.toMap()}'); // 신규 유저 정보 출력
       try {

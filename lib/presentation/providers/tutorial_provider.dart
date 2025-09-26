@@ -3,7 +3,7 @@ import 'package:ja_chwi/data/datasources/tutorial_datasource.dart';
 import 'package:ja_chwi/data/repositories/tutorial_repository_impl.dart';
 import 'package:ja_chwi/domain/entities/tutorial_entity.dart';
 import 'package:ja_chwi/domain/usecases/tutorial_usecase.dart';
-import 'package:ja_chwi/presentation/screens/guide/firestore_provider.dart';
+import 'package:ja_chwi/presentation/providers/firestore_provider.dart';
 
 final tutorialProvider =
     StateNotifierProvider<TutorialNotifier, TutorialEntity?>(
