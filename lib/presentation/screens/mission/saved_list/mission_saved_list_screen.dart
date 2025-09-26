@@ -166,7 +166,9 @@ class _MissionSavedListScreenState
   }
 
   int _calculateConsecutiveDays(Iterable<DateTime> dates) {
-    if (dates.isEmpty) return 0;
+    if (dates.isEmpty) {
+      return 0;
+    }
 
     final sortedDates = dates.toList()..sort((a, b) => b.compareTo(a));
     int consecutiveDays = 1;
