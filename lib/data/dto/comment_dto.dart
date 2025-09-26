@@ -2,71 +2,67 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommentDto {
-  final String commentId;
-  final String communityId;
-  final String uid;
-  final String nickName;
-  final String noteDetail;
-  final int likeCount;
-  final bool moderated;
-  final List<String> violations;
-  final Timestamp createAt;
-  final Timestamp? updateAt;
-  final Timestamp? deleteAt;
-  final bool deleteYn;
+  final String id; // doc.id
+  final String communityId; // community_id
+  final String uid; // uid
+  final String noteDetail; // note_detail
+  final int likeCount; // like_count
+  final Timestamp createAt; // comment_create_date
+  final Timestamp? updateAt; // comment_update_date
+  final Timestamp? deleteAt; // comment_delete_date
+  final bool deleteYn; // comment_delete_yn
+  final List<String>? commentLog; // community_log (유지)
 
   CommentDto({
-    required this.commentId,
+    required this.id,
     required this.communityId,
     required this.uid,
-    required this.nickName,
     required this.noteDetail,
     required this.likeCount,
-    required this.moderated,
-    required this.violations,
     required this.createAt,
     this.updateAt,
     this.deleteAt,
     required this.deleteYn,
+    this.commentLog,
   });
 
-  //TODO: 컬렉션 속성 명 변경
+  //댓글 불러오기
   factory CommentDto.fromFirebase(String id, Map<String, dynamic> d) {
     return CommentDto(
-      commentId: id,
-      communityId: d['community_id'],
-      uid: d['uid'],
-      nickName: d['nick_name'],
-      noteDetail: d['note_detail'],
+      id: id,
+      communityId: d['community_id'] as String, //FK
+      uid: d['uid'] as String,
+      noteDetail: d['note_detail'] as String,
       likeCount: (d['like_count'] ?? 0) as int,
-      moderated: (d['moderated'] ?? false) as bool,
-      violations: (d['violations'] as List?)?.cast<String>() ?? const [],
-      createAt: d['community_create_date'],
-      updateAt: d['community_update_date'],
-      deleteAt: d['community_delete_date'],
-      deleteYn: d['community_delete_yn'] ?? false,
+      createAt: d['comment_create_date'] as Timestamp,
+      updateAt: d['comment_update_date'] as Timestamp?,
+      deleteAt: d['comment_delete_date'] as Timestamp?,
+      deleteYn: (d['comment_delete_yn'] ?? false) as bool,
+      commentLog: (d['comment_log'] as List?)?.cast<String>(),
     );
   }
 
   Map<String, dynamic> toCreateMap() => {
     'community_id': communityId,
     'uid': uid,
-    'nick_name': nickName,
     'note_detail': noteDetail,
     'like_count': likeCount,
-    'moderated': moderated,
-    'violations': violations,
-    'community_create_date': FieldValue.serverTimestamp(),
-    'community_delete_yn': false,
+    'comment_create_date': FieldValue.serverTimestamp(),
+    'comment_delete_yn': false,
+    if (commentLog != null) 'comment_log': commentLog,
   };
 
-  Map<String, dynamic> toUpdateMap({String? noteDetail}) => {
+  Map<String, dynamic> toUpdateMap({
+    String? noteDetail,
+    List<String>? commentLog,
+  }) => {
     if (noteDetail != null) 'note_detail': noteDetail,
-    'community_update_date': FieldValue.serverTimestamp(),
+    if (commentLog != null) 'comment_log': commentLog,
+    'comment_update_date': FieldValue.serverTimestamp(),
   };
 
   Map<String, dynamic> toDeleteMap() => {
-    'community_delete_yn': true,
-    'community_delete_date': FieldValue.serverTimestamp(),
+    'comment_delete_yn': true,
+    'comment_delete_date': FieldValue.serverTimestamp(),
   };
 }
