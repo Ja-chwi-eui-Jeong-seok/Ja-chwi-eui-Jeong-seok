@@ -6,7 +6,7 @@ abstract interface class CommunityDataSource {
   Future<PagedResult<CommunityDto>> fetchCommunities({
     required int categoryCode,
     required int categoryDetailCode,
-    String? location, //아직 셋팅안됌
+    required String location, //아직 셋팅안됌
     int limit, //기본페이지 크기 10
     DocumentSnapshot? startAfterDoc, //페이징커서
     bool orderDesc, //차순정렬
