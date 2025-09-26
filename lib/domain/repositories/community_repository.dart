@@ -18,7 +18,7 @@ abstract interface class CommunityRepository {
   Future<PagedCommunity> fetch({
     required int categoryCode,
     required int categoryDetailCode,
-    String? location,
+    required String location,
     int limit,
     DocumentSnapshot? startAfter,
     bool desc,
