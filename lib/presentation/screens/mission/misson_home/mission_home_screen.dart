@@ -23,6 +23,7 @@ class MissionHomeScreen extends ConsumerWidget {
           RefreshIconButton(
             onPressed: () {
               ref.invalidate(todayMissionProvider);
+              ref.invalidate(achieversProvider);
             },
           ),
         ],
