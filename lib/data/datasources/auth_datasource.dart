@@ -6,6 +6,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../models/auth_model.dart';
 import '../../domain/entities/auth_entity.dart';
+import 'dart:convert'; // utf8
+import 'dart:math'; // Random
+import 'package:crypto/crypto.dart'; // sha256
 
 abstract class AuthDataSource {
   Future<AuthEntity?> signInWithGoogle();
@@ -81,22 +84,31 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
 
   @override
   Future<AuthModel?> signInWithApple() async {
+    // 1. rawNonce & hashedNonce 생성
+    final rawNonce = _generateNonce();
+    final hashedNonce = _sha256ofString(rawNonce);
+
+    // 2. Apple 로그인 요청 (hashedNonce 전달)
     final appleCredential = await SignInWithApple.getAppleIDCredential(
       scopes: [
         AppleIDAuthorizationScopes.email,
         AppleIDAuthorizationScopes.fullName,
       ],
+      nonce: hashedNonce,
     );
 
+    // 3. Firebase OAuthCredential 생성 (idToken + rawNonce)
     final oauthCredential = OAuthProvider("apple.com").credential(
       idToken: appleCredential.identityToken,
-      accessToken: appleCredential.authorizationCode,
+      rawNonce: rawNonce,
     );
 
+    // 4. Firebase Auth 로그인
     final userCred = await _auth.signInWithCredential(oauthCredential);
     final user = userCred.user;
     if (user == null) return null;
 
+    // 5. Firestore 사용자 문서 처리
     final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
     final snapshot = await docRef.get();
     final deviceName = await _getDeviceName();
@@ -122,6 +134,23 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
     } else {
       return AuthModel.fromMap(snapshot.data()!, snapshot.id);
     }
+  }
+
+  /// 🔐 nonce 생성 유틸
+  String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(
+      length,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
+  }
+
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   @override
