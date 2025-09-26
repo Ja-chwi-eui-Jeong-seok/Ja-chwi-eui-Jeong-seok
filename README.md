@@ -127,3 +127,25 @@ Repository (AuthRepositoryImpl)
 DataSource (AuthRemoteDataSourceImpl)
 ↓
 Firebase (Auth + Firestore)
+
+## 가이드 화면
+
+[UI: 가이드 화면]
+│
+▼
+[Provider / ViewModel]
+│
+▼
+[UseCase: checkTutorialStatus()]
+│
+▼
+[Repository: TutorialRepository]
+│
+▼
+[DataSource: Firestore / Local Storage]
+│
+▼
+[Model → Entity 변환]
+│
+▼
+[UseCase → Provider → UI]
