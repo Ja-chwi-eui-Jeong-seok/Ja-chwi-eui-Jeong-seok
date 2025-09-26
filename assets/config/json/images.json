@@ -2,41 +2,49 @@
   {
     "id": "1",
     "thumbUrl": "assets/images/m_profile/m_black.png",
-    "fullUrl": "assets/images/profile/black.png"
+    "fullUrl": "assets/images/profile/black.png",
+    "color": "1A1A1A"
   }, 
   {
     "id": "2",
     "thumbUrl": "assets/images/m_profile/m_red.png",
-    "fullUrl": "assets/images/profile/red.png"
+    "fullUrl": "assets/images/profile/red.png",
+    "color": "FF9696"
   }, 
   {
     "id": "3",
     "thumbUrl": "assets/images/m_profile/m_orange.png",
-    "fullUrl": "assets/images/profile/orange.png"
+    "fullUrl": "assets/images/profile/orange.png",
+    "color": "FF9977"    
   }, 
   {
     "id": "4",
     "thumbUrl": "assets/images/m_profile/m_banana.png",
-    "fullUrl": "assets/images/profile/banana.png"
+    "fullUrl": "assets/images/profile/banana.png",
+    "color": "FFEA97"
   }, 
   {
     "id": "5",
-    "thumbUrl": "assets/images/m_profile/m_night_blu.png",
-    "fullUrl": "assets/images/profile/night_blu.png"
+    "thumbUrl": "assets/images/m_profile/m_green.png",
+    "fullUrl": "assets/images/profile/night_blu.png",
+    "color": "green: ABD891"
   }, 
   {
     "id": "6",
     "thumbUrl": "assets/images/m_profile/m_sky_blu.png",
-    "fullUrl": "assets/images/profile/sky_blu.png"
+    "fullUrl": "assets/images/profile/sky_blu.png",
+    "color": "sky: 7FA8DA"
   }, 
   {
     "id": "7",
-    "thumbUrl": "assets/images/m_profile/m_white.png",
-    "fullUrl": "assets/images/profile/white.png"
+    "thumbUrl": "assets/images/m_profile/m_night_blu.png",
+    "fullUrl": "assets/images/profile/white.png",
+    "color": "night: 6664CE"
   }, 
   {
     "id": "8",
-    "thumbUrl": "assets/images/m_profile/m_rainbow.png",
-    "fullUrl": "assets/images/profile/rainbow.png"
+    "thumbUrl": "assets/images/m_profile/m_pupple.png",
+    "fullUrl": "assets/images/profile/rainbow.png",
+    "color": "pupple: DF8FE6"
   }
 ]
