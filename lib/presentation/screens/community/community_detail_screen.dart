@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
+import 'package:ja_chwi/presentation/providers/user_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
-  // ✅ 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
+  // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
   const CommunityDetailScreen({super.key, required this.id});
   final String id;
 
@@ -19,7 +20,7 @@ class CommunityDetailScreen extends ConsumerStatefulWidget {
 class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   final commentController = TextEditingController();
 
-  // ✅ 상세 VM 프로바이더 인스턴스 보관
+  // 상세 VM 프로바이더 인스턴스 보관
   late final provider = communityDetailVmProvider(widget.id);
 
   @override
@@ -35,15 +36,28 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     super.dispose();
   }
 
-  void submit() {
+  void submit() async {
     if (!mounted) return;
     final text = commentController.text.trim();
     if (text.isEmpty) return;
-    //게시글 id > firebase에 등록
-    // TODO: 댓글 생성 UseCase 연결 (닉네임/uid 주입)
-    if (kDebugMode) {
-      print('create comment to post=${widget.id}, text=$text');
+
+    final uid = ref.read(currentUidProvider);
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
     }
+
+    await ref
+        .read(provider.notifier)
+        .createComment(
+          ref,
+          uid: uid, //uid로 프로필조회 -> 닉네임, 프로필이미지
+          text: text,
+        );
+
+    if (!mounted) return;
     commentController.clear();
   }
 
@@ -138,7 +152,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                       _CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) => st.comments[i].nickName,
+                        nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
                       ),
@@ -146,7 +160,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                       _CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) => st.comments[i].nickName,
+                        nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
                       ),
@@ -416,30 +430,29 @@ class _HeartButtonState extends State<_HeartButton> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 52, // 카운트 공간 확보
-      height: 32,
-      child: Row(
-        children: [
-          IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            onPressed: () {
-              setState(() {
-                isLiked = !isLiked;
-                likeCount += isLiked ? 1 : -1;
-              });
-              // TODO: repo.incLike(commentId, isLiked ? +1 : -1) 연결
-            },
-            icon: Icon(
-              isLiked ? Icons.favorite : Icons.favorite_border,
-              color: isLiked ? Colors.red : Colors.black,
-              size: 20,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            // TODO: repo.incLike(commentId, isLiked ? +1 : -1) 연결
+          },
+          icon: Icon(
+            isLiked ? Icons.favorite : Icons.favorite_border,
+            color: isLiked ? Colors.red : Colors.black,
+            size: 18,
           ),
-          Text('$likeCount'),
-        ],
-      ),
+        ),
+        Text(
+          // NumberFormat.compact().format(likeCount), //TODO??:압축 표기(1.2K)
+          '$likeCount',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          softWrap: false,
+        ),
+      ],
     );
   }
 }
