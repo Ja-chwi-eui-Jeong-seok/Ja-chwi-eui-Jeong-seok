@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.dart';
@@ -45,7 +46,25 @@ class MissionHomeScreen extends ConsumerWidget {
               _buildTodayMissionSection(context, todayMissionAsync),
               const SizedBox(height: 32),
               _buildMissionAchieversSection(context, achievers),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20), // 40
+              /// 임시 로그아웃
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    if (context.mounted) {
+                      context.go('/login');
+                    }
+                  },
+                  child: const Text(
+                    '로그아웃',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              //요기까지
             ],
           ),
         ),
