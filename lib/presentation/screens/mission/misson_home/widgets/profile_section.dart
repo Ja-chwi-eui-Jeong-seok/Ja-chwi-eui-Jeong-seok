@@ -20,21 +20,22 @@ class ProfileSection extends StatelessWidget {
           // TODO: 실제 캐릭터 이미지로 교체
         ),
         const SizedBox(width: 16),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('LV 24', style: TextStyle(fontSize: 16)),
-            Text(
-              '2조이죠',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text('LV 24', style: TextStyle(fontSize: 16)),
+              Text(
+                '2조이죠',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        const Spacer(),
         const GoToCompletedButton(),
       ],
     );

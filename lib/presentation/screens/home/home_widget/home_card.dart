@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/home/home_widget/triple_arrow_icon.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 
 class HomeCard extends ConsumerWidget {
@@ -99,35 +100,7 @@ class HomeCard extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Transform.translate(
-                              offset: const Offset(8, 0),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                color: Color(0xFF8F8F8F),
-                                size: 12,
-                              ),
-                            ),
-                            Transform.translate(
-                              offset: const Offset(0, 0),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                color: Color(0xFF666666),
-                                size: 12,
-                              ),
-                            ),
-                            Transform.translate(
-                              offset: const Offset(-8, 0),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                color: Color(0xFF342E37),
-                                size: 12,
-                              ),
-                            ),
-                          ],
-                        ),
+                        const TripleArrowIcon(),
                       ],
                     ),
                   ),
