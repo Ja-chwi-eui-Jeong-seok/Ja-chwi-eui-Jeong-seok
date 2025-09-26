@@ -30,7 +30,9 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // 위젯 트리에서 여러 번 호출될 수 있으므로, 초기화는 한 번만 수행
-    if (_isInitialized) return;
+    if (_isInitialized) {
+      return;
+    }
     _initializeFromExtra();
     _isInitialized = true;
   }
@@ -66,7 +68,9 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
   }
 
   Future<void> _addPhotos() async {
-    if (_photos.length >= 5) return;
+    if (_photos.length >= 5) {
+      return;
+    }
     final pickImagesUseCase = ref.read(pickImagesUseCaseProvider);
     final pickedFiles = await pickImagesUseCase.execute();
 
@@ -79,7 +83,9 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
   }
 
   Future<void> _submitMission() async {
-    if (_isSubmitting) return;
+    if (_isSubmitting) {
+      return;
+    }
 
     if (_photos.isEmpty) {
       _showSnackBar('사진을 1장 이상 추가해주세요.');
@@ -102,7 +108,9 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
       if (!_isEditing) {
         if (await missionRepository.hasCompletedMissionToday(user.uid)) {
           _showSnackBar('오늘의 미션은 이미 완료했습니다!');
-          if (mounted) setState(() => _isSubmitting = false);
+          if (mounted) {
+            setState(() => _isSubmitting = false);
+          }
           return;
         }
       }
