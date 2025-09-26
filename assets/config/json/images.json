@@ -27,24 +27,24 @@
     "id": "5",
     "thumbUrl": "assets/images/m_profile/m_green.png",
     "fullUrl": "assets/images/profile/night_blu.png",
-    "color": "green: ABD891"
+    "color": "ABD891"
   }, 
   {
     "id": "6",
     "thumbUrl": "assets/images/m_profile/m_sky_blu.png",
     "fullUrl": "assets/images/profile/sky_blu.png",
-    "color": "sky: 7FA8DA"
+    "color": "7FA8DA"
   }, 
   {
     "id": "7",
     "thumbUrl": "assets/images/m_profile/m_night_blu.png",
     "fullUrl": "assets/images/profile/white.png",
-    "color": "night: 6664CE"
+    "color": "6664CE"
   }, 
   {
     "id": "8",
     "thumbUrl": "assets/images/m_profile/m_pupple.png",
     "fullUrl": "assets/images/profile/rainbow.png",
-    "color": "pupple: DF8FE6"
+    "color": "DF8FE6"
   }
 ]

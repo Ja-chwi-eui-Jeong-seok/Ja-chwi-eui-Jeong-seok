@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ja_chwi/presentation/screens/auth/auth_provider.dart';
-import 'package:ja_chwi/presentation/screens/auth/auth_view_model.dart';
+import 'package:ja_chwi/presentation/providers/auth_provider.dart';
+import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_mock_viewmodel.dart';
+// import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_view_model.dart'
+//     hide AuthStatus;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AppleLoginButton extends ConsumerWidget {
@@ -16,10 +18,12 @@ class AppleLoginButton extends ConsumerWidget {
     if (!context.mounted) return;
 
     final latestState = ref.read(authNotifierProvider);
+    // ignore: unrelated_type_equality_checks
     if (latestState.status == AuthStatus.success) {
       if (onLoginSuccess != null) {
         await onLoginSuccess!();
       }
+      // ignore: unrelated_type_equality_checks
     } else if (latestState.status == AuthStatus.error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(latestState.errorMessage)),
@@ -38,6 +42,7 @@ class AppleLoginButton extends ConsumerWidget {
         borderRadius: BorderRadius.circular(24),
         child: SignInWithAppleButton(
           style: SignInWithAppleButtonStyle.white,
+          // ignore: unrelated_type_equality_checks
           onPressed: authState.status == AuthStatus.loading
               ? () {} // 비활성화 대신 빈 함수
               : () => _handleAppleLogin(context, ref),
