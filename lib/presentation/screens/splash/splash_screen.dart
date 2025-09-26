@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
@@ -20,13 +21,24 @@ class _SplashPageState extends State<SplashScreen>
     _controller = AnimationController(vsync: this);
 
     // 애니메이션 완료 → 유저 상태 확인 후 이동
-    _controller.addStatusListener((status) {
+    _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed && mounted) {
         final user = FirebaseAuth.instance.currentUser;
 
         if (user != null) {
-          // 로그인 상태라면 → 홈 이동
-          GoRouter.of(context).go('/home');
+          // Firestore에서 유저 데이터 확인
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+
+          if (doc.exists) {
+            // 이미 등록된 유저 → 홈 이동
+            GoRouter.of(context).go('/home');
+          } else {
+            // 신규 유저 → 로그인/가입 화면 이동
+            GoRouter.of(context).go('/login');
+          }
         } else {
           // 로그인 안 되어 있으면 → 로그인 화면 이동
           GoRouter.of(context).go('/login');
