@@ -60,6 +60,11 @@ class MissionDataSourceImpl implements MissionDataSource {
         .collection('user_missions')
         .doc(docId)
         .set(dataWithTimestamp);
+
+    // 프로필의 mission_count를 1 증가시킵니다.
+    await _firestore.collection('profiles').doc(userId).update({
+      'mission_count': FieldValue.increment(1),
+    });
   }
 
   @override
@@ -127,5 +132,90 @@ class MissionDataSourceImpl implements MissionDataSource {
           (snapshot) =>
               snapshot.docs.map((doc) => doc.data()..['id'] = doc.id).toList(),
         );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers() async {
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day);
+    final endOfToday = startOfToday.add(const Duration(days: 1));
+
+    // 1. 오늘 생성된 미션 문서를 가져옵니다.
+    final missionSnapshot = await _firestore
+        .collection('user_missions')
+        .where('missioncreatedate', isGreaterThanOrEqualTo: startOfToday)
+        .where('missioncreatedate', isLessThan: endOfToday)
+        .orderBy('missioncreatedate', descending: false) // 먼저 완료한 순서
+        .get();
+
+    if (missionSnapshot.docs.isEmpty) {
+      return [];
+    }
+
+    // 2. 각 미션 문서에서 userId와 완료 시간을 추출합니다.
+    final achieversData = missionSnapshot.docs.map((doc) {
+      final data = doc.data();
+      final timestamp = data['missioncreatedate'] as Timestamp;
+      return {
+        'userId': data['userId'] as String,
+        'completedAt': timestamp.toDate(),
+      };
+    }).toList();
+
+    // 3. 각 userId로 character 정보를 가져옵니다.
+    final List<Map<String, dynamic>> result = [];
+    for (final achieverData in achieversData) {
+      final userId = achieverData['userId'] as String;
+
+      // 'profiles' 컬렉션에서 프로필 정보 가져오기
+      final profileDoc = await _firestore
+          .collection('profiles')
+          .doc(userId)
+          .get();
+
+      if (profileDoc.exists) {
+        result.add({
+          ...profileDoc.data()!,
+          ...achieverData,
+        });
+      }
+    }
+    return result;
+  }
+
+  @override
+  Future<Map<String, dynamic>> fetchUserProfile(String userId) async {
+    final profileDoc = await _firestore
+        .collection('profiles')
+        .doc(userId)
+        .get();
+    if (!profileDoc.exists) {
+      // 프로필이 없는 경우 기본값 반환
+      return <String, dynamic>{
+        'nickname': '게스트',
+        'imageFullUrl': 'assets/images/profile/black.png',
+        'mission_count': 0,
+      };
+    }
+
+    return profileDoc.data()!;
+  }
+
+  @override
+  Stream<Map<String, dynamic>> fetchUserProfileStream(String userId) {
+    return _firestore.collection('profiles').doc(userId).snapshots().asyncMap(
+      (profileDoc) async {
+        if (!profileDoc.exists) {
+          // 프로필이 없는 경우 기본값 반환
+          return <String, dynamic>{
+            'nickname': '게스트',
+            'imageFullUrl': 'assets/images/profile/black.png',
+            'mission_count': 0,
+          };
+        }
+
+        return profileDoc.data()!;
+      },
+    );
   }
 }
