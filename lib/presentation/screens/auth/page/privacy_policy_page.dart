@@ -20,7 +20,8 @@ class PrivacyPolicyPage extends StatelessWidget {
       );
     }
 
-    context.go('/profile'); // 동의 여부 저장 후 이동
+   // context.go('/guide'); // 동의 여부 저장 후 이동
+   context.go('/profile-flow', extra: user!.uid);
   }
 
   @override

@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ja_chwi/presentation/providers/profile_providers.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/profile/widgets/profile_flow_appbar.dart';
 
 /// 단계별 진행 상태 Provider
 final stepProvider = StateProvider<int>((ref) => 0);
@@ -88,7 +89,8 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
 
 /// Profile Flow Page
 class ProfileFlowPage extends ConsumerStatefulWidget {
-  const ProfileFlowPage({super.key});
+  final String uid;
+  const ProfileFlowPage({super.key,required this.uid });
 
   @override
   ConsumerState<ProfileFlowPage> createState() => _ProfileFlowPageState();
@@ -143,12 +145,14 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
   Future<void> saveProfile() async {
     final nickname = ref.read(nicknameProvider);
     final selectedImage = ref.read(selectedImageProvider);
-    final userId = "exampleUserId"; // 실제 Firebase Auth UID 사용
+    final userId = widget.uid;  // 실제 Firebase Auth UID 사용
 
     if (nickname != null && selectedImage != null && dongName != null) {
       final profile = Profile(
         nickname: nickname,
         imageFullUrl: selectedImage.fullUrl,
+        thumbUrl: selectedImage.thumbUrl,
+        color: selectedImage.color,
         dongName: dongName!,
         createDate: DateTime.now(),
       );
@@ -159,6 +163,8 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("프로필 저장 완료")),
       );
+      // 1~2초 기다렸다가 화면 이동
+      await Future.delayed(const Duration(seconds: 2));
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -166,38 +172,37 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
       );
     }
   }
+  
 
-  Future<void> onConfirm() async {
-    await saveProfile();
-    if (!mounted) return;
-    context.push('/home');
-  }
+Future<void> onConfirm() async {
+  final selectedImage = ref.read(selectedImageProvider);
+    final nickname = ref.read(nicknameProvider);
+  final uid = widget.uid; // ProfileFlowPage에서 받은 uid
+  if (selectedImage == null) return; // 이미지 선택 안 됐으면 종료
+
+  await saveProfile(); // 프로필 저장
+
+  if (!mounted) return;
+
+  // 이미지 URL + color 전달
+  context.push(
+    '/guide',
+    extra: {
+            'uid': uid,
+      'nickname': nickname,
+      'thumbUrl': selectedImage.thumbUrl,
+      'imageFullUrl': selectedImage.fullUrl,
+      'color': selectedImage.color,
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
     final step = ref.watch(stepProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        //  title: const Text("Profile Flow"),
-        leading: step > 0
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
-                onPressed: () {
-                  Navigator.pop(context); // 이전 화면으로 이동
-                },
-              )
-            : null,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(10),
-          child: LinearProgressIndicator(
-            value: (step + 1) / 3,
-            backgroundColor: Colors.grey.shade300,
-            color: Colors.blue,
-            minHeight: 4,
-          ),
-        ),
-      ),
+      appBar: ProfileFlowAppBar(step:step),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
