@@ -19,6 +19,7 @@ class MissionAchieversScreen extends ConsumerStatefulWidget {
 class MissionAchieversScreenState
     extends ConsumerState<MissionAchieversScreen> {
   // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
+  bool _showAllAchievers = false;
   int _selectedCategoryIndex = 0;
   final List<String> _categories = ['요리', '청소', '운동'];
 
@@ -32,7 +33,11 @@ class MissionAchieversScreenState
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        actions: [RefreshIconButton(onPressed: () {})],
+        actions: [
+          RefreshIconButton(
+            onPressed: () => ref.invalidate(achieversProvider),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -53,17 +58,46 @@ class MissionAchieversScreenState
             _buildRankingSection(achievers),
             const SizedBox(height: 24),
             Expanded(
-              child: ListView.separated(
-                itemCount: achievers.length,
-                itemBuilder: (context, index) {
-                  final achiever = achievers[index];
-                  return AchieverCard(
-                    level: achiever.level,
-                    name: achiever.name,
-                    time: achiever.time,
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListView.separated(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      // 1, 2, 3위는 상단에 표시되므로 4위부터 리스트에 표시합니다.
+                      itemCount: _getListItemCount(achievers.length),
+                      itemBuilder: (context, index) {
+                        // index는 0부터 시작하므로, 4위(achievers[3])부터 가져옵니다.
+                        final achiever = achievers[index + 3];
+                        return AchieverCard(
+                          rank: index + 4, // 4, 5, 6... 등수를 전달
+                          level: achiever.level,
+                          name: achiever.name,
+                        );
+                      },
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                    ),
+                    if (achievers.length > 10 && !_showAllAchievers)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _showAllAchievers = true;
+                            });
+                          },
+                          child: const Text(
+                            '더보기',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -72,46 +106,65 @@ class MissionAchieversScreenState
     );
   }
 
+  int _getListItemCount(int totalAchievers) {
+    if (totalAchievers <= 3) return 0;
+    final remaining = totalAchievers - 3;
+    if (totalAchievers > 10 && !_showAllAchievers) {
+      return 7; // 4위부터 10위까지 (7명)
+    }
+    return remaining; // 전체
+  }
+
   Widget _buildRankingSection(List<MissionAchiever> mockAllAchievers) {
     // TODO: 실제 랭킹 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
-    // UI 레이아웃 순서(2위, 1위, 3위)에 맞게 데이터를 재구성합니다.
-    // 데이터가 3개 미만일 경우 에러 방지
-    if (mockAllAchievers.length < 3) return const SizedBox.shrink();
-    final topRankers = [
-      {
-        'rank': 2,
-        'name': mockAllAchievers[1].name,
-        'level': mockAllAchievers[1].level,
-        'size': 80.0,
-        'isFirst': false,
-      },
-      {
+    if (mockAllAchievers.isEmpty) return const SizedBox.shrink();
+
+    final rankerData = List<Map<String, dynamic>?>.filled(3, null);
+
+    // 1, 2, 3위 데이터 채우기
+    if (mockAllAchievers.isNotEmpty) {
+      rankerData[0] = {
         'rank': 1,
-        'name': mockAllAchievers[0].name,
-        'level': mockAllAchievers[0].level,
+        'data': mockAllAchievers[0],
         'size': 100.0,
         'isFirst': true,
-      },
-      {
-        'rank': 3,
-        'name': mockAllAchievers[2].name,
-        'level': mockAllAchievers[2].level,
+      };
+    }
+    if (mockAllAchievers.length > 1) {
+      rankerData[1] = {
+        'rank': 2,
+        'data': mockAllAchievers[1],
         'size': 80.0,
         'isFirst': false,
-      },
-    ];
+      };
+    }
+    if (mockAllAchievers.length > 2) {
+      rankerData[2] = {
+        'rank': 3,
+        'data': mockAllAchievers[2],
+        'size': 80.0,
+        'isFirst': false,
+      };
+    }
+
+    // UI 레이아웃 순서(2위, 1위, 3위)에 맞게 데이터를 재구성합니다.
+    final topRankersInLayoutOrder = [
+      rankerData[1], // 2위
+      rankerData[0], // 1위
+      rankerData[2], // 3위
+    ].where((data) => data != null).cast<Map<String, dynamic>>().toList();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: topRankers.map((ranker) {
+      children: topRankersInLayoutOrder.map((ranker) {
         final isFirst = ranker['isFirst'] as bool;
         return Flexible(
           flex: isFirst ? 3 : 2,
           child: _buildRanker(
             ranker['rank'] as int,
-            ranker['name'] as String,
-            ranker['level'] as String,
+            (ranker['data'] as MissionAchiever).name,
+            (ranker['data'] as MissionAchiever).level,
             ranker['size'] as double,
           ),
         );
@@ -148,7 +201,7 @@ class MissionAchieversScreenState
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.grey[200],
-                border: Border.all(color: medalColor, width: 4), // 랭킹 테두리 색
+                // border: Border.all(color: medalColor, width: 4), // 랭킹 테두리 색
               ),
               child: Icon(
                 Icons.person_outline,

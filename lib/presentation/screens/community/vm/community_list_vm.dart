@@ -34,7 +34,7 @@ class CommunityListVM extends Notifier<CommunityListState> {
 
   final int categoryCode;
   final int detailCode;
-  final String? location;
+  final String location;
 
   @override
   CommunityListState build() => const CommunityListState();
@@ -89,7 +89,7 @@ class CommunityListVM extends Notifier<CommunityListState> {
 NotifierProvider<CommunityListVM, CommunityListState> communityListVmProvider({
   required int categoryCode,
   required int detailCode,
-  String? location,
+  required String location,
 }) {
   return NotifierProvider<CommunityListVM, CommunityListState>(
     () => CommunityListVM(categoryCode, detailCode, location),

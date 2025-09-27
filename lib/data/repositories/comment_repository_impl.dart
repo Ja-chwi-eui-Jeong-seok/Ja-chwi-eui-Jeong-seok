@@ -12,15 +12,13 @@ class CommentRepositoryImpl implements CommentRepository {
     id: d.id,
     communityId: d.communityId,
     uid: d.uid,
-    nickName: d.nickName,
     noteDetail: d.noteDetail,
     likeCount: d.likeCount,
-    moderated: d.moderated,
-    violations: d.violations,
     createAt: d.createAt.toDate(),
     updateAt: d.updateAt?.toDate(),
     deleteAt: d.deleteAt?.toDate(),
     deleteYn: d.deleteYn,
+    commentLog: d.commentLog,
   );
 
   @override
@@ -29,32 +27,46 @@ class CommentRepositoryImpl implements CommentRepository {
       id: '',
       communityId: input.communityId,
       uid: input.uid,
-      nickName: input.nickName,
       noteDetail: input.noteDetail,
       likeCount: input.likeCount,
-      moderated: input.moderated,
-      violations: input.violations,
-      createAt: Timestamp.now(),
+      createAt: Timestamp.now(), // 실제 저장은 serverTimestamp로 덮임
       updateAt: null,
       deleteAt: null,
       deleteYn: false,
+      commentLog: input.commentLog,
     );
     return ds.create(dto);
   }
 
   @override
-  Future<void> softDelete(String id) => ds.softDelete(id);
+  Future<String> createMinimal({
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  }) {
+    return ds.createMinimal(
+      communityId: communityId,
+      uid: uid,
+      noteDetail: noteDetail,
+    );
+  }
 
   @override
-  Future<void> update(String id, Map<String, dynamic> patch) =>
-      ds.update(id, patch);
+  Future<Comment> createAndGetMinimal({
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  }) async {
+    final dto = await ds.createAndGetMinimal(
+      communityId: communityId,
+      uid: uid,
+      noteDetail: noteDetail,
+    );
+    return _toEntity(dto); //서버시간 반영된 Entity
+  }
 
   @override
-  Future<void> incLike(String id, int delta) => ds.incLike(id, delta);
-
-  @override
-  Future<({List<Comment> items, DocumentSnapshot? lastDoc, bool hasMore})>
-  fetchByCommunity({
+  Future<PagedComments> fetchByCommunity({
     required String communityId,
     required CommentOrder order,
     int limit = 20,
@@ -66,10 +78,17 @@ class CommentRepositoryImpl implements CommentRepository {
       limit: limit,
       startAfterDoc: startAfter,
     );
-    return (
-      items: page.items.map(_toEntity).toList(),
-      lastDoc: page.lastDoc,
-      hasMore: page.hasMore,
-    );
+    final items = page.items.map(_toEntity).toList();
+    return PagedComments(items, page.lastDoc, page.hasMore);
   }
+
+  @override
+  Future<void> incLike(String id, int delta) => ds.incLike(id, delta);
+
+  @override
+  Future<void> update(String id, Map<String, dynamic> patch) =>
+      ds.update(id, patch);
+
+  @override
+  Future<void> softDelete(String id) => ds.softDelete(id);
 }

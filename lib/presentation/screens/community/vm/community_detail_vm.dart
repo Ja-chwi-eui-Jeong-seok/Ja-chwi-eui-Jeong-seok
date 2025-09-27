@@ -99,6 +99,31 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
     }
   }
 
+  Future<void> createComment(
+    WidgetRef ref, {
+    required String uid,
+    required String text,
+  }) async {
+    final t = text.trim();
+    if (t.isEmpty) return;
+
+    // 서버시간 반영된 댓글을 생성해서 즉시 받기
+    final created = await ref
+        .read(createCommentProvider)
+        .call(
+          communityId: communityId, // 현재 상세 화면의 게시글 doc.id
+          uid: uid,
+          noteDetail: t,
+        );
+
+    // 정렬 상태에 맞게 UI 반영
+    if (state.order == CommentOrder.latest) {
+      state = state.copyWith(comments: [created, ...state.comments]);
+    } else {
+      await refreshComments(ref, state.order);
+    }
+  }
+
   Future<void> refreshComments(WidgetRef ref, CommentOrder order) async {
     state = state.copyWith(order: order, lastDoc: null, hasMore: true);
     await _loadComments(ref, reset: true);

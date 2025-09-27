@@ -35,6 +35,7 @@ class SelectedDayMissionView extends StatelessWidget {
       final String description = missionData['description'] as String? ?? '';
 
       return Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(20),
         constraints: const BoxConstraints(minHeight: 200),
         decoration: BoxDecoration(
@@ -132,6 +133,7 @@ class SelectedDayMissionView extends StatelessWidget {
       );
     } else {
       return Container(
+        width: double.infinity,
         constraints: const BoxConstraints(
           minHeight: 200,
         ),

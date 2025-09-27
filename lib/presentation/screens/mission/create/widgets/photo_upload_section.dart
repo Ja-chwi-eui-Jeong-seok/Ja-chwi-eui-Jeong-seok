@@ -107,7 +107,7 @@ class PhotoUploadSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    '사진을 추가해주세요',
+                    '사진을 1장 이상 추가해주세요',
                     style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                 ],
