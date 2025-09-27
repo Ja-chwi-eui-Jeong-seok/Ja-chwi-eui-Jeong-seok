@@ -26,17 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
   // Future<void> _checkguide() async {
   //   final prefs = await SharedPreferences.getInstance();
   //   final showguide = prefs.getBool('showguide') ?? true;
-
-  //   // if (showguide) {
-  //   //   await prefs.setBool('showguide', false); // 다음부터는 안 보이게
   //   if (mounted) {
   //     GoRouter.of(context).push('/guide'); // 가이드 화면으로 이동
   //   }
-  //   // }
   // }
 
   @override
   Widget build(BuildContext context) {
+    // MediaQuery를 한 번만 읽고 재사용
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -65,37 +64,41 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: Stack(
-        children: [
-          const HomeBackground(),
-          Center(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                MonjiJump(),
-                AiChatCircle(
-                  circleSize: 40,
-                  offsetX: -10,
-                  offsetY: 80,
-                  icon: CupertinoIcons.chat_bubble_text,
-                  onTap: () {
-                    print('Ai챗');
-                  },
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final stackWidth = constraints.maxWidth;
+          final stackHeight = constraints.maxHeight;
+
+          final circleCenter = Offset(
+            stackWidth * 0.73,
+            stackHeight * 0.464, // Stack 안에서 계산
+          );
+          final circleRadius = stackWidth * 0.05;
+
+          return Stack(
+            children: [
+              const HomeBackground(),
+              Center(child: MonjiJump()),
+              AiChatCircle(
+                center: circleCenter,
+                radius: circleRadius,
+                onTap: () {
+                  GoRouter.of(context).go('/ai-chat');
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    const HomeProgress(),
+                    const SizedBox(height: 8),
+                    const HomeCard(),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                const HomeProgress(),
-                const SizedBox(height: 8),
-                const HomeCard(),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
       bottomNavigationBar: BottomNav(mode: BottomNavMode.tab),
     );
