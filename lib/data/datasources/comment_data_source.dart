@@ -13,7 +13,6 @@ abstract interface class CommentDataSource {
     required String noteDetail,
   });
 
-  /// ✅ 생성 후, 서버에서 다시 읽어 Timestamp가 해석된 DTO를 반환
   Future<CommentDto> createAndGetMinimal({
     required String communityId,
     required String uid,
@@ -30,4 +29,10 @@ abstract interface class CommentDataSource {
   Future<void> incLike(String id, int delta);
   Future<void> update(String id, Map<String, dynamic> patch);
   Future<void> softDelete(String id);
+
+  //게시글 댓글 카운트용
+  Future<int> countByCommunity({
+    required String communityId,
+    bool excludeDeleted = true, // true면 삭제댓글 제외
+  });
 }
