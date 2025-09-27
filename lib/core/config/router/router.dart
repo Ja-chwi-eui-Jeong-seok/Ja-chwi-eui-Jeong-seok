@@ -16,7 +16,6 @@ import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_li
 import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_home_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_flow.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
-import 'package:ja_chwi/presentation/screens/profile/profile_flow.dart';
 import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
@@ -32,7 +31,6 @@ import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-  // initialLocation: '/profile-flow',
   initialLocation: '/splash',
 
   // initialLocation: '/profile',
@@ -64,7 +62,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/privacy-policy',
       name: '개인정보처리방침',
-      builder: (context, state) =>  PrivacyPolicyPage(),
+      builder: (context, state) => PrivacyPolicyPage(),
     ),
     GoRoute(
       path: '/character-create',
@@ -128,7 +126,7 @@ final GoRouter router = GoRouter(
       name: '커뮤니티 작성',
       builder: (context, state) => const CommunityCreateScreen(),
     ),
-     GoRoute(
+    GoRoute(
       path: '/profile-flow',
       name: '프로필 단계',
       //builder: (context, state) => ProfileFlowPage(uid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52'),
@@ -136,7 +134,7 @@ final GoRouter router = GoRouter(
       //   final uid = state.extra as String; // 값 받기
       //   return ProfileFlowPage(uid: uid);
       // },
-       builder: (context, state) {
+      builder: (context, state) {
         final uid = state.extra as String?;
         print('$uid');
         if (uid == null) {
@@ -174,11 +172,6 @@ final GoRouter router = GoRouter(
       path: '/report-detail',
       name: '신고내역 상세',
       builder: (context, state) => const ReportDetailScreen(),
-    ),
-    GoRoute(
-      path: '/profile-flow',
-      name: '임시프로필플로우',
-      builder: (context, state) => ProfileFlowPage(),
     ),
   ],
 );
