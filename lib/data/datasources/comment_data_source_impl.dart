@@ -116,4 +116,21 @@ class CommentDataSourceImpl implements CommentDataSource {
       'comment_delete_date': FieldValue.serverTimestamp(),
     });
   }
+
+  @override
+  Future<int> countByCommunity({
+    required String communityId,
+    bool excludeDeleted = true,
+  }) async {
+    Query<Map<String, dynamic>> q = col.where(
+      'community_id',
+      isEqualTo: communityId,
+    );
+    if (excludeDeleted) {
+      q = q.where('comment_delete_yn', isEqualTo: false);
+    }
+    final snap = await q.count().get();
+    return snap.count ??
+        0; //TODO: 작동확인 cloud_firestore의 AggregateQuerySnapshot.count (int)
+  }
 }

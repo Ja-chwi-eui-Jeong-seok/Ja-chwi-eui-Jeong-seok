@@ -91,4 +91,15 @@ class CommentRepositoryImpl implements CommentRepository {
 
   @override
   Future<void> softDelete(String id) => ds.softDelete(id);
+
+  @override
+  Future<int> getCountByCommunity(
+    String communityId, {
+    bool excludeDeleted = true,
+  }) {
+    return ds.countByCommunity(
+      communityId: communityId,
+      excludeDeleted: excludeDeleted,
+    );
+  }
 }

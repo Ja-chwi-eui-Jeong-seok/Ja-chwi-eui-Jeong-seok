@@ -17,7 +17,7 @@ class ProfileScreen extends ConsumerWidget {
           children: const [
             ProfileHeader(step: 0,),
             ProfileNicknameInput(),
-            ProfileGrid(),
+            //ProfileGrid(),
           ],
         ),
       ),

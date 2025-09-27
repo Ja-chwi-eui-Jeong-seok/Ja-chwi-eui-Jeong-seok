@@ -9,36 +9,52 @@ import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Map<String, dynamic>? extra;
+
+  const HomeScreen({super.key, this.extra});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Color userColor = const Color(0xFF1A1A1A); // 기본 색상
-
+  late final String? uid;
+  late final String? nickname;
+  late final String? imageFullUrl;
+  late final String? thumbUrl;
+  late final String? color;
   @override
   void initState() {
     super.initState();
-    _loadUserColor();
+    // _checkguide();
+    final args = widget.extra;
+    uid = args?['uid'];
+    nickname = args?['nickname'];
+    imageFullUrl = args?['imageFullUrl'];
+    thumbUrl = args?['thumbUrl'];
+    color = args?['color'];
+
+    print('HomeScreen initState');
+    print('uid: $uid, nickname: $nickname');
+    print('imageFullUrl: $imageFullUrl, color: $color');
   }
 
-  Future<void> _loadUserColor() async {
-    final prefs = await SharedPreferences.getInstance();
-    final colorValue = prefs.getInt('monji_color') ?? 0xFF1A1A1A;
-    if (mounted) {
-      setState(() {
-        userColor = Color(colorValue);
-      });
-    }
-  }
+  // Future<void> _loadUserColor() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final colorValue = prefs.getInt('monji_color') ?? 0xFF1A1A1A;
+  //   if (mounted) {
+  //     setState(() {
+  //       userColor = Color(colorValue);
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false, // ← 뒤로가기 버튼 비활성화
         backgroundColor: Colors.white,
         elevation: 0,
         title: Row(
