@@ -6,6 +6,7 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widfet/comment_list.dart';
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
@@ -36,6 +37,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     super.dispose();
   }
 
+  //댓글입력
   void submit() async {
     if (!mounted) return;
     final text = commentController.text.trim();
@@ -118,28 +120,28 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                 ),
                 //
                 //SliverPersistentHeader 댓글해더 시작
-                //최신순 추천선
                 SliverPersistentHeader(
-                  //SliverPersistentHeader 델리게이트필요
                   pinned: true,
-                  delegate: _TabBarDelegate(
-                    TabBar(
-                      // 탭 변경 시 정렬 스위치
-                      onTap: (i) {
-                        final ord = i == 0
-                            ? CommentOrder.latest
-                            : CommentOrder.popular;
-                        ref.read(provider.notifier).refreshComments(ref, ord);
+                  delegate: _PlainHeaderDelegate(
+                    height: 48,
+                    child: Builder(
+                      builder: (context) {
+                        return _SortTabs(
+                          onTap: (i) {
+                            // 탭 전환 시 TabBarView도 함께 전환
+                            final ctrl = DefaultTabController.of(context);
+                            ctrl.animateTo(i);
+
+                            // 정렬 스위치
+                            final ord = i == 0
+                                ? CommentOrder.latest
+                                : CommentOrder.popular;
+                            ref
+                                .read(provider.notifier)
+                                .refreshComments(ref, ord);
+                          },
+                        );
                       },
-                      indicator: const UnderlineTabIndicator(
-                        borderSide: BorderSide(color: Colors.black, width: 2),
-                      ),
-                      labelColor: Colors.black,
-                      unselectedLabelColor: Colors.grey,
-                      tabs: const [
-                        Tab(text: '최신순'),
-                        Tab(text: '추천순'),
-                      ],
                     ),
                   ),
                 ), //SliverPersistentHeader 댓글해더 끝
@@ -149,20 +151,36 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   TabBarView(
                     children: [
                       //최신순
-                      _CommentList(
+                      CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
+                        nickOf: (i) =>
+                            st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
+                        isLikedOf: (i) =>
+                            st.likedIds.contains(st.comments[i].id),
+                        onToggleLike: (i) => ref
+                            .read(provider.notifier)
+                            .toggleLike(ref, st.comments[i].id),
+                        createdAtOf: (i) =>
+                            st.comments[i].createAt, // or .createdAt
                       ),
                       //추천순
-                      _CommentList(
+                      CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
+                        nickOf: (i) =>
+                            st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
+                        isLikedOf: (i) =>
+                            st.likedIds.contains(st.comments[i].id),
+                        onToggleLike: (i) => ref
+                            .read(provider.notifier)
+                            .toggleLike(ref, st.comments[i].id),
+                        createdAtOf: (i) =>
+                            st.comments[i].createAt, // or .createdAt
                       ),
                     ],
                   ),
@@ -233,230 +251,6 @@ class _PostBody extends StatelessWidget {
   }
 }
 
-//SliverPersistentHeader 델리게이트 ---
-//SliverPersistentHeader는 스크롤했을때 TabBar부분이 고정되게 해주는 어댑터
-//SliverPersistentHeader를 쓰기위해 delegate로 정의하는 부분
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  _TabBarDelegate(this.tabBar);
-  final TabBar tabBar;
-
-  //header의 최소높이와 최대높이를 지정하는 부분
-  @override
-  double get minExtent => tabBar.preferredSize.height; //48px
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(color: Colors.white, child: tabBar);
-  }
-
-  //델리게이트 리빌드 여부 결정, 탭바는 겨의 안바뀌니까 false
-  @override
-  bool shouldRebuild(covariant _TabBarDelegate old) => false;
-}
-
-// --- 댓글 리스트 ---
-// 기존 CommentCard의 주석과 형태를 유지하되, VM 데이터로 교체
-class _CommentList extends StatelessWidget {
-  const _CommentList({
-    required this.itemCount,
-    required this.nickOf,
-    required this.textOf,
-    required this.likeCountOf,
-    required this.loading,
-  });
-
-  final int itemCount;
-  final String Function(int) nickOf;
-  final String Function(int) textOf;
-  final int Function(int) likeCountOf;
-  final bool loading;
-
-  @override
-  Widget build(BuildContext context) {
-    // 중요: 스크롤은 ListView가 맡게 (shrinkWrap/physics 건드리지 않기)
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      itemCount: itemCount + (loading ? 1 : 0),
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, i) {
-        if (i >= itemCount) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        return GestureDetector(
-          onLongPressStart: (details) async {
-            //details = onLongPressStart했을떄 정보
-            final scaffold = ScaffoldMessenger.of(context);
-            //현재화면의 최상단 레이어(Overlay)를 찾고 그 랜더박스 정보 제공, 목적: 화면전체 크기를 얻어 메뉴 위치계산에 사용
-            final overlay =
-                Overlay.of(context).context.findRenderObject() as RenderBox;
-
-            //showMenu : 팝업 메뉴 표시
-            final selected = await showMenu<String>(
-              //꾹 눌렀을때 나오는 메뉴 모양 커스텀
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusGeometry.circular(15),
-              ),
-              context: context,
-
-              //작은사각형이 큰 사각형의 어디있는지 상대좌표로 변환하여 메뉴 시작위치가 터치 지점으로 잡힘
-              position: RelativeRect.fromRect(
-                //사용자가 누른 지점을 0,0사이즈의 사각형으로 표현
-                Rect.fromLTWH(
-                  details.globalPosition.dx,
-                  details.globalPosition.dy,
-                  0,
-                  0,
-                ),
-
-                //화면 전체를 덮는 사각형
-                Offset.zero & overlay.size,
-              ),
-              color: Colors.white,
-              items: [
-                PopupMenuItem(
-                  value: 'report',
-                  child: Row(
-                    children: const [
-                      Text('신고하기'),
-                      SizedBox(width: 50),
-                      Spacer(),
-                      Icon(Icons.notifications_none),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'block',
-                  child: Row(
-                    children: const [
-                      Text('차단하기'),
-                      Spacer(),
-                      Icon(Icons.do_not_disturb_on_outlined),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'share',
-                  child: Row(
-                    children: const [
-                      Text('공유하기'),
-                      Spacer(),
-                      Icon(Icons.share),
-                    ],
-                  ),
-                ),
-              ],
-            );
-
-            //selected의 value에 따라 기능실행
-            switch (selected) {
-              case 'report':
-                // 신고 처리
-                scaffold.showSnackBar(const SnackBar(content: Text('신고 완료')));
-                break;
-              case 'block':
-                // 차단 처리
-                scaffold.showSnackBar(const SnackBar(content: Text('차단 완료')));
-                break;
-              case 'share':
-                // 공유 처리
-                // Share.share('공유할 내용'); // share_plus 사용 시
-                break;
-              case null:
-                // 메뉴 밖을 눌러 닫힘. 아무것도 하지 않음.
-                break;
-            }
-          },
-          child: Container(
-            color: Colors.white,
-            height: 80,
-            child: Row(
-              children: [
-                SizedBox(
-                  height: 45,
-                  width: 45,
-                  child: Image.asset(
-                    'assets/images/m_profile/m_black.png',
-                  ), //댓글 작성자 프로필정보(현재는 더미이미지사용)
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nickOf(i),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        textOf(i),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                _HeartButton(count: likeCountOf(i)),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _HeartButton extends StatefulWidget {
-  const _HeartButton({required this.count});
-  final int count;
-
-  @override
-  State<_HeartButton> createState() => _HeartButtonState();
-}
-
-class _HeartButtonState extends State<_HeartButton> {
-  bool isLiked = false;
-  late int likeCount = widget.count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          onPressed: () {
-            // TODO: repo.incLike(commentId, isLiked ? +1 : -1) 연결
-          },
-          icon: Icon(
-            isLiked ? Icons.favorite : Icons.favorite_border,
-            color: isLiked ? Colors.red : Colors.black,
-            size: 18,
-          ),
-        ),
-        Text(
-          // NumberFormat.compact().format(likeCount), //TODO??:압축 표기(1.2K)
-          '$likeCount',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          softWrap: false,
-        ),
-      ],
-    );
-  }
-}
-
 // 입력창
 class CommentWrite extends StatelessWidget {
   const CommentWrite({
@@ -506,6 +300,7 @@ class CommentWrite extends StatelessWidget {
                     SizedBox(
                       height: 36,
                       width: 36,
+                      //TODO: 사용자 이미지로 바꾸기
                       child: Image.asset('assets/images/m_profile/m_black.png'),
                     ),
                     const SizedBox(width: 8),
@@ -561,6 +356,82 @@ class CommentWrite extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+//해더댈리게이트(최신순추천순)
+//SliverPersistentHeader 델리게이트 ---
+//SliverPersistentHeader는 스크롤했을때 TabBar부분이 고정되게 해주는 어댑터
+//SliverPersistentHeader를 쓰기위해 delegate로 정의하는 부분
+class _PlainHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _PlainHeaderDelegate({required this.child, required this.height});
+  final Widget child;
+  final double height;
+  //header의 최소높이와 최대높이를 지정하는 부분
+  @override
+  double get minExtent => height;
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: Colors.white,
+      child: SizedBox(height: height, child: child),
+    );
+  }
+
+  //델리게이트 리빌드 여부 결정, 탭바는 겨의 안바뀌니까 false
+  @override
+  bool shouldRebuild(covariant _PlainHeaderDelegate oldDelegate) =>
+      oldDelegate.child != child || oldDelegate.height != height;
+}
+
+//최신순 추천순 위젯
+class _SortTabs extends StatelessWidget {
+  const _SortTabs({required this.onTap});
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = DefaultTabController.of(context);
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, __) {
+        final idx = controller.index;
+        TextStyle style(bool selected) => TextStyle(
+          fontSize: 14,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          color: selected ? Colors.black : Colors.grey,
+        );
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          child: Row(
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onTap(0),
+                child: Text('최신순', style: style(idx == 0)),
+              ),
+              const SizedBox(width: 8),
+              const Text('|', style: TextStyle(color: Colors.grey)),
+              const SizedBox(width: 8),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onTap(1),
+                child: Text('추천순', style: style(idx == 1)),
+              ),
+              const Spacer(),
+            ],
+          ),
+        );
+      },
     );
   }
 }

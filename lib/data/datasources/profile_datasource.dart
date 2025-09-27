@@ -6,7 +6,9 @@ class FirebaseProfileDataSource {
   final String collectionName = "profiles";
 
   Future<void> saveProfile(Profile profile, String userId) async {
-    await firestore.collection(collectionName).doc(userId).set(profile.toJson());
+    final profileData = profile.toJson();
+    profileData['mission_count'] = 0; // mission_count 필드 추가 및 초기화
+    await firestore.collection(collectionName).doc(userId).set(profileData);
   }
 
   Future<Profile?> loadProfile(String userId) async {
