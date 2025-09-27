@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/ai_chat_circle.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_card.dart';
+import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
-import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,25 +16,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Color userColor = const Color(0xFF1A1A1A); // 기본 색상
+
   @override
   void initState() {
     super.initState();
-    // _checkguide();
+    _loadUserColor();
   }
 
-  // Future<void> _checkguide() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final showguide = prefs.getBool('showguide') ?? true;
-  //   if (mounted) {
-  //     GoRouter.of(context).push('/guide'); // 가이드 화면으로 이동
-  //   }
-  // }
+  Future<void> _loadUserColor() async {
+    final prefs = await SharedPreferences.getInstance();
+    final colorValue = prefs.getInt('monji_color') ?? 0xFF1A1A1A;
+    if (mounted) {
+      setState(() {
+        userColor = Color(colorValue);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // MediaQuery를 한 번만 읽고 재사용
-    final screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -44,19 +44,16 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                '자취의 정석',
-                style: TextStyle(
-                  fontFamily: 'GamjaFlower',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28,
-                ),
+            const Text(
+              '자취의 정석',
+              style: TextStyle(
+                fontFamily: 'GamjaFlower',
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
               ),
             ),
             IconButton(
-              icon: Icon(Icons.notifications),
+              icon: const Icon(Icons.notifications),
               onPressed: () {
                 print('알림 창');
               },
@@ -69,16 +66,13 @@ class _HomeScreenState extends State<HomeScreen> {
           final stackWidth = constraints.maxWidth;
           final stackHeight = constraints.maxHeight;
 
-          final circleCenter = Offset(
-            stackWidth * 0.73,
-            stackHeight * 0.464, // Stack 안에서 계산
-          );
+          final circleCenter = Offset(stackWidth * 0.73, stackHeight * 0.464);
           final circleRadius = stackWidth * 0.05;
 
           return Stack(
             children: [
               const HomeBackground(),
-              Center(child: MonjiJump()),
+              Center(child: MonjiJump(bodyColor: userColor)),
               AiChatCircle(
                 center: circleCenter,
                 radius: circleRadius,
@@ -89,10 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
-                  children: [
-                    const HomeProgress(),
-                    const SizedBox(height: 8),
-                    const HomeCard(),
+                  children: const [
+                    HomeProgress(),
+                    SizedBox(height: 8),
+                    HomeCard(),
                   ],
                 ),
               ),
