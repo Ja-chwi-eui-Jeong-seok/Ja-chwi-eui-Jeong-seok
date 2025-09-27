@@ -26,6 +26,7 @@ class CommunityDetailState {
 
   //현재 로그인 사용자가 좋아요를 누른 commentId 집합
   final Set<String> likedIds;
+  //게시글작성 후 돌아오는게시글id
 
   const CommunityDetailState({
     this.post,

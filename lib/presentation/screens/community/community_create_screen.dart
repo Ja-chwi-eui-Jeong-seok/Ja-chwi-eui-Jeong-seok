@@ -277,7 +277,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                     // 선택값 읽기
                     final code = ref.read(selectedCategoryCodeProvider);
                     final subCode = ref.read(selectedSubCategoryCodeProvider);
-                    // 프로필/GPS 데이터 꺼내기 (이미 위에서 watch 했으므로 값 체크)
+                    //TODO:프로필/GPS 데이터 꺼내기 (이미 위에서 watch 했으므로 값 체크)
                     final profile = ref
                         .read(userProfileProvider(uid))
                         .maybeWhen(
@@ -310,8 +310,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                     debugPrint("작성자: ${profile.nickname}");
                     debugPrint("하위코드: ${gps.location}");
 
-                    // 서버 제출: VM에 위임
-                    final err = await vm.submit(
+                    final res = await vm.submit(
                       title: _titleController.text,
                       content: _contentController.text,
                       categoryCode: code,
@@ -321,15 +320,15 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                     );
 
                     if (!context.mounted) return;
-                    if (err == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('등록완료')),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(err)),
-                      );
+
+                    if (res.error != null) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(res.error!)));
+                      return;
                     }
+
+                    context.push('/community-detail', extra: res.newId);
                   },
                   child: Container(
                     width: 300,
