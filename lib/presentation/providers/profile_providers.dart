@@ -12,14 +12,16 @@ class ProfileImage {
   final String id;
   final String thumbUrl;
   final String fullUrl;
+  final String color;
 
-  ProfileImage({required this.id, required this.thumbUrl, required this.fullUrl});
+  ProfileImage({required this.id, required this.thumbUrl, required this.fullUrl,required this.color});
 
   factory ProfileImage.fromJson(Map<String, dynamic> json) {
     return ProfileImage(
       id: json['id'],
       thumbUrl: json['thumbUrl'],
       fullUrl: json['fullUrl'],
+      color: json['color'],
     );
   }
 }

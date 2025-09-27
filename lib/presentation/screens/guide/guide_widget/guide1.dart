@@ -2,7 +2,18 @@ import 'package:flutter/material.dart';
 
 class Guide1 extends StatelessWidget {
   final VoidCallback onNext;
-  const Guide1({super.key, required this.onNext});
+  final String uid;
+  final String nickname;
+  final String? imageFullUrl;
+  final String? thumbUrl;
+  final String? color;
+  const Guide1({super.key, 
+    required this.onNext, 
+    required this.uid,
+    required this.nickname,
+    this.imageFullUrl,
+    this.thumbUrl,
+    this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +30,7 @@ class Guide1 extends StatelessWidget {
             left: size.width * 0.07,
             bottom: size.height * 0.12,
             child: Image.asset(
-              'assets/images/profile/black.png',
+              imageFullUrl ?? 'assets/images/profile/black.png',
               width: size.width * 0.3,
               height: size.width * 0.25,
             ),
