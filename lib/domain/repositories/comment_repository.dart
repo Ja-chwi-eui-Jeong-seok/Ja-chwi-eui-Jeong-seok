@@ -35,4 +35,10 @@ abstract interface class CommentRepository {
   Future<void> incLike(String id, int delta);
   Future<void> update(String id, Map<String, dynamic> patch);
   Future<void> softDelete(String id);
+
+  /// 게시글별 댓글 수
+  Future<int> getCountByCommunity(
+    String communityId, {
+    bool excludeDeleted = true,
+  });
 }

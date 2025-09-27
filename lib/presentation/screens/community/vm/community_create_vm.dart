@@ -13,7 +13,7 @@ class CommunityCreateVm {
   bool get submitting => _submitting;
 
   /// 성공: null 반환, 실패: 에러 메시지 반환
-  Future<String?> submit({
+  Future<({String? error, String? newId})> submit({
     required String title,
     required String content,
     required int? categoryCode,
@@ -21,11 +21,11 @@ class CommunityCreateVm {
     required String createUser,
     required String location,
   }) async {
-    if (_submitting) return '처리 중입니다';
-    if (title.trim().isEmpty) return '제목을 입력하세요';
-    if (content.trim().isEmpty) return '내용을 입력하세요';
+    if (_submitting) return (error: '처리 중입니다', newId: null);
+    if (title.trim().isEmpty) return (error: '제목을 입력하세요', newId: null);
+    if (content.trim().isEmpty) return (error: '내용을 입력하세요', newId: null);
     if (categoryCode == null || subCategoryCode == null) {
-      return '카테고리와 세부 카테고리를 선택하세요';
+      return (error: '카테고리와 세부 카테고리를 선택하세요', newId: null);
     }
 
     _submitting = true;
@@ -36,19 +36,19 @@ class CommunityCreateVm {
         categoryDetailCode: subCategoryCode,
         communityName: title.trim(),
         communityDetail: content.trim(),
-        createUser: createUser, //임시
-        location: location, //임시
-        communityCreateDate: DateTime.now(),
+        createUser: createUser,
+        location: location,
+        communityCreateDate: DateTime.now(), // 서버시간으로 덮임
         communityUpdateDate: null,
         communityDeleteDate: null,
         communityDeleteYn: false,
         communityDeleteNote: '',
       );
-      final id = await ref.read(createCommunityProvider).call(c);
-      //TODO:상세이동
-      return null;
+
+      final newId = await ref.read(createCommunityProvider).call(c);
+      return (error: null, newId: newId);
     } catch (e) {
-      return '오류: $e';
+      return (error: '오류: $e', newId: null);
     } finally {
       _submitting = false;
     }
