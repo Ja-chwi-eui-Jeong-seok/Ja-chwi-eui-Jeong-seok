@@ -14,8 +14,8 @@ import 'package:ja_chwi/presentation/screens/mission/create/mission_create_scree
 // import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_list_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_home_screen.dart';
-import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_flow.dart';
+import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
@@ -62,7 +62,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/privacy-policy',
       name: '개인정보처리방침',
-      builder: (context, state) =>  PrivacyPolicyPage(),
+      builder: (context, state) => PrivacyPolicyPage(),
     ),
     GoRoute(
       path: '/character-create',
@@ -126,7 +126,7 @@ final GoRouter router = GoRouter(
       name: '커뮤니티 작성',
       builder: (context, state) => const CommunityCreateScreen(),
     ),
-     GoRoute(
+    GoRoute(
       path: '/profile-flow',
       name: '프로필 단계',
       //builder: (context, state) => ProfileFlowPage(uid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52'),
@@ -134,7 +134,7 @@ final GoRouter router = GoRouter(
       //   final uid = state.extra as String; // 값 받기
       //   return ProfileFlowPage(uid: uid);
       // },
-       builder: (context, state) {
+      builder: (context, state) {
         final uid = state.extra as String?;
         print('$uid');
         if (uid == null) {

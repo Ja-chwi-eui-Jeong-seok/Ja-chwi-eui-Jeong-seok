@@ -28,4 +28,7 @@ abstract class MissionDataSource {
 
   /// 사용자의 완료된 미션 목록을 가져오는 스트림입니다.
   Stream<List<Map<String, dynamic>>> fetchUserMissions(String userId);
+
+  /// 오늘의 미션 달성자 목록을 가져옵니다.
+  Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers();
 }

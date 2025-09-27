@@ -46,4 +46,8 @@ class MissionRepositoryImpl implements MissionRepository {
   Stream<List<Map<String, dynamic>>> fetchUserMissions(String userId) {
     return dataSource.fetchUserMissions(userId);
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers() =>
+      dataSource.fetchTodayMissionAchievers();
 }
