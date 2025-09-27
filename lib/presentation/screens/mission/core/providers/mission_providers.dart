@@ -4,9 +4,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/data/datasources/mission_datasource_impl.dart';
 import 'package:ja_chwi/data/datasources/image_picker_datasource_impl.dart';
+import 'package:ja_chwi/data/datasources/user_datasource_impl.dart';
 import 'package:ja_chwi/data/repositories/mission_repository_impl.dart';
 import 'package:ja_chwi/data/repositories/image_picker_repository_impl.dart';
 import 'package:ja_chwi/domain/repositories/mission_repository.dart';
+import 'package:ja_chwi/domain/repositories/user_repository.dart';
+import 'package:ja_chwi/domain/repositories/user_repository_impl.dart';
 import 'package:ja_chwi/domain/usecases/fetch_user_profile_usecase.dart';
 import 'package:ja_chwi/domain/usecases/fetch_today_mission_achievers_usecase.dart';
 import 'package:ja_chwi/domain/usecases/pick_images_usecase.dart';
@@ -14,11 +17,6 @@ import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/user_pr
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'package:intl/intl.dart';
-
-/// Repository
-
-/// Providers
 
 /// 오늘의 미션 달성자 목록을 비동기적으로 가져오는 FutureProvider
 final achieversProvider = FutureProvider<List<MissionAchiever>>((ref) async {
@@ -43,6 +41,15 @@ final missionRepositoryProvider = StateProvider<MissionRepository>((ref) {
   return MissionRepositoryImpl(dataSource);
 });
 
+/// UserRepository를 제공하는 Provider
+/// 참고: 이 Provider는 사용자 관련 기능이므로 나중에 `user_provider.dart` 같은 공용 파일로 옮기는 것이 좋습니다.
+final userRepositoryProvider = Provider<UserRepository>((ref) {
+  final firestore = FirebaseFirestore.instance;
+  // UserDataSourceImpl은 Firestore 인스턴스만 필요합니다.
+  final dataSource = UserDataSourceImpl(firestore);
+  return UserRepositoryImpl(dataSource);
+});
+
 /// PickImagesUseCase를 제공하는 Provider
 final pickImagesUseCaseProvider = Provider<PickImagesUseCase>((ref) {
   final picker = ImagePicker();
@@ -63,7 +70,7 @@ final fetchTodayMissionAchieversUseCaseProvider =
 final fetchUserProfileUseCaseProvider = Provider<FetchUserProfileUseCase>((
   ref,
 ) {
-  return FetchUserProfileUseCase(ref.watch(missionRepositoryProvider));
+  return FetchUserProfileUseCase(ref.watch(userRepositoryProvider));
 });
 
 /// 오늘의 미션 데이터를 비동기적으로 가져오는 FutureProvider

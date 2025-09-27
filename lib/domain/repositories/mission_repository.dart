@@ -31,10 +31,4 @@ abstract class MissionRepository {
 
   /// 오늘의 미션 달성자 목록을 가져옵니다.
   Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers();
-
-  /// 현재 사용자의 프로필 정보를 가져옵니다.
-  Future<Map<String, dynamic>> fetchUserProfile(String userId);
-
-  /// 현재 사용자의 프로필 정보를 실시간으로 가져옵니다.
-  Stream<Map<String, dynamic>> fetchUserProfileStream(String userId);
 }
