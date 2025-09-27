@@ -1,16 +1,23 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/domain/entities/community.dart';
 import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
 
-final communityCreateVmProvider = Provider<CommunityCreateVm>(
+final communityCreateVmProvider = ChangeNotifierProvider<CommunityCreateVm>(
   (ref) => CommunityCreateVm(ref),
 );
 
-class CommunityCreateVm {
+class CommunityCreateVm extends ChangeNotifier {
   CommunityCreateVm(this.ref);
   final Ref ref;
   bool _submitting = false;
   bool get submitting => _submitting;
+
+  // UI에 변경 알림을 보내기 위한 setter
+  void _setSubmitting(bool v) {
+    _submitting = v;
+    notifyListeners();
+  }
 
   /// 성공: null 반환, 실패: 에러 메시지 반환
   Future<({String? error, String? newId})> submit({
@@ -28,7 +35,8 @@ class CommunityCreateVm {
       return (error: '카테고리와 세부 카테고리를 선택하세요', newId: null);
     }
 
-    _submitting = true;
+    // _submitting = true;
+    _setSubmitting(true);
     try {
       final c = Community(
         id: '',
@@ -50,7 +58,7 @@ class CommunityCreateVm {
     } catch (e) {
       return (error: '오류: $e', newId: null);
     } finally {
-      _submitting = false;
+      _setSubmitting(false);
     }
   }
 }

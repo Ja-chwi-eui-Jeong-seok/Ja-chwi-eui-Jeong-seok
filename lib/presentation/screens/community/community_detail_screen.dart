@@ -120,28 +120,28 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                 ),
                 //
                 //SliverPersistentHeader 댓글해더 시작
-                //최신순 추천선
                 SliverPersistentHeader(
-                  //SliverPersistentHeader 델리게이트필요
                   pinned: true,
-                  delegate: _TabBarDelegate(
-                    TabBar(
-                      // 탭 변경 시 정렬 스위치
-                      onTap: (i) {
-                        final ord = i == 0
-                            ? CommentOrder.latest
-                            : CommentOrder.popular;
-                        ref.read(provider.notifier).refreshComments(ref, ord);
+                  delegate: _PlainHeaderDelegate(
+                    height: 48,
+                    child: Builder(
+                      builder: (context) {
+                        return _SortTabs(
+                          onTap: (i) {
+                            // 탭 전환 시 TabBarView도 함께 전환
+                            final ctrl = DefaultTabController.of(context);
+                            ctrl.animateTo(i);
+
+                            // 정렬 스위치
+                            final ord = i == 0
+                                ? CommentOrder.latest
+                                : CommentOrder.popular;
+                            ref
+                                .read(provider.notifier)
+                                .refreshComments(ref, ord);
+                          },
+                        );
                       },
-                      indicator: const UnderlineTabIndicator(
-                        borderSide: BorderSide(color: Colors.black, width: 2),
-                      ),
-                      labelColor: Colors.black,
-                      unselectedLabelColor: Colors.grey,
-                      tabs: const [
-                        Tab(text: '최신순'),
-                        Tab(text: '추천순'),
-                      ],
                     ),
                   ),
                 ), //SliverPersistentHeader 댓글해더 끝
@@ -151,11 +151,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   TabBarView(
                     children: [
                       //최신순
-                      // 최신순
                       CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
+                        nickOf: (i) =>
+                            st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
                         isLikedOf: (i) =>
@@ -170,7 +170,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                       CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
+                        nickOf: (i) =>
+                            st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
                         isLikedOf: (i) =>
@@ -248,33 +249,6 @@ class _PostBody extends StatelessWidget {
       child: Text(body),
     );
   }
-}
-
-//SliverPersistentHeader 델리게이트 ---
-//SliverPersistentHeader는 스크롤했을때 TabBar부분이 고정되게 해주는 어댑터
-//SliverPersistentHeader를 쓰기위해 delegate로 정의하는 부분
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  _TabBarDelegate(this.tabBar);
-  final TabBar tabBar;
-
-  //header의 최소높이와 최대높이를 지정하는 부분
-  @override
-  double get minExtent => tabBar.preferredSize.height; //48px
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(color: Colors.white, child: tabBar);
-  }
-
-  //델리게이트 리빌드 여부 결정, 탭바는 겨의 안바뀌니까 false
-  @override
-  bool shouldRebuild(covariant _TabBarDelegate old) => false;
 }
 
 // 입력창
@@ -382,6 +356,82 @@ class CommentWrite extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+//해더댈리게이트(최신순추천순)
+//SliverPersistentHeader 델리게이트 ---
+//SliverPersistentHeader는 스크롤했을때 TabBar부분이 고정되게 해주는 어댑터
+//SliverPersistentHeader를 쓰기위해 delegate로 정의하는 부분
+class _PlainHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _PlainHeaderDelegate({required this.child, required this.height});
+  final Widget child;
+  final double height;
+  //header의 최소높이와 최대높이를 지정하는 부분
+  @override
+  double get minExtent => height;
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: Colors.white,
+      child: SizedBox(height: height, child: child),
+    );
+  }
+
+  //델리게이트 리빌드 여부 결정, 탭바는 겨의 안바뀌니까 false
+  @override
+  bool shouldRebuild(covariant _PlainHeaderDelegate oldDelegate) =>
+      oldDelegate.child != child || oldDelegate.height != height;
+}
+
+//최신순 추천순 위젯
+class _SortTabs extends StatelessWidget {
+  const _SortTabs({required this.onTap});
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = DefaultTabController.of(context);
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (_, __) {
+        final idx = controller.index;
+        TextStyle style(bool selected) => TextStyle(
+          fontSize: 14,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          color: selected ? Colors.black : Colors.grey,
+        );
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          child: Row(
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onTap(0),
+                child: Text('최신순', style: style(idx == 0)),
+              ),
+              const SizedBox(width: 8),
+              const Text('|', style: TextStyle(color: Colors.grey)),
+              const SizedBox(width: 8),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onTap(1),
+                child: Text('추천순', style: style(idx == 1)),
+              ),
+              const Spacer(),
+            ],
+          ),
+        );
+      },
     );
   }
 }

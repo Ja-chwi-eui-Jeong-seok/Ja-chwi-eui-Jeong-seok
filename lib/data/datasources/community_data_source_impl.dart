@@ -42,7 +42,7 @@ class CommunityDataSourceImpl implements CommunityDataSource {
         .where('community_delete_yn', isEqualTo: false);
 
     //날짜 임시로 동작구
-    if (location != null && location.isNotEmpty) {
+    if (location.isNotEmpty) {
       if (kDebugMode) {
         print('위치 : $location');
       }
