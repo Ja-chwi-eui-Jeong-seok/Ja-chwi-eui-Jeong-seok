@@ -1,4 +1,3 @@
-// lib/data/datasources/comment_data_source_impl.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ja_chwi/data/common/page_result.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
@@ -18,24 +17,48 @@ class CommentDataSourceImpl implements CommentDataSource {
   }
 
   @override
-  Future<void> softDelete(String id) => col.doc(id).update({
-    'community_delete_yn': true,
-    'community_delete_date': FieldValue.serverTimestamp(),
-  });
-
-  @override
-  Future<void> update(String id, Map<String, dynamic> patch) =>
-      col.doc(id).update(patch);
-
-  @override
-  Future<void> incLike(String id, int delta) async {
-    await fs.runTransaction((tx) async {
-      final ref = col.doc(id);
-      final snap = await tx.get(ref);
-      if (!snap.exists) return;
-      final curr = (snap.data()!['like_count'] ?? 0) as int;
-      tx.update(ref, {'like_count': curr + delta});
+  Future<String> createMinimal({
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  }) async {
+    final ref = await col.add({
+      'community_id': communityId,
+      'uid': uid,
+      'note_detail': noteDetail,
+      'like_count': 0,
+      'comment_create_date': FieldValue.serverTimestamp(),
+      'comment_delete_yn': false,
     });
+    return ref.id;
+  }
+
+  @override
+  Future<CommentDto> createAndGetMinimal({
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  }) async {
+    // 1) 문서 id를 먼저 확정
+    final ref = col.doc();
+
+    // 2) 서버 타임스탬프 포함해 기록
+    await ref.set({
+      'community_id': communityId,
+      'uid': uid,
+      'note_detail': noteDetail,
+      'like_count': 0,
+      'comment_create_date': FieldValue.serverTimestamp(),
+      'comment_delete_yn': false,
+    });
+
+    // 3) 서버에서 "다시" 읽어 해석된 Timestamp를 확보
+    final snap = await ref.get(const GetOptions(source: Source.server));
+    final data = snap.data();
+    if (data == null) {
+      throw StateError('Failed to fetch created comment from server.');
+    }
+    return CommentDto.fromFirebase(ref.id, data);
   }
 
   @override
@@ -43,19 +66,18 @@ class CommentDataSourceImpl implements CommentDataSource {
     required String communityId,
     required CommentOrder order,
     int limit = 20,
-    DocumentSnapshot? startAfterDoc,
+    DocumentSnapshot<Object?>? startAfterDoc,
   }) async {
     Query<Map<String, dynamic>> q = col
         .where('community_id', isEqualTo: communityId)
-        .where('community_delete_yn', isEqualTo: false);
+        .where('comment_delete_yn', isEqualTo: false);
 
     if (order == CommentOrder.latest) {
-      q = q.orderBy('community_create_date', descending: true);
+      q = q.orderBy('comment_create_date', descending: true);
     } else {
-      // 인기순: like_count desc, tie-breaker by create_date desc
       q = q
           .orderBy('like_count', descending: true)
-          .orderBy('community_create_date', descending: true);
+          .orderBy('comment_create_date', descending: true);
     }
 
     q = q.limit(limit);
@@ -65,12 +87,33 @@ class CommentDataSourceImpl implements CommentDataSource {
     final items = snap.docs
         .map((d) => CommentDto.fromFirebase(d.id, d.data()))
         .toList();
-    final last = snap.docs.isNotEmpty ? snap.docs.last : null;
+    final lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
 
     return PagedResult(
       items: items,
-      lastDoc: last,
+      lastDoc: lastDoc,
       hasMore: snap.docs.length == limit,
     );
+  }
+
+  @override
+  Future<void> incLike(String id, int delta) {
+    return col.doc(id).update({'like_count': FieldValue.increment(delta)});
+  }
+
+  @override
+  Future<void> update(String id, Map<String, dynamic> patch) {
+    return col.doc(id).update({
+      ...patch,
+      'comment_update_date': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<void> softDelete(String id) {
+    return col.doc(id).update({
+      'comment_delete_yn': true,
+      'comment_delete_date': FieldValue.serverTimestamp(),
+    });
   }
 }

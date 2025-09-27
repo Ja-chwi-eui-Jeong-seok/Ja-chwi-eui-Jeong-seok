@@ -18,6 +18,7 @@ class MissionCreateScreen extends ConsumerStatefulWidget {
 
 class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
   String _missionTitle = '';
+  List<String> _tags = [];
   bool _isPublic = true;
   List<dynamic> _photos = []; // String (URL) or XFile (local)
   final TextEditingController _descriptionController = TextEditingController();
@@ -42,6 +43,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
       final missionData = extra;
       setState(() {
         _missionTitle = missionData['title'] as String? ?? '';
+        _tags = List<String>.from(missionData['tags'] as List? ?? []);
         _isPublic = missionData['isPublic'] as bool? ?? true;
         _photos = List<dynamic>.from(missionData['photos'] as List? ?? []);
         _descriptionController.text =
@@ -50,6 +52,10 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
     } else if (extra is String) {
       // 생성 모드 (템플릿 제목 전달)
       _missionTitle = extra;
+      // 생성 모드일 때, 오늘의 미션 태그를 가져옵니다.
+      ref.read(todayMissionProvider.future).then((mission) {
+        if (mounted) setState(() => _tags = mission.tags);
+      });
     }
   }
 
@@ -74,6 +80,12 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
 
   Future<void> _submitMission() async {
     if (_isSubmitting) return;
+
+    if (_photos.isEmpty) {
+      _showSnackBar('사진을 1장 이상 추가해주세요.');
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     final missionRepository = ref.read(missionRepositoryProvider);
@@ -106,7 +118,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
             'isPublic': _isPublic,
             'photos': photoUrls,
             'description': _descriptionController.text,
-            'tags': [], // TODO : 태그 수정 기능 구현 시 이 부분도 수정 필요
+            'tags': _tags,
           },
         );
       } else {
@@ -118,7 +130,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
             'isPublic': _isPublic,
             'photos': photoUrls,
             'description': _descriptionController.text,
-            'tags': [],
+            'tags': _tags,
           },
         );
       }

@@ -7,6 +7,7 @@ import 'package:ja_chwi/presentation/providers/user_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 //커뮤니티 화면 (카테고리 탭 2단구조 + 게시글 패치)
 class CommunityScreen extends ConsumerWidget {
@@ -16,7 +17,8 @@ class CommunityScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     //카테고리 상태 구독
     final catState = ref.watch(categoryVMProvider);
-
+    //더미유저데이터
+    final uid = ref.read(currentUidProvider);
     return catState.parents.when(
       //로딩
       loading: () => const Scaffold(
@@ -42,7 +44,7 @@ class CommunityScreen extends ConsumerWidget {
                   SizedBox(width: 8),
                   Icon(Icons.arrow_drop_down),
                   SizedBox(width: 4),
-                  Text('동작구'), //유저 위치 표시해야함
+                  Text('동작구'), //현재 유저 프로필에 설정된 위치 표시해야함
                   Spacer(),
                 ],
               ),
@@ -78,26 +80,31 @@ class CommunityScreen extends ConsumerWidget {
                 return _SecondDepthTabs(parentCode: p.categoryCode);
               }).toList(),
             ),
-            floatingActionButton: FloatingActionButton.small(
-              //글쓰기 버튼 자리
-              onPressed: () {
-                //로그인처리확인
-                //더미유저데이터
-                final uid = ref.read(currentUidProvider);
-                if (uid == null) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    SnackBar(content: Text('로그인이 필요합니다.')),
-                  );
-                  return;
-                }
-                //uid를 extra로 넘김, 넘긴후 글쓰기 화면에서 uid로 위치조회
-                context.push('/community-create', extra: uid);
-              },
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.edit),
+            floatingActionButton: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: FloatingActionButton.small(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                //글쓰기 버튼 자리
+                onPressed: () {
+                  //로그인처리확인
+
+                  if (uid == null) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(
+                      SnackBar(content: Text('로그인이 필요합니다.')),
+                    );
+                    return;
+                  }
+                  //uid를 extra로 넘김, 넘긴후 글쓰기 화면에서 uid로 위치조회
+                  context.push('/community-create', extra: uid);
+                },
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.edit),
+              ),
             ),
           ),
         );
@@ -198,6 +205,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
       communityListVmProvider(
         categoryCode: widget.parentCode,
         detailCode: widget.detailCode,
+        location: '동작구', //유저 프로필 > 프로필에서 위치값 현재는 임의로 동작구지정
       );
 
   @override
@@ -210,140 +218,149 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
   @override
   Widget build(BuildContext context) {
     final st = ref.watch(provider);
-    return NotificationListener<ScrollNotification>(
-      onNotification: (n) {
-        if (!st.hasMore || st.isLoading) return false; // 가드
-        if (n.metrics.pixels >= n.metrics.maxScrollExtent * 0.9) {
-          ref.read(provider.notifier).loadMore(ref);
-        }
-        return false;
-      },
+    return Scaffold(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (n) {
+          if (!st.hasMore || st.isLoading) return false; // 가드
+          if (n.metrics.pixels >= n.metrics.maxScrollExtent * 0.9) {
+            ref.read(provider.notifier).loadMore(ref);
+          }
+          return false;
+        },
 
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: [
-                Text(
-                  widget.detailName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Text(
+                    widget.detailName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                //쓸지안쓸지 모름..안쓸것같음
-                const Text(
-                  '최신순',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const Text('  |  ', style: TextStyle(color: Colors.grey)),
-                const Text('추천순', style: TextStyle(color: Colors.grey)),
-              ],
+                  const Spacer(),
+                  //쓸지안쓸지 모름..안쓸것같음
+                  const Text(
+                    '최신순',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const Text('  |  ', style: TextStyle(color: Colors.grey)),
+                  const Text('추천순', style: TextStyle(color: Colors.grey)),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // 게시글 리스트
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
-              itemCount:
-                  st.items.length + ((st.isLoading && st.hasMore) ? 1 : 0),
+            // 게시글 리스트
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  bottom: 100,
+                ),
+                itemCount:
+                    st.items.length + ((st.isLoading && st.hasMore) ? 1 : 0),
 
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, i) {
-                if (i >= st.items.length) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, i) {
+                  if (i >= st.items.length) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  final x = st.items[i];
+                  final date = DateFormat(
+                    'yyyy.MM.dd',
+                  ).format(x.communityCreateDate);
+                  // likeCount 필드가 아직 없으면 0으로 표시
+                  final likeCount = 0;
+
+                  return InkWell(
+                    onTap: () => context.push(
+                      '/community-detail',
+                      extra: x.id,
+                    ), // x: Community
+                    child: Container(
+                      height: 96,
+                      //테두리
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Color(0xFFF2F2F2), width: 3),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 좌측 텍스트
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      // 제목
+                                      StringUtils.truncateWithEllipsis(
+                                        15,
+                                        x.communityName,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      //날짜
+                                      date,
+                                      // style: const TextStyle(color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                                Spacer(),
+
+                                Row(
+                                  children: [
+                                    Text(
+                                      //작성자(현재 임시)
+                                      x.createUser,
+                                      //style: const TextStyle(color: Colors.grey),
+                                    ),
+                                    Spacer(),
+                                    const Icon(Icons.favorite_border, size: 18),
+                                    const SizedBox(width: 4),
+
+                                    Text('$likeCount'),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          // 우측 하트
+                          Row(
+                            children: [],
+                          ),
+                        ],
+                      ),
                     ),
                   );
-                }
-                final x = st.items[i];
-                final date = DateFormat(
-                  'yyyy.MM.dd',
-                ).format(x.communityCreateDate);
-                // likeCount 필드가 아직 없으면 0으로 표시
-                final likeCount = 0;
-
-                return InkWell(
-                  onTap: () => context.push(
-                    '/community-detail',
-                    extra: x.id,
-                  ), // x: Community
-                  child: Container(
-                    height: 96,
-                    //테두리
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Color(0xFFF2F2F2), width: 3),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 좌측 텍스트
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    // 제목
-                                    StringUtils.truncateWithEllipsis(
-                                      15,
-                                      x.communityName,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Text(
-                                    //날짜
-                                    date,
-                                    // style: const TextStyle(color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                              Spacer(),
-
-                              Row(
-                                children: [
-                                  Text(
-                                    //작성자(현재 임시)
-                                    x.createUser,
-                                    //style: const TextStyle(color: Colors.grey),
-                                  ),
-                                  Spacer(),
-                                  const Icon(Icons.favorite_border, size: 18),
-                                  const SizedBox(width: 4),
-
-                                  Text('$likeCount'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        // 우측 하트
-                        Row(
-                          children: [],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNav(
+        mode: BottomNavMode.tab,
       ),
     );
   }
