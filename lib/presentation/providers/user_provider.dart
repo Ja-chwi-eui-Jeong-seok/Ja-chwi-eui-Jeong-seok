@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// 1) 현재 로그인 중인 유저 uid (더미)
 final currentUidProvider = Provider<String?>((ref) {
   // TODO: 실제 구현에선 FirebaseAuth.instance.currentUser?.uid
-  return 'dummy-uid-123';
+  return 'dummy-uid-12345';
 });
 
 /// 2) 유저 프로필 더미
