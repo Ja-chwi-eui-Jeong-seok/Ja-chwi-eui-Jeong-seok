@@ -149,12 +149,18 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   TabBarView(
                     children: [
                       //최신순
+                      // 최신순
                       _CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
                         nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
+                        isLikedOf: (i) =>
+                            st.likedIds.contains(st.comments[i].id), // ← 추가
+                        onToggleLike: (i) => ref
+                            .read(provider.notifier) // ← 추가
+                            .toggleLike(ref, st.comments[i].id),
                       ),
                       //추천순
                       _CommentList(
@@ -163,6 +169,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         nickOf: (i) => st.comments[i].uid, //UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
+                        isLikedOf: (i) =>
+                            st.likedIds.contains(st.comments[i].id), // ← 추가
+                        onToggleLike: (i) => ref
+                            .read(provider.notifier) // ← 추가
+                            .toggleLike(ref, st.comments[i].id),
                       ),
                     ],
                   ),
@@ -269,6 +280,8 @@ class _CommentList extends StatelessWidget {
     required this.textOf,
     required this.likeCountOf,
     required this.loading,
+    required this.isLikedOf,
+    required this.onToggleLike,
   });
 
   final int itemCount;
@@ -276,9 +289,26 @@ class _CommentList extends StatelessWidget {
   final String Function(int) textOf;
   final int Function(int) likeCountOf;
   final bool loading;
+  final bool Function(int) isLikedOf;
+  final void Function(int) onToggleLike;
 
   @override
   Widget build(BuildContext context) {
+    if (itemCount == 0) {
+      if (loading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 100),
+          child: Text(
+            '댓글이 아직 없습니다',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
     // 중요: 스크롤은 ListView가 맡게 (shrinkWrap/physics 건드리지 않기)
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -406,7 +436,11 @@ class _CommentList extends StatelessWidget {
                     ],
                   ),
                 ),
-                _HeartButton(count: likeCountOf(i)),
+                _HeartButton(
+                  liked: isLikedOf(i),
+                  count: likeCountOf(i),
+                  onPressed: () => onToggleLike(i),
+                ),
               ],
             ),
           ),
@@ -416,17 +450,15 @@ class _CommentList extends StatelessWidget {
   }
 }
 
-class _HeartButton extends StatefulWidget {
-  const _HeartButton({required this.count});
+class _HeartButton extends StatelessWidget {
+  const _HeartButton({
+    required this.liked,
+    required this.count,
+    required this.onPressed,
+  });
+  final bool liked;
   final int count;
-
-  @override
-  State<_HeartButton> createState() => _HeartButtonState();
-}
-
-class _HeartButtonState extends State<_HeartButton> {
-  bool isLiked = false;
-  late int likeCount = widget.count;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -436,18 +468,16 @@ class _HeartButtonState extends State<_HeartButton> {
         IconButton(
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
-          onPressed: () {
-            // TODO: repo.incLike(commentId, isLiked ? +1 : -1) 연결
-          },
+          onPressed: onPressed, // VM 토글 호출
           icon: Icon(
-            isLiked ? Icons.favorite : Icons.favorite_border,
-            color: isLiked ? Colors.red : Colors.black,
+            liked ? Icons.favorite : Icons.favorite_border,
+            color: liked ? Colors.red : Colors.black,
             size: 18,
           ),
         ),
         Text(
-          // NumberFormat.compact().format(likeCount), //TODO??:압축 표기(1.2K)
-          '$likeCount',
+          // NumberFormat.compact().format(count), 압축 표기
+          '$count',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           softWrap: false,
