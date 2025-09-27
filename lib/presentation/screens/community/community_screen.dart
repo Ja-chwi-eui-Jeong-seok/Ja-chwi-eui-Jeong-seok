@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/domain/entities/category.dart';
+import 'package:ja_chwi/domain/usecases/get_comment_count.dart';
 import 'package:ja_chwi/presentation/common/utils/string_utils.dart';
+import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/user_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
@@ -220,6 +222,8 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
     Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
   }
 
+  //게시글마다 댓글갯수 담는곳
+  final Map<String, Future<int>> _commentCountFutures = {};
   @override
   Widget build(BuildContext context) {
     final st = ref.watch(provider);
@@ -284,9 +288,12 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                   final date = DateFormat(
                     'yyyy.MM.dd',
                   ).format(x.communityCreateDate);
-                  // likeCount 필드가 아직 없으면 0으로 표시
-                  final likeCount = 0;
 
+                  //댓글수
+                  final countFuture = _commentCountFutures.putIfAbsent(
+                    x.id,
+                    () => ref.read(getCommentCountProvider).call(x.id),
+                  );
                   return InkWell(
                     onTap: () => context.push(
                       '/community-detail',
@@ -336,15 +343,39 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                 Row(
                                   children: [
                                     Text(
-                                      //작성자(현재 임시)
+                                      //TODO:작성자(현재 임시)
                                       x.createUser,
                                       //style: const TextStyle(color: Colors.grey),
                                     ),
                                     Spacer(),
-                                    const Icon(Icons.favorite_border, size: 18),
-                                    const SizedBox(width: 4),
-
-                                    Text('$likeCount'),
+                                    //댓글수 표시
+                                    const Icon(
+                                      Icons.mode_comment_outlined,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(
+                                      width: 4,
+                                    ),
+                                    FutureBuilder(
+                                      future: countFuture,
+                                      builder: (_, snap) {
+                                        if (snap.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const SizedBox(
+                                            width: 14,
+                                            height: 14,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          );
+                                        }
+                                        final c = snap.data ?? 0;
+                                        return Text('$c');
+                                      },
+                                    ),
+                                    const SizedBox(width: 10),
+                                    //TODO: 스크랩
+                                    const Icon(Icons.bookmark_border, size: 18),
                                   ],
                                 ),
                               ],
