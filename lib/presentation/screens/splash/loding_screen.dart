@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/auth/login_widget/wave_text.dart';
 import 'package:lottie/lottie.dart';
 
 class LodingScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _SplashPageState extends State<LodingScreen>
     // 애니메이션이 끝났을 때 화면 이동
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        GoRouter.of(context).go('/login'); // 초기 프로필 설정 창으로 가고 이미 만들어져 있으면 홈으로
+        GoRouter.of(context).go('/home'); // 초기 프로필 설정 창으로 가고 이미 만들어져 있으면 홈으로
       }
     });
   }
@@ -40,15 +41,7 @@ class _SplashPageState extends State<LodingScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              '자취의 정석',
-              style: TextStyle(
-                fontSize: 52,
-                fontFamily: 'GamjaFlower',
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            const WaveText(text: '자취 준비중...'),
             const SizedBox(height: 20),
             SizedBox(
               height: 150,
@@ -56,7 +49,7 @@ class _SplashPageState extends State<LodingScreen>
                 builder: (_) {
                   try {
                     return Lottie.asset(
-                      'assets/config/json/intro_monji.json',
+                      'assets/config/json/monji_jump.json',
                       controller: _controller,
                       onLoaded: (composition) {
                         _controller
