@@ -6,6 +6,7 @@ import 'package:ja_chwi/data/repositories/comment_repository_impl.dart';
 import 'package:ja_chwi/domain/repositories/comment_repository.dart';
 import 'package:ja_chwi/domain/usecases/create_comment.dart';
 import 'package:ja_chwi/domain/usecases/fetch_comments.dart';
+import 'package:ja_chwi/domain/usecases/get_comment_count.dart';
 
 final commentDsProvider = Provider<CommentDataSource>(
   (ref) => CommentDataSourceImpl(FirebaseFirestore.instance),
@@ -16,9 +17,13 @@ final commentRepoProvider = Provider<CommentRepository>(
 );
 
 final createCommentProvider = Provider(
-  (ref) => CreateComment(ref.read(commentRepoProvider)), // ✅ Comment 반환
+  (ref) => CreateComment(ref.read(commentRepoProvider)), //Comment 반환
 );
 
 final fetchCommentsProvider = Provider(
   (ref) => FetchComments(ref.read(commentRepoProvider)),
+);
+//게시글 댓글수
+final getCommentCountProvider = Provider<GetCommentCount>(
+  (ref) => GetCommentCount(ref.read(commentRepoProvider)),
 );
