@@ -38,7 +38,7 @@ class Guide1 extends StatelessWidget {
                 ),
                 child: const Center(
                   child: Text(
-                    '집 좀 치워라 \n확마 그냥',
+                    '반가워요! \n저는 자취의 정령, \n집먼지에요!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.black,
