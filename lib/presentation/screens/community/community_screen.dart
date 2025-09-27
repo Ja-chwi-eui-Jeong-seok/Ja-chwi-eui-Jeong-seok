@@ -17,7 +17,7 @@ class CommunityScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     //카테고리 상태 구독
     final catState = ref.watch(categoryVMProvider);
-    //더미유저데이터
+    //TODOL더미유저데이터 바꿔야함
     final uid = ref.read(currentUidProvider);
     return catState.parents.when(
       //로딩
@@ -37,6 +37,8 @@ class CommunityScreen extends ConsumerWidget {
         return DefaultTabController(
           length: parents.length,
           child: Scaffold(
+            //TODO: 바텀네비 투명? 배경 흰색? 정해야함
+            // extendBody: true,
             appBar: AppBar(
               titleSpacing: 10,
               title: const Row(
@@ -44,7 +46,7 @@ class CommunityScreen extends ConsumerWidget {
                   SizedBox(width: 8),
                   Icon(Icons.arrow_drop_down),
                   SizedBox(width: 4),
-                  Text('동작구'), //현재 유저 프로필에 설정된 위치 표시해야함
+                  Text('동작구'), //TODO:현재 유저 프로필에 설정된 위치 표시해야함
                   Spacer(),
                 ],
               ),
@@ -81,14 +83,14 @@ class CommunityScreen extends ConsumerWidget {
               }).toList(),
             ),
             floatingActionButton: Padding(
-              padding: const EdgeInsets.only(bottom: 100),
+              padding: const EdgeInsets.only(bottom: 50),
               child: FloatingActionButton.small(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50),
                 ),
                 //글쓰기 버튼 자리
                 onPressed: () {
-                  //로그인처리확인
+                  //TODO:로그인처리확인
 
                   if (uid == null) {
                     ScaffoldMessenger.of(
@@ -98,13 +100,16 @@ class CommunityScreen extends ConsumerWidget {
                     );
                     return;
                   }
-                  //uid를 extra로 넘김, 넘긴후 글쓰기 화면에서 uid로 위치조회
+                  //TODO:uid를 extra로 넘김, 넘긴후 글쓰기 화면에서 uid로 위치조회 사용자 더미 바꿔야함
                   context.push('/community-create', extra: uid);
                 },
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 child: const Icon(Icons.edit),
               ),
+            ),
+            bottomNavigationBar: BottomNav(
+              mode: BottomNavMode.tab,
             ),
           ),
         );
@@ -248,7 +253,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const Text('  |  ', style: TextStyle(color: Colors.grey)),
-                  const Text('추천순', style: TextStyle(color: Colors.grey)),
+                  const Text('인기순', style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -358,9 +363,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNav(
-        mode: BottomNavMode.tab,
       ),
     );
   }
