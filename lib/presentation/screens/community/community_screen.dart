@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:ja_chwi/domain/entities/category.dart';
 import 'package:ja_chwi/presentation/common/utils/string_utils.dart';
 import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:go_router/go_router.dart';
@@ -13,44 +15,44 @@ import 'package:ja_chwi/presentation/screens/community/widgets/no_location_view.
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 //커뮤니티 화면 (카테고리 탭 2단구조 + 게시글 패치)
-class CommunityScreen extends ConsumerWidget {
+class CommunityScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? extra;
-
   const CommunityScreen({super.key, this.extra});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // extra 사용 가능
-    if (kDebugMode) {
-      print('CommunityScreen extra: $extra');
-    }
-    //카테고리 상태 구독
+  ConsumerState<CommunityScreen> createState() => _CommunityScreenState();
+}
+
+class _CommunityScreenState extends ConsumerState<CommunityScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final extra = widget.extra;
+    if (kDebugMode) debugPrint('CommunityScreen extra: $extra');
+
     final catState = ref.watch(categoryVMProvider);
-    //유저정보
-    final uid = extra?['uid'] as String?;
-    final location = extra?['dongName'] as String?;
-    final hasLocation = location != null && location.isNotEmpty;
+
+    // 프로필 통해 위치 얻기
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final profileAv = uid == null
+        ? const AsyncValue.loading()
+        : ref.watch(profileByUidProvider(uid));
+    final String? location = profileAv.maybeWhen(
+      data: (p) => p.dongName,
+      orElse: () => null,
+    );
+    final hasLocation = (location != null && location.isNotEmpty);
 
     return catState.parents.when(
-      //로딩
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      //에러
-      error: (e, _) => Scaffold(
-        body: Center(child: Text('카테고리 오류: $e')),
-      ),
-      //데이터
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (e, _) => Scaffold(body: Center(child: Text('카테고리 오류: $e'))),
       data: (parents) {
         if (parents.isEmpty) {
           return const Scaffold(body: Center(child: Text('카테고리가 없습니다')));
         }
-        //1 depth 카테고리
         return DefaultTabController(
           length: parents.length,
           child: Scaffold(
-            //TODO: 바텀네비 투명? 배경 흰색? 정해야함
-            // extendBody: true,
             appBar: AppBar(
               titleSpacing: 10,
               title: Row(
@@ -58,39 +60,29 @@ class CommunityScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   const Icon(Icons.arrow_drop_down),
                   const SizedBox(width: 4),
-
                   Text(location ?? '위치를 등록해주세요'),
                   const Spacer(),
                 ],
               ),
               bottom: TabBar(
-                //텝 스크롤
-                isScrollable:
-                    false, //true로 하면 동일한 가로너비로 되지 않게됌. 스크롤불가능으로해야 스타일이 맞음
+                isScrollable: false,
                 unselectedLabelStyle: const TextStyle(fontSize: 14),
                 unselectedLabelColor: Colors.grey,
                 labelStyle: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-
                 labelColor: Colors.black,
-
-                //
-                //밑줄 커스텀
                 indicator: const UnderlineTabIndicator(
                   borderSide: BorderSide(color: Colors.black, width: 3),
                   insets: EdgeInsets.symmetric(horizontal: 16),
                 ),
-                indicatorSize: TabBarIndicatorSize.tab, // 탭 전체 밑줄
-                indicatorColor: Colors.black,
-                //1차탭
+                indicatorSize: TabBarIndicatorSize.tab,
                 tabs: parents.map((p) => Tab(text: p.categoryName)).toList(),
               ),
             ),
             body: TabBarView(
               physics: const NeverScrollableScrollPhysics(),
-              // 상위 탭 선택 시, 하위 탭(_SecondDepthTabs)으로 이동
               children: parents.map((p) {
                 return hasLocation
                     ? _SecondDepthTabs(
@@ -104,13 +96,10 @@ class CommunityScreen extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50),
               ),
-              //글쓰기 버튼 자리
               onPressed: () {
                 if (uid == null) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    SnackBar(content: Text('로그인이 필요합니다.')),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('로그인이 필요합니다.')),
                   );
                   return;
                 }
@@ -126,12 +115,9 @@ class CommunityScreen extends ConsumerWidget {
               foregroundColor: Colors.white,
               child: const Icon(Icons.edit),
             ),
-            // bottomNavigationBar: BottomNav(
-            //   mode: BottomNavMode.tab,
-            // ),
             bottomNavigationBar: BottomNav(
               mode: BottomNavMode.tab,
-              userData: extra, // SplashScreen에서 받아온 Map<String, dynamic>
+              userData: extra,
             ),
           ),
         );
@@ -231,41 +217,100 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
 }
 
 class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
+  // build에서 만들지 말고, 필드로 고정
+  late NotifierProvider<CommunityListVM, CommunityListState> provider;
+  bool _ready = false; // provider 준비 여부
+
+  // 댓글수 캐시
+  final Map<String, Future<int>> _commentCountFutures = {};
+
   @override
   void initState() {
     super.initState();
-
-    // 첫 진입 시 초기 데이터 로드
-    // Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+    _maybeInitProviderAndLoad();
   }
 
-  //게시글마다 댓글갯수 담는곳
-  final Map<String, Future<int>> _commentCountFutures = {};
   @override
-  Widget build(BuildContext context) {
-    if (widget.location == null || widget.location!.isEmpty) {
-      return const NoLocationView();
+  void didUpdateWidget(covariant _PostsPlaceholder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // location이 뒤늦게 생기거나 변경되면 재초기화
+    if (oldWidget.location != widget.location) {
+      _ready = false;
+      _maybeInitProviderAndLoad();
     }
-    final provider = communityListVmProvider(
+  }
+
+  void _maybeInitProviderAndLoad() {
+    final loc = widget.location;
+    if (loc == null || loc.isEmpty) return; // 아직 준비 안됨
+
+    provider = communityListVmProvider(
       categoryCode: widget.parentCode,
       detailCode: widget.detailCode,
-      location: widget.location!,
+      location: loc,
     );
-    final st = ref.watch(provider);
-    // 첫 빌드 때만 초기 로드
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _ready = true;
+
+    // 초기 로드 1회
+    Future.microtask(() {
+      if (!mounted) return;
       ref.read(provider.notifier).loadInitial(ref);
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // location 없거나 provider 아직 준비 안됐으면 안내뷰
+    if (!_ready) return const NoLocationView();
+
+    final st = ref.watch(provider);
+    // 빈 목록/로딩 처리
+    if (st.items.isEmpty) {
+      return Scaffold(
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Text(
+                    widget.detailName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Center(
+                child: st.isLoading
+                    ? const CircularProgressIndicator()
+                    : const Padding(
+                        padding: EdgeInsets.only(bottom: 100),
+                        child: Text(
+                          '아직 게시글이 없습니다',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
         onNotification: (n) {
-          if (!st.hasMore || st.isLoading) return false; // 가드
+          if (!st.hasMore || st.isLoading) return false;
           if (n.metrics.pixels >= n.metrics.maxScrollExtent * 0.9) {
             ref.read(provider.notifier).loadMore(ref);
           }
           return false;
         },
-
         child: Column(
           children: [
             Padding(
