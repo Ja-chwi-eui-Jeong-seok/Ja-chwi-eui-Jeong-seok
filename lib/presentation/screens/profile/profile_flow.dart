@@ -56,11 +56,11 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
       children: [
         if (selectedImage != null)
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 80,
-                height: 80,
+                width: 100,
+                height: 100,
                 child: Image.asset(
                   selectedImage.thumbUrl,
                   fit: BoxFit.cover,
