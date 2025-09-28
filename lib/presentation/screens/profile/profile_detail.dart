@@ -7,10 +7,12 @@ import 'package:ja_chwi/presentation/screens/setting/setting.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class ProfileDetail extends ConsumerWidget {
-  const ProfileDetail({super.key});
+    final Map<String, dynamic>? extra;
+  const ProfileDetail({super.key, this.extra});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('ProfileDetailScreen extra: $extra'); // ✅ 데이터 확인
     return Scaffold(
       appBar: AppBar(title:  Text('Profile Screen'),        
       actions: [
@@ -34,11 +36,10 @@ class ProfileDetail extends ConsumerWidget {
           ],
         ),
       ),
-      //  bottomNavigationBar:BottomNav(
-      //                       mode: BottomNavMode.confirm,
-      //                       confirmRoute: '/home',
-      //                     ) // 불러오기만 하면 됨
-       bottomNavigationBar:BottomNav(mode: BottomNavMode.tab)
+      bottomNavigationBar: BottomNav(
+    mode: BottomNavMode.tab,
+    userData: extra ?? {},
+  ),
     );
   }
 }
