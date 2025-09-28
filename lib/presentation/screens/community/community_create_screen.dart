@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/providers/user_provider.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 
 // VM 상태(provider) import
@@ -58,8 +58,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
       );
     }
     //uid 기반 프로필정보 로드(유저정보,위치정보)
-    final profileAv = ref.watch(userProfileProvider(uid));
-    final gpsAv = ref.watch(userGpsProvider(uid));
+    final profileAv = ref.watch(profileByUidProvider(uid));
 
     return Scaffold(
       appBar: AppBar(title: const Text("글쓰기")),
@@ -72,29 +71,12 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  Text('작성정보'),
-                  // 프로필 표시
-                  profileAv.when(
-                    loading: () => const Text('작성자 불러오는 중...'),
-                    error: (e, _) => Text('작성자 오류: $e'),
-                    data: (p) => Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 16,
-                          //TODO:더미: 프로필 없으면 이니셜
-                          child: Text(p.nickname.characters.first),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('${p.nickname} (uid: ${p.uid})'),
-                      ],
-                    ),
-                  ),
                   // 위치 표시
-                  gpsAv.when(
+                  profileAv.when(
                     loading: () => const Text('위치 불러오는 중...'),
                     error: (e, _) => Text('위치 오류: $e'),
                     data: (g) => Text(
-                      '현재 위치: ${g.location} (lat:${g.lat}, lng:${g.lng})',
+                      '현재 위치: ${g.dongName}',
                     ),
                   ),
                   TextFormField(
@@ -283,20 +265,11 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                       final code = ref.read(selectedCategoryCodeProvider);
                       final subCode = ref.read(selectedSubCategoryCodeProvider);
                       //TODO:프로필/GPS 데이터 꺼내기 (이미 위에서 watch 했으므로 값 체크)
-                      final profile = ref
-                          .read(userProfileProvider(uid))
-                          .maybeWhen(
-                            data: (p) => p,
-                            orElse: () => null,
-                          );
-                      final gps = ref
-                          .read(userGpsProvider(uid))
-                          .maybeWhen(
-                            data: (g) => g,
-                            orElse: () => null,
-                          );
                       // 예외처리
-                      if (profile == null || gps == null) {
+                      final profile = ref
+                          .read(profileByUidProvider(uid))
+                          .maybeWhen(data: (p) => p, orElse: () => null);
+                      if (profile == null || profile.dongName.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -313,15 +286,15 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                       debugPrint("상위코드: $code");
                       debugPrint("하위코드: $subCode");
                       debugPrint("작성자: ${profile.nickname}");
-                      debugPrint("하위코드: ${gps.location}");
+                      debugPrint("하위코드: ${profile.dongName}");
                       //작성내용 전송
                       final res = await vm.submit(
                         title: _titleController.text,
                         content: _contentController.text,
                         categoryCode: code,
                         subCategoryCode: subCode,
-                        createUser: profile.uid,
-                        location: gps.location,
+                        createUser: uid,
+                        location: profile.dongName,
                       );
 
                       if (!context.mounted) return;

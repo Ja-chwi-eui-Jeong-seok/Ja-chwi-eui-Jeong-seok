@@ -1,30 +1,36 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/domain/entities/category.dart';
-import 'package:ja_chwi/domain/usecases/get_comment_count.dart';
 import 'package:ja_chwi/presentation/common/utils/string_utils.dart';
 import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
-import 'package:ja_chwi/presentation/providers/user_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/nick_name.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/no_location_view.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 //커뮤니티 화면 (카테고리 탭 2단구조 + 게시글 패치)
 class CommunityScreen extends ConsumerWidget {
-    final Map<String, dynamic>? extra;
-  
+  final Map<String, dynamic>? extra;
+
   const CommunityScreen({super.key, this.extra});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-        // extra 사용 가능
-    print('CommunityScreen extra: $extra');
+    // extra 사용 가능
+    if (kDebugMode) {
+      print('CommunityScreen extra: $extra');
+    }
     //카테고리 상태 구독
     final catState = ref.watch(categoryVMProvider);
-    //TODOL더미유저데이터 바꿔야함
-    final uid = ref.read(currentUidProvider);
+    //유저정보
+    final uid = extra?['uid'] as String?;
+    final location = extra?['dongName'] as String?;
+    final hasLocation = location != null && location.isNotEmpty;
+
     return catState.parents.when(
       //로딩
       loading: () => const Scaffold(
@@ -47,13 +53,14 @@ class CommunityScreen extends ConsumerWidget {
             // extendBody: true,
             appBar: AppBar(
               titleSpacing: 10,
-              title: const Row(
+              title: Row(
                 children: [
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_drop_down),
-                  SizedBox(width: 4),
-                  Text('동작구'), //TODO:현재 유저 프로필에 설정된 위치 표시해야함
-                  Spacer(),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_drop_down),
+                  const SizedBox(width: 4),
+
+                  Text(location ?? '위치를 등록해주세요'),
+                  const Spacer(),
                 ],
               ),
               bottom: TabBar(
@@ -85,42 +92,47 @@ class CommunityScreen extends ConsumerWidget {
               physics: const NeverScrollableScrollPhysics(),
               // 상위 탭 선택 시, 하위 탭(_SecondDepthTabs)으로 이동
               children: parents.map((p) {
-                return _SecondDepthTabs(parentCode: p.categoryCode);
+                return hasLocation
+                    ? _SecondDepthTabs(
+                        parentCode: p.categoryCode,
+                        location: location,
+                      )
+                    : const NoLocationView();
               }).toList(),
             ),
-            floatingActionButton: Padding(
-              padding: const EdgeInsets.only(bottom: 50),
-              child: FloatingActionButton.small(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                //글쓰기 버튼 자리
-                onPressed: () {
-                  //TODO:로그인처리확인
-
-                  if (uid == null) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(
-                      SnackBar(content: Text('로그인이 필요합니다.')),
-                    );
-                    return;
-                  }
-                  //TODO:uid를 extra로 넘김, 넘긴후 글쓰기 화면에서 uid로 위치조회 사용자 더미 바꿔야함
-                  context.push('/community-create', extra: uid);
-                },
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                child: const Icon(Icons.edit),
+            floatingActionButton: FloatingActionButton.small(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
               ),
+              //글쓰기 버튼 자리
+              onPressed: () {
+                if (uid == null) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(
+                    SnackBar(content: Text('로그인이 필요합니다.')),
+                  );
+                  return;
+                }
+                if (!hasLocation) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('위치 등록 후 글쓰기가 가능합니다.')),
+                  );
+                  return;
+                }
+                context.push('/community-create', extra: uid);
+              },
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.edit),
             ),
             // bottomNavigationBar: BottomNav(
             //   mode: BottomNavMode.tab,
             // ),
             bottomNavigationBar: BottomNav(
-            mode: BottomNavMode.tab,
-            userData: extra, // SplashScreen에서 받아온 Map<String, dynamic>
-          ),
+              mode: BottomNavMode.tab,
+              userData: extra, // SplashScreen에서 받아온 Map<String, dynamic>
+            ),
           ),
         );
       },
@@ -130,8 +142,9 @@ class CommunityScreen extends ConsumerWidget {
 
 /// 상위 탭(부모 카테고리) → 하위 탭(세부 카테고리)을 표시하는 위젯
 class _SecondDepthTabs extends ConsumerStatefulWidget {
-  const _SecondDepthTabs({required this.parentCode});
+  const _SecondDepthTabs({required this.parentCode, required this.location});
   final int parentCode;
+  final String? location;
 
   @override
   ConsumerState<_SecondDepthTabs> createState() => _SecondDepthTabsState();
@@ -187,6 +200,7 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
                       parentCode: widget.parentCode,
                       detailCode: s.categoryDetailCode,
                       detailName: s.categoryDetailName,
+                      location: widget.location,
                     );
                   }).toList(),
                 ),
@@ -205,37 +219,43 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
     required this.parentCode,
     required this.detailCode,
     required this.detailName,
+    required this.location,
   });
   final int parentCode;
   final int detailCode;
   final String detailName;
+  final String? location;
 
   @override
   ConsumerState<_PostsPlaceholder> createState() => _PostsPlaceholderState();
 }
 
 class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
-  // CommunityListVM 을 위한 provider
-  late final NotifierProvider<CommunityListVM, CommunityListState> provider =
-      communityListVmProvider(
-        categoryCode: widget.parentCode,
-        detailCode: widget.detailCode,
-        location: '동작구', //유저 프로필 > 프로필에서 위치값 현재는 임의로 동작구지정
-      );
-
   @override
   void initState() {
     super.initState();
-    
+
     // 첫 진입 시 초기 데이터 로드
-    Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+    // Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
   }
 
   //게시글마다 댓글갯수 담는곳
   final Map<String, Future<int>> _commentCountFutures = {};
   @override
   Widget build(BuildContext context) {
+    if (widget.location == null || widget.location!.isEmpty) {
+      return const NoLocationView();
+    }
+    final provider = communityListVmProvider(
+      categoryCode: widget.parentCode,
+      detailCode: widget.detailCode,
+      location: widget.location!,
+    );
     final st = ref.watch(provider);
+    // 첫 빌드 때만 초기 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(provider.notifier).loadInitial(ref);
+    });
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
         onNotification: (n) {
@@ -260,13 +280,13 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                     ),
                   ),
                   const Spacer(),
-                  //쓸지안쓸지 모름..안쓸것같음
-                  const Text(
-                    '최신순',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const Text('  |  ', style: TextStyle(color: Colors.grey)),
-                  const Text('인기순', style: TextStyle(color: Colors.grey)),
+                  //TODO: 정렬기능
+                  // const Text(
+                  //   '최신순',
+                  //   style: TextStyle(fontWeight: FontWeight.w600),
+                  // ),
+                  // const Text('  |  ', style: TextStyle(color: Colors.grey)),
+                  // const Text('인기순', style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -307,7 +327,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                     onTap: () => context.push(
                       '/community-detail',
                       extra: x.id,
-                    ), // x: Community
+                    ),
                     child: Container(
                       height: 96,
                       //테두리
@@ -343,7 +363,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                     Text(
                                       //날짜
                                       date,
-                                      // style: const TextStyle(color: Colors.grey),
                                     ),
                                   ],
                                 ),
@@ -351,10 +370,8 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
 
                                 Row(
                                   children: [
-                                    Text(
-                                      //TODO:작성자(현재 임시)
-                                      x.createUser,
-                                      //style: const TextStyle(color: Colors.grey),
+                                    NickName(
+                                      uid: x.createUser,
                                     ),
                                     Spacer(),
                                     //댓글수 표시
@@ -382,9 +399,9 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                         return Text('$c');
                                       },
                                     ),
-                                    const SizedBox(width: 10),
+                                    //const SizedBox(width: 10),
                                     //TODO: 스크랩
-                                    const Icon(Icons.bookmark_border, size: 18),
+                                    //const Icon(Icons.bookmark_border, size: 18),
                                   ],
                                 ),
                               ],
