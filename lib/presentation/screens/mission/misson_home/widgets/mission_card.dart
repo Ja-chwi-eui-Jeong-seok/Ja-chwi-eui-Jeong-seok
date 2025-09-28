@@ -23,7 +23,8 @@ class MissionCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 10, 8, 10),
       decoration: BoxDecoration(
         // color: const Color(0xFFF5F5F5),
-        color: const Color(0xD3D3D3D3),
+        // color: const Color(0xD3D3D3D3),
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

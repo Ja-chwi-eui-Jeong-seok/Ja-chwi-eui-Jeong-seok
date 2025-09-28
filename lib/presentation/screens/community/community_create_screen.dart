@@ -41,6 +41,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
   Widget build(BuildContext context) {
     // 카테고리 VM 상태 구독: 상위/하위 목록과 로딩/에러 포함
     final catState = ref.watch(categoryVMProvider);
+    //글작성상태 구독
+    final submitState = ref.watch(communityCreateVmProvider).submitting;
 
     // 선택 상태 구독: 선택된 상위코드와 하위이름
     final selectedCode = ref.watch(selectedCategoryCodeProvider);
@@ -79,7 +81,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                       children: [
                         CircleAvatar(
                           radius: 16,
-                          // 더미: 프로필 없으면 이니셜
+                          //TODO:더미: 프로필 없으면 이니셜
                           child: Text(p.nickname.characters.first),
                         ),
                         const SizedBox(width: 8),
@@ -272,78 +274,93 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
               padding: const EdgeInsets.only(left: 24, right: 24, bottom: 50),
               child: SizedBox(
                 width: double.infinity,
-                child: GestureDetector(
-                  onTap: () async {
-                    // 선택값 읽기
-                    final code = ref.read(selectedCategoryCodeProvider);
-                    final subCode = ref.read(selectedSubCategoryCodeProvider);
-                    //TODO:프로필/GPS 데이터 꺼내기 (이미 위에서 watch 했으므로 값 체크)
-                    final profile = ref
-                        .read(userProfileProvider(uid))
-                        .maybeWhen(
-                          data: (p) => p,
-                          orElse: () => null,
-                        );
-                    final gps = ref
-                        .read(userGpsProvider(uid))
-                        .maybeWhen(
-                          data: (g) => g,
-                          orElse: () => null,
-                        );
-                    // 예외처리
-                    if (profile == null || gps == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            '작성자/위치 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.',
+                child: AbsorbPointer(
+                  // 제출 중 탭 막기
+                  absorbing: submitState,
+                  child: GestureDetector(
+                    onTap: () async {
+                      // 선택값 읽기
+                      final code = ref.read(selectedCategoryCodeProvider);
+                      final subCode = ref.read(selectedSubCategoryCodeProvider);
+                      //TODO:프로필/GPS 데이터 꺼내기 (이미 위에서 watch 했으므로 값 체크)
+                      final profile = ref
+                          .read(userProfileProvider(uid))
+                          .maybeWhen(
+                            data: (p) => p,
+                            orElse: () => null,
+                          );
+                      final gps = ref
+                          .read(userGpsProvider(uid))
+                          .maybeWhen(
+                            data: (g) => g,
+                            orElse: () => null,
+                          );
+                      // 예외처리
+                      if (profile == null || gps == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '작성자/위치 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.',
+                            ),
                           ),
-                        ),
+                        );
+                        return;
+                      }
+
+                      // 디버그 출력
+                      debugPrint("제목: ${_titleController.text}");
+                      debugPrint("내용: ${_contentController.text}");
+                      debugPrint("상위코드: $code");
+                      debugPrint("하위코드: $subCode");
+                      debugPrint("작성자: ${profile.nickname}");
+                      debugPrint("하위코드: ${gps.location}");
+                      //작성내용 전송
+                      final res = await vm.submit(
+                        title: _titleController.text,
+                        content: _contentController.text,
+                        categoryCode: code,
+                        subCategoryCode: subCode,
+                        createUser: profile.uid,
+                        location: gps.location,
                       );
-                      return;
-                    }
 
-                    // 디버그 출력
-                    debugPrint("제목: ${_titleController.text}");
-                    debugPrint("내용: ${_contentController.text}");
-                    debugPrint("상위코드: $code");
-                    debugPrint("하위코드: $subCode");
-                    debugPrint("작성자: ${profile.nickname}");
-                    debugPrint("하위코드: ${gps.location}");
+                      if (!context.mounted) return;
 
-                    final res = await vm.submit(
-                      title: _titleController.text,
-                      content: _contentController.text,
-                      categoryCode: code,
-                      subCategoryCode: subCode,
-                      createUser: profile.uid,
-                      location: gps.location,
-                    );
+                      if (res.error != null) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(res.error!)));
+                        return;
+                      }
 
-                    if (!context.mounted) return;
-
-                    if (res.error != null) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(res.error!)));
-                      return;
-                    }
-
-                    context.push('/community-detail', extra: res.newId);
-                  },
-                  child: Container(
-                    width: 300,
-                    height: 55,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "확인",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
+                      context.push('/community-detail', extra: res.newId);
+                    },
+                    child: Opacity(
+                      opacity: submitState ? 0.6 : 1,
+                      child: Container(
+                        width: 300,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Center(
+                          child: submitState
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  "확인",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
