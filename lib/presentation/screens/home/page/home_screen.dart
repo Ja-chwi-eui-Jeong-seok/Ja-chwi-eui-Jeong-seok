@@ -6,7 +6,7 @@ import 'package:ja_chwi/presentation/screens/home/home_widget/home_card.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic>? extra;
