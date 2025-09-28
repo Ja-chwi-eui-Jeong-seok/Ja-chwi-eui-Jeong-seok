@@ -12,6 +12,7 @@ import 'package:ja_chwi/presentation/providers/profile_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_flow_appbar.dart';
 
+
 /// 단계별 진행 상태 Provider
 final stepProvider = StateProvider<int>((ref) => 0);
 
@@ -89,8 +90,9 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
 
 /// Profile Flow Page
 class ProfileFlowPage extends ConsumerStatefulWidget {
+    final Map<String, dynamic>? extra;
   final String uid;
-  const ProfileFlowPage({super.key,required this.uid });
+  const ProfileFlowPage({super.key,required this.uid,required this.extra });
 
   @override
   ConsumerState<ProfileFlowPage> createState() => _ProfileFlowPageState();

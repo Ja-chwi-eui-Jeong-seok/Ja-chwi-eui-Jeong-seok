@@ -13,10 +13,14 @@ import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 //커뮤니티 화면 (카테고리 탭 2단구조 + 게시글 패치)
 class CommunityScreen extends ConsumerWidget {
-  const CommunityScreen({super.key});
+    final Map<String, dynamic>? extra;
+  
+  const CommunityScreen({super.key, this.extra});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+        // extra 사용 가능
+    print('CommunityScreen extra: $extra');
     //카테고리 상태 구독
     final catState = ref.watch(categoryVMProvider);
     //TODOL더미유저데이터 바꿔야함
@@ -110,9 +114,13 @@ class CommunityScreen extends ConsumerWidget {
                 child: const Icon(Icons.edit),
               ),
             ),
+            // bottomNavigationBar: BottomNav(
+            //   mode: BottomNavMode.tab,
+            // ),
             bottomNavigationBar: BottomNav(
-              mode: BottomNavMode.tab,
-            ),
+            mode: BottomNavMode.tab,
+            userData: extra, // SplashScreen에서 받아온 Map<String, dynamic>
+          ),
           ),
         );
       },
@@ -218,6 +226,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
   @override
   void initState() {
     super.initState();
+    
     // 첫 진입 시 초기 데이터 로드
     Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
   }
