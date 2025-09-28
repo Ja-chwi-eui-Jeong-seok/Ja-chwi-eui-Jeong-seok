@@ -16,8 +16,8 @@ import 'package:ja_chwi/presentation/screens/mission/create/mission_create_scree
 // import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_list_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_home_screen.dart';
-import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_flow.dart';
+import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/my_reports.dart';
@@ -59,7 +59,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/privacy-policy',
       name: '개인정보처리방침',
-      builder: (context, state) =>  PrivacyPolicyPage(),
+      builder: (context, state) => PrivacyPolicyPage(),
     ),
      GoRoute(
       path: '/home',
@@ -131,6 +131,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const CommunityCreateScreen(),
     ),
     GoRoute(
+
   path: '/profile-flow',
   builder: (context, state) {
     final data = state.extra as Map<String, dynamic>?; // extra 전체 받기
@@ -148,6 +149,7 @@ final GoRouter router = GoRouter(
     );
   },
 ),
+
     GoRoute(
       path: '/profile',
       name: '프로필',
