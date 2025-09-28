@@ -27,8 +27,16 @@ final achieversProvider = FutureProvider<List<MissionAchiever>>((ref) async {
 
 /// 현재 사용자의 프로필 정보를 비동기적으로 가져오는 FutureProvider
 final userProfileProvider = StreamProvider<UserProfile>((ref) {
+  // 1. FirebaseAuth에서 현재 로그인한 사용자 정보를 가져옵니다.
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    // 로그인하지 않은 경우, 에러를 발생시켜 UI에서 처리하도록 합니다.
+    return Stream.error(Exception('로그인한 사용자가 없습니다.'));
+  }
+
   final usecase = ref.watch(fetchUserProfileUseCaseProvider);
-  return usecase.execute().map((userProfileData) {
+  // 2. 가져온 user.uid를 usecase의 execute 메서드에 전달합니다.
+  return usecase.execute(user.uid).map((userProfileData) {
     return UserProfile.fromMap(userProfileData);
   });
 });

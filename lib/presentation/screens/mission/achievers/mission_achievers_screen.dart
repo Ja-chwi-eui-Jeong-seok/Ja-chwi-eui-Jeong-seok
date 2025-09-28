@@ -188,7 +188,7 @@ class MissionAchieversScreenState
 
   Widget _buildRankingSection(List<MissionAchiever> achievers) {
     final _placeholderAchiever = MissionAchiever(
-      name: '미정',
+      name: '?',
       time: '',
       level: 'Lv.?',
       imageFullUrl: 'assets/images/profile/black.png', // 기본 이미지
