@@ -20,7 +20,7 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const WaveText(text: '자취의 정석 \n 시작하기'),
+                    const WaveText(text: '자취의 정석\n시작하기'),
                     const SizedBox(height: 40),
                     Image.asset(
                       'assets/images/profile/black.png',
