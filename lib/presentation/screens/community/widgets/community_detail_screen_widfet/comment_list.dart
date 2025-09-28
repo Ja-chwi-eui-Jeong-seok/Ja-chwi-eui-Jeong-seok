@@ -1,12 +1,14 @@
 // --- 댓글 리스트 ---
 // 기존 CommentCard의 주석과 형태를 유지하되, VM 데이터로 교체
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widfet/heart_button.dart';
 
-class CommentList extends StatelessWidget {
+class CommentList extends ConsumerWidget {
   const CommentList({
     required this.itemCount,
-    required this.nickOf,
+    required this.uidOf,
     required this.textOf,
     required this.likeCountOf,
     required this.loading,
@@ -16,7 +18,7 @@ class CommentList extends StatelessWidget {
   });
 
   final int itemCount;
-  final String Function(int) nickOf;
+  final String Function(int) uidOf;
   final String Function(int) textOf;
   final int Function(int) likeCountOf;
   final bool loading;
@@ -40,7 +42,8 @@ class CommentList extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    //댓글카운트
     if (itemCount == 0) {
       if (loading) {
         return const Center(child: CircularProgressIndicator());
@@ -56,7 +59,7 @@ class CommentList extends StatelessWidget {
       );
     }
 
-    // 중요: 스크롤은 ListView가 맡게 (shrinkWrap/physics 건드리지 않기)
+    // shrinkWrap/physics 건드리지 않기
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       itemCount: itemCount + (loading ? 1 : 0),
@@ -147,9 +150,34 @@ class CommentList extends StatelessWidget {
                 SizedBox(
                   height: 45,
                   width: 45,
-                  child: Image.asset(
-                    'assets/images/m_profile/m_black.png',
-                  ), //TODO:댓글 작성자 프로필정보(현재는 더미이미지사용)
+                  child: Builder(
+                    builder: (_) {
+                      final uid = uidOf(i);
+                      final av = ref.watch(profileByUidProvider(uid));
+                      return av.when(
+                        data: (p) => ClipRRect(
+                          borderRadius: BorderRadius.circular(22.5),
+                          child: (p.thumbUrl.isNotEmpty
+                              ? Image.asset(p.thumbUrl)
+                              : (p.imageFullUrl.isNotEmpty
+                                    ? Image.asset(p.imageFullUrl)
+                                    : Image.asset(
+                                        'assets/images/m_profile/m_black.png',
+                                      ))),
+                        ),
+                        loading: () => Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          child: const CircleAvatar(radius: 22.5),
+                        ),
+                        error: (_, __) => const CircleAvatar(
+                          radius: 22.5,
+                          child: Icon(Icons.person),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -159,12 +187,23 @@ class CommentList extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            nickOf(i),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          //작성자이름
+                          Builder(
+                            builder: (_) {
+                              final uid = uidOf(i);
+                              final av = ref.watch(profileByUidProvider(uid));
+                              final nickname = av.maybeWhen(
+                                data: (p) => p.nickname,
+                                orElse: () => uid, // 로딩/에러 시 임시로 uid
+                              );
+                              return Text(
+                                nickname,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            },
                           ),
                           SizedBox(
                             width: 8,
@@ -179,6 +218,7 @@ class CommentList extends StatelessWidget {
                         ],
                       ),
                       Text(
+                        //댓글내용
                         textOf(i),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
