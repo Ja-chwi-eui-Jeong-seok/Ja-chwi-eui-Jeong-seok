@@ -22,7 +22,7 @@ class _SplashPageState extends State<LodingScreen>
     // 애니메이션이 끝났을 때 화면 이동
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        GoRouter.of(context).go('/home'); // 초기 프로필 설정 창으로 가고 이미 만들어져 있으면 홈으로
+        GoRouter.of(context).go('/home');
       }
     });
   }
