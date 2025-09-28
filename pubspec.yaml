@@ -70,6 +70,8 @@ dependencies:
   http: ^1.5.0
   dotenv: ^4.2.0
   flutter_dotenv: ^6.0.0
+  csv: ^6.0.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -103,6 +105,7 @@ flutter:
     - assets/images/
     - assets/banned_words/slang.csv
     - assets/config/env/setting.env
+    - assets/config/csv/통계청_법정동 연계정보_20250602.csv
     # - assets/config/mock/
 
   # An image asset can refer to one or more resolution-specific "variants", see

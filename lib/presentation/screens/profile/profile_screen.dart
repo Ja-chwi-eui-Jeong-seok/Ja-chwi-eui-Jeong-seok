@@ -6,10 +6,14 @@ import 'package:ja_chwi/presentation/screens/profile/widgets/profile_grid.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key});
+    final Map<String, dynamic>? extra;
+  const ProfileScreen({super.key,this.extra});
+ 
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+        // ✅ 전달받은 extra 확인
+    print('ProfileScreen extra: $extra');
     return Scaffold(
       appBar: AppBar(title: const Text('Profile Screen')),
       body: SingleChildScrollView(

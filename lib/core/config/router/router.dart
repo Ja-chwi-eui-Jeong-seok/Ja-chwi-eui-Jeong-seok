@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/page/ai_chat.dart';
-import 'package:ja_chwi/presentation/screens/auth/page/character_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/login_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/privacy_policy_page.dart';
+import 'package:ja_chwi/presentation/screens/block/block_user.dart';
+import 'package:ja_chwi/presentation/screens/block/my_block_user.dart';
 import 'package:ja_chwi/presentation/screens/community/community_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
@@ -18,8 +20,8 @@ import 'package:ja_chwi/presentation/screens/profile/profile_flow.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
 import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
-import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
-import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
+import 'package:ja_chwi/presentation/screens/report/my_reports.dart';
+import 'package:ja_chwi/presentation/screens/report/report_user.dart';
 import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 // AppBar 타이틀
 // GoRouter는 현재 라우트 정보를 GoRouterState.of(context)로 제공한다.
@@ -31,20 +33,15 @@ import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/splash',
+  //initialLocation: '/my-block-users', //'/block-user',
 
-  // initialLocation: '/profile',
+   initialLocation: '/splash',
   routes: [
     GoRoute(
       path: '/splash',
       name: '스플레시',
       builder: (context, state) => const SplashScreen(),
     ),
-    // GoRoute(
-    //   path: '/guide',
-    //   name: '가이드',
-    //   builder: (context, state) => const GuideScreen(),
-    // ),
     GoRoute(
       path: '/guide',
       name: '가이드',
@@ -64,23 +61,16 @@ final GoRouter router = GoRouter(
       name: '개인정보처리방침',
       builder: (context, state) => PrivacyPolicyPage(),
     ),
-    GoRoute(
-      path: '/character-create',
-      name: '캐릭터 생성',
-      builder: (context, state) => const CharacterCreateScreen(),
-    ),
-    // GoRoute(
-    //   path: '/home',
-    //   name: '메인',
-    //   builder: (context, state) => const HomeScreen(),
-    // ),
-    GoRoute(
+     GoRoute(
       path: '/home',
       name: '메인',
       builder: (context, state) {
-        final args = state.extra as Map<String, dynamic>?;
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return HomeScreen(extra: data);
+      // builder: (context, state) {
+      //   final args = state.extra as Map<String, dynamic>?;
 
-        return HomeScreen(extra: args);
+      //   return HomeScreen(extra: args);
       },
     ),
     GoRoute(
@@ -91,7 +81,16 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/mission',
       name: '미션',
-      builder: (context, state) => const MissionHomeScreen(),
+       builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+        return MissionHomeScreen(extra: data);
+  },
+      // builder: (context, state) {
+      //   final args = state.extra as Map<String, dynamic>?;
+
+      //   return MissionHomeScreen(extra: args);
+      // },
+      //builder: (context, state) => const MissionHomeScreen(),
     ),
     GoRoute(
       path: '/mission-create',
@@ -111,7 +110,12 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/community',
       name: '커뮤니티',
-      builder: (context, state) => const CommunityScreen(),
+       builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
+
+        return CommunityScreen(extra: args);
+      },
+      //builder: (context, state) => const CommunityScreen(),
     ),
     GoRoute(
       path: '/community-detail',
@@ -127,27 +131,25 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const CommunityCreateScreen(),
     ),
     GoRoute(
-      path: '/profile-flow',
-      name: '프로필 단계',
-      //builder: (context, state) => ProfileFlowPage(uid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52'),
-      //     builder: (context, state) {
-      //   final uid = state.extra as String; // 값 받기
-      //   return ProfileFlowPage(uid: uid);
-      // },
-      builder: (context, state) {
-        final uid = state.extra as String?;
-        print('$uid');
-        if (uid == null) {
-          // UID 없으면 login 화면으로 이동
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            GoRouter.of(context).go('/login');
-          });
-          // 임시로 빈 화면 반환
-          return SizedBox.shrink();
-        }
-        return ProfileFlowPage(uid: uid);
-      },
-    ),
+
+  path: '/profile-flow',
+  builder: (context, state) {
+    final data = state.extra as Map<String, dynamic>?; // extra 전체 받기
+    debugPrint("넘어온 데이터: $data");
+
+    final uid = data?['uid'] as String?;
+    if (uid == null) {
+      context.go('/login');
+      return const SizedBox.shrink();
+    }
+
+    return ProfileFlowPage(
+      uid: uid,
+      extra: data,
+    );
+  },
+),
+
     GoRoute(
       path: '/profile',
       name: '프로필',
@@ -156,7 +158,12 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/profile-detail',
       name: '프로필 상세',
-      builder: (context, state) => const ProfileDetail(),
+       builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return ProfileDetail(extra: data);
+  
+      },
+     // builder: (context, state) => const ProfileDetail(),
     ),
     GoRoute(
       path: '/admin',
@@ -164,14 +171,34 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const AdminScreen(),
     ),
     GoRoute(
-      path: '/report',
-      name: '신고내역',
-      builder: (context, state) => const ReportScreen(),
+      path: '/my-report',
+      name: '내가신고내역',
+      builder: (context, state) => MyReportsPage(
+          myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
+      ),
     ),
     GoRoute(
-      path: '/report-detail',
-      name: '신고내역 상세',
-      builder: (context, state) => const ReportDetailScreen(),
+      path: '/report',
+      name: '신고등록',
+      builder: (context, state) => const ReportUserPage(
+                myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
+                targetUid: 'MoDmwRSaBANwKlVLvyhEXgiD5Sn2',),
     ),
+    //관리자가 uid 불러와 차단하는경우 
+    GoRoute(
+      path: '/block-user',
+      name: '차단등록',
+      builder: (context, state) => BlockUserPage(
+        myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
+      ),
+    ),
+    GoRoute(
+      path: '/my-block',
+      name: '차단내역',
+      builder: (context, state) {
+        final uid = FirebaseAuth.instance.currentUser!.uid;
+        return MyBlockedUsersPage(myUid: uid);
+      },
+),
   ],
 );
