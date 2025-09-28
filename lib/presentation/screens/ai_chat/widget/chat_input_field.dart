@@ -13,10 +13,10 @@ class ChatInputField extends StatelessWidget {
         ),
         child: Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.image),
-              onPressed: () {},
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.image),
+            //   onPressed: () {},
+            // ),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -26,7 +26,7 @@ class ChatInputField extends StatelessWidget {
                 ),
                 child: const TextField(
                   decoration: InputDecoration(
-                    hintText: '메시지 입력해주세요',
+                    hintText: 'Comming Soon',
                     border: InputBorder.none,
                   ),
                 ),

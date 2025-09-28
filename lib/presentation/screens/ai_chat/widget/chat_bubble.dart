@@ -125,10 +125,15 @@ class _ChatBubbleState extends State<ChatBubble> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
+                      color: Colors.black,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(widget.message),
+                    child: Text(
+                      widget.message,
+                      style: TextStyle(
+                        color: widget.isUser ? Colors.white : Colors.black,
+                      ),
+                    ),
                   ),
                 ],
               ],
@@ -139,7 +144,9 @@ class _ChatBubbleState extends State<ChatBubble> {
             const SizedBox(width: 8),
             const CircleAvatar(
               radius: 18,
-              backgroundImage: AssetImage(''),
+              backgroundImage: AssetImage(
+                'assets/images/m_profile/m_black.png',
+              ),
             ),
           ],
         ],
