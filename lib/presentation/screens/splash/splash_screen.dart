@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/providers/bottom_provider.dart';
+// import 'package:ja_chwi/presentation/providers/bottom_provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashPageState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -20,7 +21,7 @@ class _SplashPageState extends State<SplashScreen> with SingleTickerProviderStat
     super.initState();
     _controller = AnimationController(vsync: this);
 
-   // 애니메이션 완료 → 유저 상태 확인 후 이동
+    // 애니메이션 완료 → 유저 상태 확인 후 이동
     _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed && mounted) {
         final user = FirebaseAuth.instance.currentUser;
@@ -33,7 +34,7 @@ class _SplashPageState extends State<SplashScreen> with SingleTickerProviderStat
               .collection('user_profile')
               .doc(user.uid)
               .get(); // 계정이 있는지 확인
-        
+
           final usersDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
@@ -44,36 +45,35 @@ class _SplashPageState extends State<SplashScreen> with SingleTickerProviderStat
               .doc(user.uid)
               .get(); // 캐릭터생성 확인
 
-         if (userProfileDoc.exists&&usersDoc.exists&&profilesDoc.exists) {
+          if (userProfileDoc.exists && usersDoc.exists && profilesDoc.exists) {
             // 프로필 계정, 개인정보동의, 캐릭터 모두 있음
             GoRouter.of(context).go('/home', extra: extraData);
-          }else if (!userProfileDoc.exists) {
-            //  계정 없음 
+          } else if (!userProfileDoc.exists) {
+            //  계정 없음
             GoRouter.of(context).go('/login');
-          }else if(!usersDoc.exists) {
-            // 개인정보 동의 없음 
+          } else if (!usersDoc.exists) {
+            // 개인정보 동의 없음
             GoRouter.of(context).go('/privacy-policy', extra: extraData);
           } else {
-            // 개인정보 동의 없음 
+            // 개인정보 동의 없음
             GoRouter.of(context).go('/profile-flow', extra: extraData);
-
           }
         } else {
           // 로그인 안 되어 있으면 → 로그인 화면 이동
           GoRouter.of(context).go('/login');
         }
       }
-    }
-  );
-
-
-
+    });
   }
-   Future<Map<String, dynamic>> fetchUserData(String uid) async {
-  final firestore = FirebaseFirestore.instance;
 
-  // 1️⃣ user_profile 먼저 가져오기
-  final userProfileDoc = await firestore.collection('user_profile').doc(uid).get();
+  Future<Map<String, dynamic>> fetchUserData(String uid) async {
+    final firestore = FirebaseFirestore.instance;
+
+    // 1️⃣ user_profile 먼저 가져오기
+    final userProfileDoc = await firestore
+        .collection('user_profile')
+        .doc(uid)
+        .get();
 
     // user_profile 기준 uid 사용
     final userUid = userProfileDoc.id; // doc.id가 uid
@@ -85,7 +85,7 @@ class _SplashPageState extends State<SplashScreen> with SingleTickerProviderStat
       'uid': userUid, // ✅ user_profile 기준
       'nickname': profileDoc.data()?['nickname'] ?? '',
       'thumbUrl': profileDoc.data()?['thumbUrl'] ?? '',
-      'mission_count': profileDoc.data()?['mission_count'] ?? '',     
+      'mission_count': profileDoc.data()?['mission_count'] ?? '',
       'imageFullUrl': profileDoc.data()?['imageFullUrl'] ?? '',
       'color': profileDoc.data()?['color'] ?? '',
       'managerType': userProfileDoc.data()?['manager_type'] ?? '',
@@ -93,7 +93,7 @@ class _SplashPageState extends State<SplashScreen> with SingleTickerProviderStat
 
     print('fetchUserData 결과: $userData');
     return userData;
-}
+  }
 
   @override
   void dispose() {
@@ -145,4 +145,4 @@ class _SplashPageState extends State<SplashScreen> with SingleTickerProviderStat
       ),
     );
   }
-} 
+}
