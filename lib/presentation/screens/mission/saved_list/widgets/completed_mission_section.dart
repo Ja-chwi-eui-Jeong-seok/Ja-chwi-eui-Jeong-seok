@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/selected_day_mission_view.dart';
@@ -34,7 +35,10 @@ class CompletedMissionSection extends StatelessWidget {
                   onPressed: () {
                     context.push('/mission-create', extra: missionData);
                   },
-                  icon: const Icon(Icons.edit_outlined, color: Colors.grey),
+                  icon: const Icon(
+                    CupertinoIcons.square_pencil_fill,
+                    color: Colors.black54,
+                  ),
                   tooltip: '수정하기',
                 ),
         ),

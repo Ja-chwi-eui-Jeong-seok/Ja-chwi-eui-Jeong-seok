@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/custom_tag.dart';
 
@@ -115,8 +116,8 @@ class SelectedDayMissionView extends StatelessWidget {
                 children: [
                   Icon(
                     isPublic
-                        ? Icons.lock_open_rounded
-                        : Icons.lock_outline_rounded,
+                        ? CupertinoIcons.lock_fill
+                        : CupertinoIcons.lock_open_fill,
                     size: 16,
                     color: Colors.black54,
                   ),
