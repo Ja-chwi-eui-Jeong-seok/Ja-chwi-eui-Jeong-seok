@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class RefreshIconButton extends StatelessWidget {
@@ -8,7 +9,7 @@ class RefreshIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.refresh, color: Colors.black),
+      icon: const Icon(CupertinoIcons.arrow_2_circlepath, color: Colors.black),
       onPressed: onPressed ?? () {},
     );
   }
