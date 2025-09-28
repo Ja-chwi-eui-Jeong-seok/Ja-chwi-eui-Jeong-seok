@@ -99,12 +99,18 @@ class _HomeScreenState extends State<HomeScreen> {
           return Stack(
             children: [
               const HomeBackground(),
-              Center(child: MonjiJump()),
+              Center(
+                child: MonjiJump(
+                  bodyColor: Color(
+                    int.parse('0xFF${userData?['color'] ?? '1A1A1A'}'),
+                  ),
+                ),
+              ),
               AiChatCircle(
                 center: circleCenter,
                 radius: circleRadius,
                 onTap: () {
-                  GoRouter.of(context).go('/ai-chat');
+                  GoRouter.of(context).push('/ai-chat', extra: userData);
                 },
               ),
               Padding(
