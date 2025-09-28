@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/ai_chat_circle.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_card.dart';
+import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
-import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-       userData = widget.extra;
+    userData = widget.extra;
 
     print('HomeScreen 데이터: $userData');
     // final args = widget.extra;
@@ -43,26 +42,22 @@ class _HomeScreenState extends State<HomeScreen> {
     // missionCount = args?['missionCount'];
     // managerType = args?['managerType'];
 
+    // print('HomeScreen initState');
+    // print('uid: $uid, nickname: $nickname,thumbUrl:$thumbUrl');
+    // print('imageFullUrl: $imageFullUrl, color: $color');
+    // print('missionCount: $missionCount, managerType: $managerType');
 
-
-  // print('HomeScreen initState');
-  // print('uid: $uid, nickname: $nickname,thumbUrl:$thumbUrl');
-  // print('imageFullUrl: $imageFullUrl, color: $color');
-  // print('missionCount: $missionCount, managerType: $managerType');
-  
     // _checkguide();
   }
 
-  // Future<void> _checkguide() async {
+  // Future<void> _loadUserColor() async {
   //   final prefs = await SharedPreferences.getInstance();
-  //   final showguide = prefs.getBool('showguide') ?? true;
-
-  //   // if (showguide) {
-  //   //   await prefs.setBool('showguide', false); // 다음부터는 안 보이게
+  //   final colorValue = prefs.getInt('monji_color') ?? 0xFF1A1A1A;
   //   if (mounted) {
-  //     GoRouter.of(context).push('/guide'); // 가이드 화면으로 이동
+  //     setState(() {
+  //       userColor = Color(colorValue);
+  //     });
   //   }
-  //   // }
   // }
 
   @override
@@ -76,19 +71,16 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                '자취의 정석',
-                style: TextStyle(
-                  fontFamily: 'GamjaFlower',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28,
-                ),
+            const Text(
+              '자취의 정석',
+              style: TextStyle(
+                fontFamily: 'GamjaFlower',
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
               ),
             ),
             IconButton(
-              icon: Icon(Icons.notifications),
+              icon: const Icon(Icons.notifications),
               onPressed: () {
                 print('알림 창');
               },
@@ -96,42 +88,49 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: Stack(
-        children: [
-          const HomeBackground(),
-          Center(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                MonjiJump(),
-                AiChatCircle(
-                  circleSize: 40,
-                  offsetX: -10,
-                  offsetY: 80,
-                  icon: CupertinoIcons.chat_bubble_text,
-                  onTap: () {
-                    print('Ai챗');
-                  },
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final stackWidth = constraints.maxWidth;
+          final stackHeight = constraints.maxHeight;
+
+          final circleCenter = Offset(stackWidth * 0.73, stackHeight * 0.464);
+          final circleRadius = stackWidth * 0.05;
+
+          return Stack(
+            children: [
+              const HomeBackground(),
+              Center(
+                child: MonjiJump(
+                  bodyColor: Color(
+                    int.parse('0xFF${userData?['color'] ?? '1A1A1A'}'),
+                  ),
                 ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                const HomeProgress(),
-                const SizedBox(height: 8),
-                const HomeCard(),
-              ],
-            ),
-          ),
-        ],
+              ),
+              AiChatCircle(
+                center: circleCenter,
+                radius: circleRadius,
+                onTap: () {
+                  GoRouter.of(context).push('/ai-chat', extra: userData);
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: const [
+                    HomeProgress(),
+                    SizedBox(height: 8),
+                    HomeCard(),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
       bottomNavigationBar: BottomNav(
-            mode: BottomNavMode.tab,
-            userData: userData, // SplashScreen에서 전달받은 데이터
-            ),
+        mode: BottomNavMode.tab,
+        userData: userData, // SplashScreen에서 전달받은 데이터
+      ),
     );
   }
 }

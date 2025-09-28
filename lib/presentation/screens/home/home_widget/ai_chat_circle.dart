@@ -2,31 +2,40 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AiChatCircle extends StatelessWidget {
-  final double circleSize;
-  final double offsetX;
-  final double offsetY;
+  final Offset? center; // 선택적
+  final double? radius; // 선택적
   final IconData icon;
   final VoidCallback? onTap;
 
   const AiChatCircle({
     super.key,
-    this.circleSize = 60,
-    this.offsetX = 50,
-    this.offsetY = 20,
+    this.center,
+    this.radius,
     this.icon = CupertinoIcons.chat_bubble_text,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 여기서 size 정의
+    final size = MediaQuery.of(context).size;
+
+    // Guide3에서 center/radius를 주면 그걸 쓰고,
+    // HomeScreen에서는 기본 위치/크기 계산
+    final defaultCenter = Offset(size.width * 0.73, size.height * 0.464);
+    final defaultRadius = size.width * 0.07;
+
+    final effectiveCenter = center ?? defaultCenter;
+    final effectiveRadius = radius ?? defaultRadius;
+
     return Positioned(
-      top: offsetY,
-      right: -offsetX,
+      left: effectiveCenter.dx - effectiveRadius,
+      top: effectiveCenter.dy - effectiveRadius,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: circleSize,
-          height: circleSize,
+          width: effectiveRadius * 2,
+          height: effectiveRadius * 2,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.black,
@@ -34,7 +43,7 @@ class AiChatCircle extends StatelessWidget {
           child: Icon(
             icon,
             color: Colors.white,
-            size: circleSize * 0.5,
+            size: effectiveRadius,
           ),
         ),
       ),
