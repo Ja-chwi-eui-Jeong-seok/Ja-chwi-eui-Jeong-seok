@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class MonjiJump extends StatelessWidget {
-  static const Color bodyColor = Color(0xFF1A1A1A); // 직접 16진수 지정
+  final Color bodyColor; // 직접 16진수 지정
   //black: 1A1A1A / red: FF9696 / orange: FF9977 / banana: FFEA97
   //green: ABD891 / sky: 7FA8DA / night: 6664CE / pupple: DF8FE6
 
-  const MonjiJump({super.key});
+  const MonjiJump({super.key, required this.bodyColor});
 
   @override
   Widget build(BuildContext context) {
