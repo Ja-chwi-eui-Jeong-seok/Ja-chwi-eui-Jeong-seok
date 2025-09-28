@@ -70,7 +70,7 @@ class MissionHomeScreen extends ConsumerWidget {
                   },
                   child: const Text(
                     '로그아웃',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
               ),

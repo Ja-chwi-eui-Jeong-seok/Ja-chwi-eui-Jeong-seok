@@ -5,7 +5,6 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 // import 'package:ja_chwi/presentation/screens/mission/achievers/widgets/category_tabs.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
-import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/achiever_card.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 
 class MissionAchieversScreen extends ConsumerStatefulWidget {
@@ -70,11 +69,80 @@ class MissionAchieversScreenState
                           itemCount: _getListItemCount(achievers.length),
                           itemBuilder: (context, index) {
                             // index는 0부터 시작하므로, 4위(achievers[3])부터 가져옵니다.
-                            final achiever = achievers[index + 3];
-                            return AchieverCard(
-                              rank: index + 4, // 4, 5, 6... 등수를 전달
-                              level: achiever.level,
-                              name: achiever.name,
+                            final rank = index + 4;
+                            final achiever = achievers[rank - 1];
+                            // AchieverCard 대신 ListTile과 유사한 UI를 직접 구성합니다.
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 30,
+                                    child: Text(
+                                      '$rank',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  SizedBox(
+                                    width: 48,
+                                    height: 48,
+                                    child: ClipOval(
+                                      child: Image.asset(
+                                        achiever.imageFullUrl,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    achiever.level,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    achiever.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  TextButton(
+                                    onPressed: () {
+                                      // achiever.userId를 사용하여 uid를 가져옵니다.
+                                      context.push(
+                                        '/profile-detail',
+                                        extra: {'userId': achiever.userId},
+                                      );
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Text(
+                                          '상세보기',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(width: 2),
+                                        Icon(
+                                          Icons.arrow_forward_ios,
+                                          color: Colors.black,
+                                          size: 13,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                           separatorBuilder: (context, index) =>
@@ -123,7 +191,8 @@ class MissionAchieversScreenState
 
   Widget _buildRankingSection(List<MissionAchiever> achievers) {
     final _placeholderAchiever = MissionAchiever(
-      name: '미정',
+      userId: '',
+      name: '?',
       time: '',
       level: 'Lv.?',
       imageFullUrl: 'assets/images/profile/black.png', // 기본 이미지
