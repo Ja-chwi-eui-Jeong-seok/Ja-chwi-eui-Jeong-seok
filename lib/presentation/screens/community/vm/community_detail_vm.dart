@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +12,7 @@ import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
 
 //TODO: 로그인 사용자 uid 나중에 바꿔야함
-import 'package:ja_chwi/presentation/providers/user_provider.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 
 /// 상세 화면 상태
 class CommunityDetailState {
@@ -122,7 +123,7 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
 
   // 현재 로드된 댓글 목록 기준, 로그인 사용자가 좋아요한 commentId 집합 로드
   Future<void> _loadLikedSet(WidgetRef ref) async {
-    final uid = ref.read(currentUidProvider);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null || state.comments.isEmpty) {
       state = state.copyWith(likedIds: {});
       return;
@@ -185,7 +186,7 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
 
   //좋아요 토글(중복 방지 + 카운트 동기)
   Future<void> toggleLike(WidgetRef ref, String commentId) async {
-    final uid = ref.read(currentUidProvider); //TODO: 유저프로필 업데이트되면 바꾸기
+    final uid = FirebaseAuth.instance.currentUser?.uid; //TODO: 유저프로필 업데이트되면 바꾸기
     if (uid == null) {
       //로그인 가드. UI에서 토스트 안내 권장.
       return;
