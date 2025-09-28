@@ -94,7 +94,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             child: const Icon(
                               Icons.refresh,
                               size: 12, // 아이콘 아주 작게
-                              color: Colors.red,
+                              color: Colors.black,
                             ),
                           ),
                           const SizedBox(width: 2), // 아이콘 간격 최소화
@@ -105,7 +105,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             child: const Icon(
                               Icons.close,
                               size: 12,
-                              color: Colors.red,
+                              color: Colors.black,
                             ),
                           ),
                         ],
@@ -139,7 +139,7 @@ class _ChatBubbleState extends State<ChatBubble> {
             const SizedBox(width: 8),
             const CircleAvatar(
               radius: 18,
-              backgroundImage: AssetImage('assets/user_profile.png'),
+              backgroundImage: AssetImage(''),
             ),
           ],
         ],

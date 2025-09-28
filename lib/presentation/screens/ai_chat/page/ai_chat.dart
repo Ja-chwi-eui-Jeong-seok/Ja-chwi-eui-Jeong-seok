@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/widget/chat_bubble.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/widget/chat_input_field.dart';
 
@@ -11,7 +12,7 @@ class AiChat extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         title: const Text('채팅'),
       ),
