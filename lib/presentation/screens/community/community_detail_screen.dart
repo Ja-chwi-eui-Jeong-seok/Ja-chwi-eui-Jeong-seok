@@ -1,9 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/providers/user_provider.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widfet/comment_list.dart';
@@ -43,7 +44,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final text = commentController.text.trim();
     if (text.isEmpty) return;
 
-    final uid = ref.read(currentUidProvider);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('로그인이 필요합니다.')),
@@ -69,7 +70,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
     // 화면 헤더 데이터 구성
     final title = st.post?.communityName ?? '제목';
-    final author = st.post?.createUser ?? '작성자';
+    final authorUid = st.post?.createUser;
+    final author = authorUid == null
+        ? '작성자'
+        : ref
+              .watch(profileByUidProvider(authorUid))
+              .maybeWhen(data: (p) => p.nickname, orElse: () => '작성자');
     final created = st.post == null
         ? '09.17 17:47'
         : DateFormat('MM.dd HH:mm').format(st.post!.communityCreateDate);
@@ -154,8 +160,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                       CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) =>
-                            st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
+                        uidOf: (i) => st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
                         isLikedOf: (i) =>
@@ -170,8 +175,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                       CommentList(
                         itemCount: st.comments.length,
                         likeCountOf: (i) => st.comments[i].likeCount,
-                        nickOf: (i) =>
-                            st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
+                        uidOf: (i) => st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
                         textOf: (i) => st.comments[i].noteDetail,
                         loading: st.loadingComments,
                         isLikedOf: (i) =>
