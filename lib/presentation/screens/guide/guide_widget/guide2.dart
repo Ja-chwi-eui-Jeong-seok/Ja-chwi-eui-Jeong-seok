@@ -22,10 +22,10 @@ class Guide2 extends StatelessWidget {
 
     // 화면 비율 기준으로 강조 영역 설정
     final highlightRect = Rect.fromLTWH(
-      size.width * 0.02, // 좌측 3%
-      size.height * 0.115, // 상단 12.5%
-      size.width * 0.96, // 너비 94%
-      size.height * 0.222, // 높이 20.2%
+      size.width * 0.02,
+      size.height * 0.115,
+      size.width * 0.96,
+      size.height * 0.222,
     );
 
     return GestureDetector(
