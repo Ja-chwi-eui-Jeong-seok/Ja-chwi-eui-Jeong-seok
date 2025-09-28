@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/page/ai_chat.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/character_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/login_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/privacy_policy_page.dart';
+import 'package:ja_chwi/presentation/screens/block/block_user.dart';
+import 'package:ja_chwi/presentation/screens/block/my_block_user.dart';
 import 'package:ja_chwi/presentation/screens/community/community_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
@@ -31,9 +34,9 @@ import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 //라우트만 추가되면 RouteTitles.map에 새 경로를 매핑해주면 된다. 화면마다 수정할 필요 없음.
 
 final GoRouter router = GoRouter(
-  initialLocation: '/splash',
+  //initialLocation: '/my-block-users', //'/block-user',
 
-  // initialLocation: '/profile',
+   initialLocation: '/home',
   routes: [
     GoRoute(
       path: '/splash',
@@ -173,5 +176,20 @@ final GoRouter router = GoRouter(
       name: '신고내역 상세',
       builder: (context, state) => const ReportDetailScreen(),
     ),
+    //관리자가 uid 불러와 차단하는경우 
+    GoRoute(
+      path: '/block-user',
+      builder: (context, state) => BlockUserPage(
+        myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
+      ),
+    ),
+    GoRoute(
+      path: '/my-block-users',
+      name: '차단내역',
+      builder: (context, state) {
+        final uid = FirebaseAuth.instance.currentUser!.uid;
+        return MyBlockedUsersPage(myUid: uid);
+      },
+),
   ],
 );
