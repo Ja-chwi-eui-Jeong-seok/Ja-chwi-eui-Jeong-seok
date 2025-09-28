@@ -12,15 +12,14 @@ import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class MissionHomeScreen extends ConsumerWidget {
-    final Map<String, dynamic>? extra;
+  final Map<String, dynamic>? extra;
   const MissionHomeScreen({super.key, this.extra});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
-     // extra 사용 가능
+    // extra 사용 가능
     print('MissionHomeScreen extra: $extra');
-    
+
     final achievers = ref.watch(achieversProvider);
 
     final todayMissionAsync = ref.watch(todayMissionProvider);
@@ -57,7 +56,7 @@ class MissionHomeScreen extends ConsumerWidget {
               const SizedBox(height: 32),
               _buildTodayMissionSection(context, todayMissionAsync),
               const SizedBox(height: 20),
-              _buildMissionAchieversSection(context, achieversAsync),
+              _buildMissionAchieversSection(context, achievers),
               const SizedBox(height: 20), // 40
               /// 임시 로그아웃
               Align(
@@ -81,9 +80,10 @@ class MissionHomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar:  BottomNav( 
+      bottomNavigationBar: BottomNav(
         mode: BottomNavMode.tab,
-    userData: extra ?? {},),
+        userData: extra ?? {},
+      ),
     );
   }
 
