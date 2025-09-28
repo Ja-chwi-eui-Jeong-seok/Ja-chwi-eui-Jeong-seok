@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -152,34 +151,53 @@ class MissionDataSourceImpl implements MissionDataSource {
       return [];
     }
 
-    // 2. 각 미션 문서에서 userId와 완료 시간을 추출합니다.
-    final achieversData = missionSnapshot.docs.map((doc) {
-      final data = doc.data();
-      final timestamp = data['missioncreatedate'] as Timestamp;
-      return {
-        'userId': data['userId'] as String,
-        'completedAt': timestamp.toDate(),
-      };
-    }).toList();
+    // 2. 미션 문서에서 userId와 완료 시간을 Map 형태로 추출합니다. (Key: userId, Value: completedAt)
+    final Map<String, DateTime> achieverCompletionTimes = {
+      for (var doc in missionSnapshot.docs)
+        doc.data()['userId'] as String:
+            (doc.data()['missioncreatedate'] as Timestamp).toDate(),
+    };
 
-    // 3. 각 userId로 character 정보를 가져옵니다.
+    final userIds = achieverCompletionTimes.keys.toList();
+
+    // 3. userId 목록을 30개씩 나누어 profiles 정보를 한 번에 가져옵니다. (whereIn 쿼리 제한 때문)
     final List<Map<String, dynamic>> result = [];
-    for (final achieverData in achieversData) {
-      final userId = achieverData['userId'] as String;
+    const chunkSize = 30;
 
-      // 'profiles' 컬렉션에서 프로필 정보 가져오기
-      final profileDoc = await _firestore
+    for (var i = 0; i < userIds.length; i += chunkSize) {
+      final chunk = userIds.sublist(
+        i,
+        i + chunkSize > userIds.length ? userIds.length : i + chunkSize,
+      );
+
+      if (chunk.isEmpty) continue;
+
+      final profileSnapshot = await _firestore
           .collection('profiles')
-          .doc(userId)
+          .where(FieldPath.documentId, whereIn: chunk)
           .get();
 
-      if (profileDoc.exists) {
+      for (final profileDoc in profileSnapshot.docs) {
+        final userId = profileDoc.id;
+        final profileData = profileDoc.data();
+        final completedAt = achieverCompletionTimes[userId];
+
         result.add({
-          ...profileDoc.data()!,
-          ...achieverData,
+          ...profileData,
+          'userId': userId,
+          'completedAt': completedAt,
         });
       }
     }
+
+    // 4. 완료 시간(missioncreatedate) 기준으로 다시 정렬합니다.
+    result.sort((a, b) {
+      // 'a'와 'b'는 result 리스트의 요소(Map)이며, 'completedAt' 키를 가지고 있습니다.
+      return (a['completedAt'] as DateTime).compareTo(
+        b['completedAt'] as DateTime,
+      );
+    });
+
     return result;
   }
 }
