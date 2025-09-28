@@ -116,8 +116,11 @@ class MissionAchieversScreenState
                                   const Spacer(),
                                   TextButton(
                                     onPressed: () {
-                                      // TODO: 해당 유저의 프로필 상세 페이지로 이동
-                                      // context.push('/profile-detail', extra: {'userId': achiever.userId});
+                                      // achiever.userId를 사용하여 uid를 가져옵니다.
+                                      context.push(
+                                        '/profile-detail',
+                                        extra: {'userId': achiever.userId},
+                                      );
                                     },
                                     child: const Row(
                                       children: [
@@ -188,6 +191,7 @@ class MissionAchieversScreenState
 
   Widget _buildRankingSection(List<MissionAchiever> achievers) {
     final _placeholderAchiever = MissionAchiever(
+      userId: '',
       name: '?',
       time: '',
       level: 'Lv.?',

@@ -20,7 +20,7 @@ class ProfileSection extends ConsumerWidget {
               height: 60,
               child: ClipOval(
                 child: Image.asset(
-                  userProfile.imageUrl,
+                  userProfile.imageFullUrl,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) =>
                       const Icon(Icons.person),
