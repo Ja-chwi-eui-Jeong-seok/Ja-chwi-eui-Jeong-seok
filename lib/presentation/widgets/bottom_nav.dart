@@ -20,12 +20,14 @@ class BottomNav extends StatelessWidget {
   final BottomNavMode mode;
   final String? confirmRoute; // confirm 모드에서 이동할 경로
   final VoidCallback? onConfirm; // ✅ 추가
+  final Map<String, dynamic>? userData; // 추가
 
   const BottomNav({
     super.key,
     this.mode = BottomNavMode.tab,
     this.confirmRoute,
     this.onConfirm,
+    this.userData
   });
 
   @override
@@ -64,7 +66,14 @@ class BottomNav extends StatelessWidget {
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
-            onTap: (index) => context.go(routes[index]),
+            onTap: (index) {
+            final routes = ['/home', '/mission', '/community', '/profile-detail'];
+            context.go(
+              routes[index],
+              extra: userData, // null 방지
+            );
+            print('BottomNav onTap: index=$index, userData=$userData');
+           },
             selectedItemColor: Colors.red,      // 선택된 아이콘 + 텍스트 색상
             unselectedItemColor: Colors.grey,   // 선택되지 않은 아이콘 색상
             backgroundColor: Colors.transparent,

@@ -18,25 +18,36 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final String? uid;
-  late final String? nickname;
-  late final String? imageFullUrl;
-  late final String? thumbUrl;
-  late final String? color;
+  // late final String? uid;
+  // late final String? nickname;
+  // late final String? thumbUrl;
+  // late final String? imageFullUrl;
+  // late final String? color;
+  // late final int ? missionCount;
+  // late final bool? managerType;
+  late Map<String, dynamic>? userData;
+
   @override
   void initState() {
     super.initState();
-    // _checkguide();
-    final args = widget.extra;
-    uid = args?['uid'];
-    nickname = args?['nickname'];
-    imageFullUrl = args?['imageFullUrl'];
-    thumbUrl = args?['thumbUrl'];
-    color = args?['color'];
+    userData = widget.extra;
 
-    print('HomeScreen initState');
-    print('uid: $uid, nickname: $nickname');
-    print('imageFullUrl: $imageFullUrl, color: $color');
+    print('HomeScreen 데이터: $userData');
+    // final args = widget.extra;
+    // uid = args?['uid'];
+    // nickname = args?['nickname'];
+    // thumbUrl = args?['thumbUrl'];
+    // imageFullUrl = args?['imageFullUrl'];
+    // color = args?['color'];
+    // missionCount = args?['missionCount'];
+    // managerType = args?['managerType'];
+
+    // print('HomeScreen initState');
+    // print('uid: $uid, nickname: $nickname,thumbUrl:$thumbUrl');
+    // print('imageFullUrl: $imageFullUrl, color: $color');
+    // print('missionCount: $missionCount, managerType: $managerType');
+
+    // _checkguide();
   }
 
   // Future<void> _loadUserColor() async {
@@ -110,7 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      bottomNavigationBar: BottomNav(mode: BottomNavMode.tab),
+      bottomNavigationBar: BottomNav(
+        mode: BottomNavMode.tab,
+        userData: userData, // SplashScreen에서 전달받은 데이터
+      ),
     );
   }
 }
