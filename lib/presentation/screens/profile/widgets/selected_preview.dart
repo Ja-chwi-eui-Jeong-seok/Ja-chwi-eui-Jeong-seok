@@ -10,9 +10,9 @@ class SelectedPreview extends ConsumerWidget {
     final nickname = ref.watch(nicknameProvider);
     final selectedImage = ref.watch(selectedImageProvider);
 
-    if (nickname == null || nickname.isEmpty) return const Text("닉네임을 입력하세요");
+    
     if (selectedImage == null) return const Text("프로필 이미지를 선택하세요");
-
+if (nickname == null || nickname.isEmpty) return const Text("닉네임을 입력하세요");
     return Column(
       children: [
         Text("닉네임: $nickname"),

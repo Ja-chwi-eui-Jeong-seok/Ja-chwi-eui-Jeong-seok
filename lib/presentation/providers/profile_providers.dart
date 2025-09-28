@@ -26,6 +26,7 @@ class ProfileImage {
   }
 }
 
+
 // 이미지 리스트 Provider
 final profileImagesProvider = FutureProvider<List<ProfileImage>>((ref) async {
   final jsonString = await rootBundle.loadString('assets/config/json/images.json');
@@ -33,7 +34,7 @@ final profileImagesProvider = FutureProvider<List<ProfileImage>>((ref) async {
   return data.map((e) => ProfileImage.fromJson(e)).toList();
 });
 
-// 선택된 이미지
+//선택된 이미지
 final selectedImageProvider = StateProvider<ProfileImage?>((ref) => null);
 
 // Firebase Repository
@@ -41,3 +42,4 @@ final profileRepositoryProvider = Provider<ProfileRepositoryImpl>((ref) {
   final dataSource = FirebaseProfileDataSource();
   return ProfileRepositoryImpl(dataSource);
 });
+

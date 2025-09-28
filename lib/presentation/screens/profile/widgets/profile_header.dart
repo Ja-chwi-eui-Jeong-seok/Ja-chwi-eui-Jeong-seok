@@ -18,46 +18,50 @@ class ProfileHeader extends ConsumerWidget {
           height: 300, // 상단 이미지 영역 높이
           child: Transform.scale(
               scale: 0.6, // 80% 크기
+              alignment: Alignment(0, 0.7), // y=0.5 → 아래로 이동
                 child: FittedBox(
                   fit: BoxFit.contain,  // 비율 유지하며 최대 영역
-                  alignment: Alignment.center,
+                  alignment: Alignment(0, 0.7), // y=0.5 → 아래로 이동
                   child: Image.asset(
                     selectedImage,
                   ),
                 ),
               ),
         ),
-
+      
         // 2️⃣ 이미지 위 텍스트
-        Positioned(
-          left: 80,
-          bottom: 250,
+        Positioned (
+          left: 100,
+          bottom: 190,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
             ),
              child: Text(
+               textAlign: TextAlign.center, // ✅ 가운데 정렬
                 // Replace 'step' with your actual step variable or logic
                 (() {
                   // You need to define 'step' somewhere above, e.g., final step = ...;
                   if (step == 0) {
-                    return '집먼지 이름을 입력해주세요';
+                   return ' 집먼지를 \n 꾸며주세요';
+         
                   } else if (step == 1) {
-                    return '집먼지를 꾸며주세요';
+                  return '집먼지 이름을 정해주세요';
                   } else {
                     return '집먼지의 집을 찾아주세요';
                   }
                 })(),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Colors.black,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  
                 ),
               ),
           ),
         ),
-      ],
+       ],
     );
   }
 }
