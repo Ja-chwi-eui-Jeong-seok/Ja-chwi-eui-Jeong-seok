@@ -6,9 +6,26 @@ class FirebaseProfileDataSource {
   final String collectionName = "profiles";
 
   Future<void> saveProfile(Profile profile, String userId) async {
+    final profileRef = firestore.collection(collectionName).doc(userId);
     final profileData = profile.toJson();
-    profileData['mission_count'] = 0; // mission_count 필드 추가 및 초기화
-    await firestore.collection(collectionName).doc(userId).set(profileData);
+
+    // 트랜잭션을 사용하여 원자적(atomic)으로 작업을 처리합니다.
+    await firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(profileRef);
+
+      if (!snapshot.exists) {
+        // 문서가 존재하지 않으면 (신규 사용자)
+        // mission_count를 0으로 설정하여 문서를 생성합니다.
+        transaction.set(profileRef, {
+          ...profileData,
+          'mission_count': 0,
+        });
+      } else {
+        // 문서가 이미 존재하면 (기존 사용자)
+        // mission_count를 제외한 나머지 정보만 업데이트합니다.
+        transaction.update(profileRef, profileData);
+      }
+    });
   }
 
   Future<Profile?> loadProfile(String userId) async {
