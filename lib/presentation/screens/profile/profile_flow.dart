@@ -1,25 +1,19 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
+import 'package:ja_chwi/domain/entities/profile_entity.dart';
+import 'package:ja_chwi/presentation/providers/profile_providers.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_grid.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_header.dart';
-import 'package:ja_chwi/presentation/screens/profile/widgets/selected_preview.dart';
-import 'package:ja_chwi/domain/entities/profile_entity.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:ja_chwi/presentation/providers/profile_providers.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_flow_appbar.dart';
+import 'package:go_router/go_router.dart';
 
-
-/// 단계별 진행 상태 Provider
 final stepProvider = StateProvider<int>((ref) => 0);
 
-/// 닉네임 입력 위젯
 class NicknameInput extends ConsumerStatefulWidget {
   final Future<void> Function(String)? onNext;
-
   const NicknameInput({super.key, this.onNext});
 
   @override
@@ -30,7 +24,6 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
   final TextEditingController _controller = TextEditingController();
   String? errorText;
 
-  /// 현재 입력된 값 검증 + 다음 단계 콜백
   Future<bool> validateAndProceed() async {
     final input = _controller.text.trim();
     final sanitized = XssFilter.sanitize(input);
@@ -40,7 +33,6 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
       return false;
     }
 
-    // 금지어 체크
     final bannedResult = XssFilter.secureInput(sanitized);
     if (bannedResult['hasBannedWord'] == true) {
       setState(() => errorText =
@@ -58,9 +50,41 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedImage = ref.watch(selectedImageProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (selectedImage != null)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: Image.asset(
+                  selectedImage.thumbUrl,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                '집먼지의 이름을 \n 만들어 주세요..', 
+                 style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  fontFamily: 'gamjaflower', // ✅ pubspec.yaml에 등록한 폰트 이름
+                ),
+                
+               // style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                // style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                //   color: Colors.black,
+                //   fontSize: 40,
+                //   fontWeight: FontWeight.w900,)
+              ),
+            ],
+          ),
+        const SizedBox(height: 8),
         const Padding(
           padding: EdgeInsets.fromLTRB(5, 0, 0, 10),
           child: Text(
@@ -88,11 +112,9 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
   }
 }
 
-/// Profile Flow Page
 class ProfileFlowPage extends ConsumerStatefulWidget {
-    final Map<String, dynamic>? extra;
   final String uid;
-  const ProfileFlowPage({super.key,required this.uid,required this.extra });
+  const ProfileFlowPage({super.key, required this.uid, Map<String, dynamic>? extra});
 
   @override
   ConsumerState<ProfileFlowPage> createState() => _ProfileFlowPageState();
@@ -100,16 +122,27 @@ class ProfileFlowPage extends ConsumerStatefulWidget {
 
 class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
   String? dongName;
+  String? selectedNickname;
+  List<Map<String, String>> dongList = [];
   final GlobalKey<_NicknameInputState> nicknameKey =
       GlobalKey<_NicknameInputState>();
 
   @override
   void initState() {
     super.initState();
-    fetchDongName();
+    loadDongList();
   }
 
-  // 닉네임 중복 체크 후 다음 단계
+  Future<void> loadDongList() async {
+    final jsonStr = await rootBundle.loadString('assets/config/json/sido.json');
+    final List<dynamic> jsonData = json.decode(jsonStr);
+    setState(() {
+      dongList = jsonData
+          .map((e) => {"sido": e['sido'] as String, "sigun": e['sigun'] as String})
+          .toList();
+    });
+  }
+
   Future<void> onNicknameNext(String nickname) async {
     final isDuplicate =
         await ref.read(profileRepositoryProvider).isNicknameDuplicate(nickname);
@@ -122,32 +155,25 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
       return;
     }
 
-    ref.read(nicknameProvider.notifier).state = nickname;
-    ref.read(stepProvider.notifier).state = 1;
-  }
-
-  // VWorld API를 통해 동명 가져오기
-  Future<void> fetchDongName() async {
-    final key = dotenv.env['VWORLD_API_KEY'];
-    final lat = 37.5665;
-    final lon = 126.9780;
-
-    final url =
-        'https://api.vworld.kr/req/address?service=address&request=getAddress&version=2.0&point=$lon,$lat&type=PARCEL&key=$key';
-    final res = await http.get(Uri.parse(url));
-    if (res.statusCode == 200) {
-      final json = jsonDecode(res.body);
-      setState(() {
-        dongName = json['response']?['result']?[0]?['text'] ?? '';
-      });
+    if (nickname.length < 2 || nickname.length > 8) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("닉네임은 2자 이상 8자 이하로 입력해주세요")),
+      );
+      return;
     }
+
+    setState(() {
+      selectedNickname = nickname;
+    });
+    ref.read(nicknameProvider.notifier).state = nickname;
+    ref.read(stepProvider.notifier).state = 2;
   }
 
-  // Firebase 저장
   Future<void> saveProfile() async {
     final nickname = ref.read(nicknameProvider);
     final selectedImage = ref.read(selectedImageProvider);
-    final userId = widget.uid;  // 실제 Firebase Auth UID 사용
+    final userId = widget.uid;
 
     if (nickname != null && selectedImage != null && dongName != null) {
       final profile = Profile(
@@ -165,8 +191,7 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("프로필 저장 완료")),
       );
-      // 1~2초 기다렸다가 화면 이동
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 1));
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -174,85 +199,120 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
       );
     }
   }
-  
 
-Future<void> onConfirm() async {
-  final selectedImage = ref.read(selectedImageProvider);
+  Future<void> onConfirm() async {
+    await saveProfile();
+
+    if (!mounted) return;
+
+    final selectedImage = ref.read(selectedImageProvider);
     final nickname = ref.read(nicknameProvider);
-  final uid = widget.uid; // ProfileFlowPage에서 받은 uid
-  if (selectedImage == null) return; // 이미지 선택 안 됐으면 종료
 
-  await saveProfile(); // 프로필 저장
-
-  if (!mounted) return;
-
-  // 이미지 URL + color 전달
-  context.push(
-    '/guide',
-    extra: {
-            'uid': uid,
-      'nickname': nickname,
-      'thumbUrl': selectedImage.thumbUrl,
-      'imageFullUrl': selectedImage.fullUrl,
-      'color': selectedImage.color,
-    },
-  );
-}
+    context.push(
+      '/guide',
+      extra: {
+        'uid': widget.uid,
+        'nickname': nickname,
+        'thumbUrl': selectedImage?.thumbUrl,
+        'imageFullUrl': selectedImage?.fullUrl,
+        'color': selectedImage?.color,
+        'dongName': dongName,
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final step = ref.watch(stepProvider);
+    final selectedImage = ref.watch(selectedImageProvider);
 
     return Scaffold(
-      appBar: ProfileFlowAppBar(step:step),
+      appBar: ProfileFlowAppBar(step: step),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ProfileHeader(step: step),
+              if (step == 0) ProfileHeader(step: step),
               const SizedBox(height: 16),
-
-              if (step == 0) NicknameInput(key: nicknameKey, onNext: onNicknameNext),
-              if (step == 1) const ProfileGrid(),
-              if (step == 2)
-                Text(dongName != null
-                    ? "현재 동명: $dongName"
-                    : "동명 불러오는 중..."),
-
-              const SizedBox(height: 16),
-              const SelectedPreview(),
+              if (step == 0) ...[
+                const Text(
+                  "캐릭터 선택",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const ProfileGrid(),
+              ],
+              if (step == 1)
+                NicknameInput(key: nicknameKey, onNext: onNicknameNext),
+              if (step == 2) ...[
+                if (selectedImage != null && selectedNickname != null)
+                  Column(
+                    children: [
+                      Image.asset(selectedImage.thumbUrl, width: 60, height: 60),
+                      const SizedBox(width: 8),
+                      Text(
+                        selectedNickname!+'의 집은 \n 어디인가요? ',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 40,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'gamjaflower', // ✅ pubspec.yaml에 등록한 폰트 이름
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 16),
+                if (dongList.isNotEmpty)
+                Center(
+                    child: DropdownMenu<String>(
+                    initialSelection: dongName,                    
+                    label: const Text("동 선택"),
+                    dropdownMenuEntries: dongList
+                        .map((e) => DropdownMenuEntry(
+                            value: e['sigun']!, label: "${e['sido']} ${e['sigun']}"))
+                        .toList(),
+                    onSelected: (value) {
+                      setState(() {
+                        dongName = value;
+                      });
+                    },
+                  ),
+                )
+        
+              ],
             ],
           ),
         ),
       ),
-
-      /// ✅ step 별 버튼 처리
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: () async {
             if (step == 0) {
+              if (selectedImage == null) return;
+              ref.read(stepProvider.notifier).state = 1;
+            } else if (step == 1) {
               final valid = await nicknameKey.currentState?.validateAndProceed();
               if (valid != true) return;
-            } else if (step == 1) {
-              ref.read(stepProvider.notifier).state = 2;
             } else if (step == 2) {
+              if (dongName == null) return;
               await onConfirm();
             }
           },
-          style: ElevatedButton.styleFrom( 
-            minimumSize: const Size.fromHeight(52), // 높이 56           
-            elevation: 0, // 그림자 제거
-            backgroundColor: Colors.transparent, // 배경 투명
-            shadowColor: Colors.transparent, // 그림자색 제거
-            side: const BorderSide(color: Colors.grey, width: 1), // 실선 테두리
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.black, // 글자/아이콘 색
+            minimumSize: const Size.fromHeight(52),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30), // 모서리 둥글게
-            ),
+              borderRadius: BorderRadius.circular(30),
+            ),   side: const BorderSide(
+      color: Colors.black, // 테두리 색
+      width: 1, // 테두리 두께
+    ),
           ),
           child: Text(
-            step == 2 ? "저장" : "다음",
+            step == 2 ? "완료" : "다음",
             style: const TextStyle(fontSize: 16),
           ),
         ),
