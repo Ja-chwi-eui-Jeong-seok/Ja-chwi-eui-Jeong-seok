@@ -51,14 +51,17 @@ class FirebaseBlockDataSource implements BlockDataSource {
     }).toList();
   }
   //내가 차단한 리스트 
+  @override
   Future<List<BlockModel>> fetchBlockedUsersByMe(String myUid) async {
       print('fetchBlockedUsersByMe 호출, myUid: $myUid'); // ✅ 확인용 출력
+      
 
   final snapshot = await firestore
       .collection('blocks')
       .where('blockedBy', isEqualTo: myUid)
       .orderBy('createdAt', descending: true)
       .get();
+    print('쿼리 결과 docs 수: ${snapshot.docs.length}');
 
   return snapshot.docs.map((doc) {
     final data = doc.data();
@@ -70,6 +73,7 @@ class FirebaseBlockDataSource implements BlockDataSource {
       reason: data['reason'] as String?,
       createdAt: timestamp?.toDate() ?? DateTime.now(),
     );
+    
   }).toList();
 }
 

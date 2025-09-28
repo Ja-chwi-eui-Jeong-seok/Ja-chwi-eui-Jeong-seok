@@ -105,7 +105,7 @@ flutter:
     - assets/images/
     - assets/banned_words/slang.csv
     - assets/config/env/setting.env
-    - assets/config/csv/adrees.csv
+    - assets/config/csv/통계청_법정동 연계정보_20250602.csv
     # - assets/config/mock/
 
   # An image asset can refer to one or more resolution-specific "variants", see
