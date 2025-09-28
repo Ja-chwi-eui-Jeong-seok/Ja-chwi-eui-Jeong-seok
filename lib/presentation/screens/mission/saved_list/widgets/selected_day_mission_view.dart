@@ -116,8 +116,8 @@ class SelectedDayMissionView extends StatelessWidget {
                 children: [
                   Icon(
                     isPublic
-                        ? CupertinoIcons.lock_fill
-                        : CupertinoIcons.lock_open_fill,
+                        ? CupertinoIcons.lock_open_fill
+                        : CupertinoIcons.lock_fill,
                     size: 16,
                     color: Colors.black54,
                   ),

@@ -38,14 +38,21 @@ class AppleLoginButton extends ConsumerWidget {
     return SizedBox(
       height: 48,
       width: double.infinity,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: SignInWithAppleButton(
-          style: SignInWithAppleButtonStyle.white,
-          // ignore: unrelated_type_equality_checks
-          onPressed: authState.status == AuthStatus.loading
-              ? () {} // 비활성화 대신 빈 함수
-              : () => _handleAppleLogin(context, ref),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey, width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+
+          child: SignInWithAppleButton(
+            style: SignInWithAppleButtonStyle.white,
+            // ignore: unrelated_type_equality_checks
+            onPressed: authState.status == AuthStatus.loading
+                ? () {} // 비활성화 대신 빈 함수
+                : () => _handleAppleLogin(context, ref),
+          ),
         ),
       ),
     );
