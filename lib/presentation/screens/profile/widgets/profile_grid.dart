@@ -14,7 +14,7 @@ class ProfileGrid extends ConsumerWidget {
       data: (images) => GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         itemCount: images.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
@@ -35,7 +35,9 @@ class ProfileGrid extends ConsumerWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.asset(img.thumbUrl),
+              child: Image.asset(img.thumbUrl,
+                fit: BoxFit.fill, // 🔥 셀 크기에 맞게 확대/자르기
+                ),
             ),
           );
         },

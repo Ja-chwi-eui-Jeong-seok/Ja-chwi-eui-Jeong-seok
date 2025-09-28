@@ -23,6 +23,8 @@ import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/my_reports.dart';
 import 'package:ja_chwi/presentation/screens/report/report_user.dart';
 import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
+import 'package:ja_chwi/presentation/widgets/location_auto.dart';
+import 'package:ja_chwi/presentation/widgets/location_search.dart';
 // AppBar 타이틀
 // GoRouter는 현재 라우트 정보를 GoRouterState.of(context)로 제공한다.
 // 그 안의 matchedLocation이나 uri를 읽으면 현재 경로(/mission-create 등)를 얻을 수 있다.
@@ -155,6 +157,17 @@ final GoRouter router = GoRouter(
       name: '프로필',
       builder: (context, state) => const ProfileScreen(),
     ),
+        GoRoute(
+      path: '/location',
+      name: '동명 불러오기',
+      builder: (context, state) => const LocationSearchPage(),
+    ),
+        GoRoute(
+      path: '/location_search',
+      name: ' 불러오기',
+      builder: (context, state) => const LocationAutocompleteWidget(),
+    ),
+    
     GoRoute(
       path: '/profile-detail',
       name: '프로필 상세',

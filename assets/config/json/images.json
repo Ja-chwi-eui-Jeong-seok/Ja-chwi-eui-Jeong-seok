@@ -26,7 +26,7 @@
   {
     "id": "5",
     "thumbUrl": "assets/images/m_profile/m_green.png",
-    "fullUrl": "assets/images/profile/night_blu.png",
+    "fullUrl": "assets/images/profile/green.png",
     "color": "ABD891"
   }, 
   {
@@ -38,13 +38,13 @@
   {
     "id": "7",
     "thumbUrl": "assets/images/m_profile/m_night_blu.png",
-    "fullUrl": "assets/images/profile/white.png",
+    "fullUrl": "assets/images/profile/night_blu.png",
     "color": "6664CE"
   }, 
   {
     "id": "8",
     "thumbUrl": "assets/images/m_profile/m_pupple.png",
-    "fullUrl": "assets/images/profile/rainbow.png",
+    "fullUrl": "assets/images/profile/pupple.png",
     "color": "DF8FE6"
   }
 ]
