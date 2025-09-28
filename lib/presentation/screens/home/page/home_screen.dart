@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return Stack(
             children: [
               const HomeBackground(),
-              Center(child: MonjiJump(bodyColor: userColor)),
+              Center(child: MonjiJump()),
               AiChatCircle(
                 center: circleCenter,
                 radius: circleRadius,
