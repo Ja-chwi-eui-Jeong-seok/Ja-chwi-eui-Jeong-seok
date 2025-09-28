@@ -263,9 +263,45 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
     // location 없거나 provider 아직 준비 안됐으면 안내뷰
     if (!_ready) return const NoLocationView();
 
-    // ★ build에서는 필드 provider만 watch (다시 만들지 말기!)
     final st = ref.watch(provider);
-
+    // 빈 목록/로딩 처리
+    if (st.items.isEmpty) {
+      return Scaffold(
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Text(
+                    widget.detailName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Center(
+                child: st.isLoading
+                    ? const CircularProgressIndicator()
+                    : const Padding(
+                        padding: EdgeInsets.only(bottom: 100),
+                        child: Text(
+                          '아직 게시글이 없습니다',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
         onNotification: (n) {
