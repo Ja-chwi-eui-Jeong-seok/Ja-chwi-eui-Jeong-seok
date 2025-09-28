@@ -22,7 +22,7 @@ class Guide3 extends StatelessWidget {
 
     // 강조 원 위치/크기
     final circleCenter = Offset(size.width * 0.73, size.height * 0.464);
-    final circleRadius = size.width * 0.07;
+    final circleRadius = min(size.width, size.height) * 0.07;
 
     // 텍스트 위치
     final textLeft = size.width * 0.12;
