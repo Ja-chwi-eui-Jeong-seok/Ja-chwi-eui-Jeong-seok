@@ -82,7 +82,7 @@ class HomeCard extends ConsumerWidget {
                     padding: EdgeInsets.zero,
                   ),
                   onPressed: () {
-                    GoRouter.of(context).go('/mission');
+                    GoRouter.of(context).push('/mission-create');
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(4.0),
