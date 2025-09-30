@@ -11,9 +11,6 @@ import 'package:ja_chwi/presentation/providers/comment_like_providers.dart'; //a
 import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
 
-//TODO: 로그인 사용자 uid 나중에 바꿔야함
-import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
-
 /// 상세 화면 상태
 class CommunityDetailState {
   final Community? post;
@@ -186,7 +183,7 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
 
   //좋아요 토글(중복 방지 + 카운트 동기)
   Future<void> toggleLike(WidgetRef ref, String commentId) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid; //TODO: 유저프로필 업데이트되면 바꾸기
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       //로그인 가드. UI에서 토스트 안내 권장.
       return;

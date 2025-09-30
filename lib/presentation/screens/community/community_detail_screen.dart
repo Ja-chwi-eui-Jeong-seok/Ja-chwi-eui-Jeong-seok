@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +6,7 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
-import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widfet/comment_list.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
@@ -62,6 +61,31 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
     if (!mounted) return;
     commentController.clear();
+  }
+
+  Widget _pagedList(WidgetRef ref, CommunityDetailState st) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (n) {
+        if (n is ScrollUpdateNotification) {
+          final remain = n.metrics.maxScrollExtent - n.metrics.pixels;
+          if (remain < 200 && !st.loadingComments && st.hasMore) {
+            ref.read(provider.notifier).loadMore(ref);
+          }
+        }
+        return false;
+      },
+      child: CommentList(
+        itemCount: st.comments.length,
+        likeCountOf: (i) => st.comments[i].likeCount,
+        uidOf: (i) => st.comments[i].uid,
+        textOf: (i) => st.comments[i].noteDetail,
+        loading: st.loadingComments,
+        isLikedOf: (i) => st.likedIds.contains(st.comments[i].id),
+        onToggleLike: (i) =>
+            ref.read(provider.notifier).toggleLike(ref, st.comments[i].id),
+        createdAtOf: (i) => st.comments[i].createAt,
+      ),
+    );
   }
 
   @override
@@ -157,35 +181,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   TabBarView(
                     children: [
                       //최신순
-                      CommentList(
-                        itemCount: st.comments.length,
-                        likeCountOf: (i) => st.comments[i].likeCount,
-                        uidOf: (i) => st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
-                        textOf: (i) => st.comments[i].noteDetail,
-                        loading: st.loadingComments,
-                        isLikedOf: (i) =>
-                            st.likedIds.contains(st.comments[i].id),
-                        onToggleLike: (i) => ref
-                            .read(provider.notifier)
-                            .toggleLike(ref, st.comments[i].id),
-                        createdAtOf: (i) =>
-                            st.comments[i].createAt, // or .createdAt
-                      ),
+                      _pagedList(ref, st),
                       //추천순
-                      CommentList(
-                        itemCount: st.comments.length,
-                        likeCountOf: (i) => st.comments[i].likeCount,
-                        uidOf: (i) => st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
-                        textOf: (i) => st.comments[i].noteDetail,
-                        loading: st.loadingComments,
-                        isLikedOf: (i) =>
-                            st.likedIds.contains(st.comments[i].id),
-                        onToggleLike: (i) => ref
-                            .read(provider.notifier)
-                            .toggleLike(ref, st.comments[i].id),
-                        createdAtOf: (i) =>
-                            st.comments[i].createAt, // or .createdAt
-                      ),
+                      _pagedList(ref, st),
                     ],
                   ),
             ),
