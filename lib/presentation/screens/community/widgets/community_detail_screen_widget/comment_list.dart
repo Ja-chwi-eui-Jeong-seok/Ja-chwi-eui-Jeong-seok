@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
-import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widfet/heart_button.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/heart_button.dart';
 
 class CommentList extends ConsumerWidget {
   const CommentList({
+    super.key,
     required this.itemCount,
     required this.uidOf,
     required this.textOf,
@@ -35,10 +36,10 @@ class CommentList extends ConsumerWidget {
     if (mins < 60) return '${mins <= 0 ? 1 : mins}분 전';
 
     final hours = diff.inHours;
-    if (hours < 24) return '${hours}시간 전';
+    if (hours < 24) return '$hours시간 전';
 
     final days = diff.inDays;
-    return '${days}일 전';
+    return '$days일 전';
   }
 
   @override
@@ -61,7 +62,7 @@ class CommentList extends ConsumerWidget {
 
     // shrinkWrap/physics 건드리지 않기
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
       itemCount: itemCount + (loading ? 1 : 0),
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, i) {

@@ -22,6 +22,7 @@ class CommentDataSourceImpl implements CommentDataSource {
     required String uid,
     required String noteDetail,
   }) async {
+    //'community_comments'에 댓글 추가 후 댓글 doc.id 반환
     final ref = await col.add({
       'community_id': communityId,
       'uid': uid,
@@ -34,6 +35,7 @@ class CommentDataSourceImpl implements CommentDataSource {
   }
 
   @override
+  //댓글 생성
   Future<CommentDto> createAndGetMinimal({
     required String communityId,
     required String uid,
@@ -61,25 +63,28 @@ class CommentDataSourceImpl implements CommentDataSource {
     return CommentDto.fromFirebase(ref.id, data);
   }
 
-  @override
+  @override //게시글 댓글 불러오기
   Future<PagedResult<CommentDto>> fetchByCommunity({
     required String communityId,
     required CommentOrder order,
     int limit = 20,
     DocumentSnapshot<Object?>? startAfterDoc,
   }) async {
+    //게시글 id와 같고 삭제되지 않은 댓글
     Query<Map<String, dynamic>> q = col
         .where('community_id', isEqualTo: communityId)
         .where('comment_delete_yn', isEqualTo: false);
 
+    //최신순일때 정렬
     if (order == CommentOrder.latest) {
       q = q.orderBy('comment_create_date', descending: true);
     } else {
+      //최신순 아닐때(추천순) 정렬
       q = q
           .orderBy('like_count', descending: true)
           .orderBy('comment_create_date', descending: true);
     }
-
+    //제한갯수
     q = q.limit(limit);
     if (startAfterDoc != null) q = q.startAfterDocument(startAfterDoc);
 
@@ -130,7 +135,6 @@ class CommentDataSourceImpl implements CommentDataSource {
       q = q.where('comment_delete_yn', isEqualTo: false);
     }
     final snap = await q.count().get();
-    return snap.count ??
-        0; //TODO: 작동확인 cloud_firestore의 AggregateQuerySnapshot.count (int)
+    return snap.count ?? 0;
   }
 }

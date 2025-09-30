@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class HeartButton extends StatelessWidget {
   const HeartButton({
+    super.key,
     required this.liked,
     required this.count,
     required this.onPressed,
