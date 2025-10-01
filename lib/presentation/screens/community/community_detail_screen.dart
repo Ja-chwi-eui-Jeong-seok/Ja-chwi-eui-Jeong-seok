@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -29,7 +28,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   void initState() {
     super.initState();
     // 첫 진입 시 단건 게시글 + 댓글 초기 로드
-    Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+    Future.microtask(
+      () => ref.read(provider.notifier).loadInitial(ref),
+    );
   }
 
   @override
@@ -65,14 +66,21 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   }
 
   Widget _pagedList(WidgetRef ref, CommunityDetailState st) {
+    // 자식(ListView 등) 스크롤 이벤트를 이 콜백에서 받는다.
     return NotificationListener<ScrollNotification>(
       onNotification: (n) {
+        // 위치가 변할 때마다 들어오는 업데이트 알림만 처리
         if (n is ScrollUpdateNotification) {
+          //n.metrics.maxScrollExtent - n.metrics.pixels 바닥까지 남은 거리
+          //pixels 현재위치
+          //maxScrollExtent 스크롤 가능한 최대 위치
           final remain = n.metrics.maxScrollExtent - n.metrics.pixels;
+          // 200px 이내로 접근했고, 현재 로딩 중이 아니며, 더 가져올 게 있으면 페이지 로드
           if (remain < 200 && !st.loadingComments && st.hasMore) {
             ref.read(provider.notifier).loadMore(ref);
           }
         }
+        // 알림을 상위로 계속 올림 true면 중단
         return false;
       },
       child: CommentList(
@@ -109,6 +117,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         : ref
               .watch(profileByUidProvider(authorUid))
               .maybeWhen(
+                error: (_, __) => 'assets/images/m_profile/m_black.png',
                 data: (p) => p.thumbUrl,
                 orElse: () => 'assets/images/m_profile/m_black.png',
               );
@@ -146,7 +155,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           // 기존 주석 유지
                           author: author,
                           created: created,
-                          authorImg: authorImg,
+                          authorImg: authorImg == ""
+                              ? 'assets/images/m_profile/m_black.png'
+                              : 'assets/images/m_profile/m_black.png',
                         ),
                         const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
                         _PostBody(

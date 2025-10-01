@@ -5,14 +5,6 @@ import 'package:ja_chwi/data/dto/comment_dto.dart';
 enum CommentOrder { latest, popular }
 
 abstract interface class CommentDataSource {
-  Future<String> create(CommentDto dto);
-
-  Future<String> createMinimal({
-    required String communityId,
-    required String uid,
-    required String noteDetail,
-  });
-
   Future<CommentDto> createAndGetMinimal({
     required String communityId,
     required String uid,
