@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/calendar_view.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/completed_mission_section.dart';
+import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -26,12 +26,10 @@ class MissionSavedListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: CommonAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => context.pop(),
-        ),
         actions: [
-          RefreshIconButton(onPressed: () => ref.refresh(userMissionsProvider)),
+          RefreshIconButton(
+            onPressed: () => ref.invalidate(userMissionsProvider),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -40,6 +38,8 @@ class MissionSavedListScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const ProfileSection(showButton: false),
+              const SizedBox(height: 16),
               if (userMissionsAsync.isLoading)
                 const Center(child: CircularProgressIndicator())
               else if (userMissionsAsync.hasError)

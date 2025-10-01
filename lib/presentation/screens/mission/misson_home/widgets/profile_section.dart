@@ -4,7 +4,12 @@ import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_prov
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/go_to_completed_button.dart';
 
 class ProfileSection extends ConsumerWidget {
-  const ProfileSection({super.key});
+  final bool showButton;
+
+  const ProfileSection({
+    super.key,
+    this.showButton = true, // 기본값은 true로 설정하여 기존 화면에 영향이 없도록 함
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,11 +24,15 @@ class ProfileSection extends ConsumerWidget {
               width: 60,
               height: 60,
               child: ClipOval(
-                child: Image.asset(
-                  userProfile.imageFullUrl,
-                  fit: BoxFit.contain,
+                child: Image(
+                  image:
+                      (userProfile.imageFullUrl.startsWith('http')
+                              ? NetworkImage(userProfile.imageFullUrl)
+                              : AssetImage(userProfile.imageFullUrl))
+                          as ImageProvider,
+                  fit: BoxFit.contain, // 이미지가 잘리지 않고 원 안에 모두 보이도록 설정
                   errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.person),
+                      const Icon(Icons.person, size: 30),
                 ),
               ),
             ),
@@ -44,7 +53,7 @@ class ProfileSection extends ConsumerWidget {
                 ],
               ),
             ),
-            const GoToCompletedButton(),
+            if (showButton) const GoToCompletedButton(),
           ],
         );
       },
