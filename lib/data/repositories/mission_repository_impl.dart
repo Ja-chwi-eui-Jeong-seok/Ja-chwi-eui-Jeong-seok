@@ -29,9 +29,14 @@ class MissionRepositoryImpl implements MissionRepository {
   @override
   Future<void> updateMission({
     required String userId,
+    required String docId,
     required Map<String, dynamic> missionData,
   }) {
-    return dataSource.updateMission(userId: userId, missionData: missionData);
+    return dataSource.updateMission(
+      userId: userId,
+      docId: docId,
+      missionData: missionData,
+    );
   }
 
   @override
