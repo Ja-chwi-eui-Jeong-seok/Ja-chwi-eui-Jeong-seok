@@ -17,6 +17,7 @@ abstract class MissionDataSource {
   /// 기존 미션을 수정합니다.
   Future<void> updateMission({
     required String userId,
+    required String docId,
     required Map<String, dynamic> missionData,
   });
 

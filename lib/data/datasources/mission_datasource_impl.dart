@@ -69,13 +69,14 @@ class MissionDataSourceImpl implements MissionDataSource {
   @override
   Future<void> updateMission({
     required String userId,
+    required String docId,
     required Map<String, dynamic> missionData,
   }) async {
-    final docId = _generateDocId(userId);
     // 업데이트 시에는 생성 날짜와 userId를 제외합니다.
-    final dataToUpdate = Map<String, dynamic>.from(missionData)
-      ..remove('missioncreatedate')
-      ..remove('userId');
+    final dataToUpdate =
+        Map<String, dynamic>.from(missionData) // 복사본 생성
+          ..remove('missioncreatedate')
+          ..remove('userId');
 
     await _firestore
         .collection('user_missions')

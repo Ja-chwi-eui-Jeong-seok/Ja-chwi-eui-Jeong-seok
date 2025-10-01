@@ -23,6 +23,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
   List<dynamic> _photos = []; // String (URL) or XFile (local)
   final TextEditingController _descriptionController = TextEditingController();
   bool _isInitialized = false;
+  String? _docId; // 수정 모드일 때 사용할 문서 ID
   bool _isEditing = false;
   bool _isSubmitting = false;
 
@@ -44,6 +45,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
       _isEditing = true;
       final missionData = extra;
       setState(() {
+        _docId = missionData['id'] as String?;
         _missionTitle = missionData['title'] as String? ?? '';
         _tags = List<String>.from(missionData['tags'] as List? ?? []);
         _isPublic = missionData['isPublic'] as bool? ?? true;
@@ -52,9 +54,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
             missionData['description'] as String? ?? '';
       });
     } else if (extra is String) {
-      // 생성 모드 (템플릿 제목 전달)
       _missionTitle = extra;
-      // 생성 모드일 때, 오늘의 미션 태그를 가져옵니다.
       ref.read(todayMissionProvider.future).then((mission) {
         if (mounted) setState(() => _tags = mission.tags);
       });
@@ -103,8 +103,6 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
       if (user == null) {
         throw Exception("사용자 인증 정보가 없습니다. 다시 로그인해주세요.");
       }
-
-      // 오늘 날짜로 이미 완료한 미션이 있는지 확인 (수정 모드가 아닐 때만)
       if (!_isEditing) {
         if (await missionRepository.hasCompletedMissionToday(user.uid)) {
           _showSnackBar('오늘의 미션은 이미 완료했습니다!');
@@ -121,6 +119,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
         // 수정 모드: update 사용
         await missionRepository.updateMission(
           userId: user.uid,
+          docId: _docId!, // 수정 모드에서는 _docId가 항상 존재해야 함
           missionData: {
             'title': _missionTitle,
             'isPublic': _isPublic,
