@@ -170,43 +170,40 @@ class MissionSavedListScreen extends ConsumerWidget {
   ) {
     return missions.where((m) {
       final completedAt = m['missioncreatedate']?.toDate();
-      if (completedAt == null) return false;
+      if (completedAt == null) {
+        return false;
+      }
       return completedAt.year == focusedDay.year &&
           completedAt.month == focusedDay.month;
     }).length;
   }
 
   int _calculateConsecutiveDays(Iterable<DateTime> dates) {
-    if (dates.isEmpty) return 0;
+    if (dates.isEmpty) {
+      return 0;
+    }
 
-    final sortedDates = dates.toList()..sort((a, b) => b.compareTo(a));
-
+    final completedDatesSet = dates.toSet();
     final today = DateTime.now();
     final todayUtc = DateTime.utc(today.year, today.month, today.day);
-    final yesterdayUtc = todayUtc.subtract(const Duration(days: 1));
 
-    // 가장 최근 성공일이 오늘이나 어제가 아니면 연속 기록은 0
-    if (sortedDates.first != todayUtc && sortedDates.first != yesterdayUtc) {
+    // 시작 날짜를 정합니다. 오늘 미션을 완료했으면 오늘부터, 아니면 어제부터 확인
+    DateTime currentDate = completedDatesSet.contains(todayUtc)
+        ? todayUtc
+        : todayUtc.subtract(const Duration(days: 1));
+
+    // 시작 날짜의 미션이 완료되지 않았다면 연속일은 0
+    if (!completedDatesSet.contains(currentDate)) {
       return 0;
     }
 
     int consecutiveDays = 0;
-    // 시작 날짜를 정함 (오늘 미션을 했으면 오늘부터, 안했으면 어제부터 카운트 시작)
-    DateTime lastDate = sortedDates.first == todayUtc ? todayUtc : yesterdayUtc;
-
-    // 정렬된 날짜 목록을 순회하며 연속된 날짜인지 확인
-    for (final date in sortedDates) {
-      if (lastDate.difference(date).inDays == 1) {
-        consecutiveDays++;
-        lastDate = date;
-      } else if (date == lastDate) {
-        // 시작 날짜와 같은 경우
-        consecutiveDays++;
-        lastDate = date;
-      } else {
-        break;
-      }
+    // currentDate부터 과거로 하루씩 이동하며 연속된 날짜인지 확인
+    while (completedDatesSet.contains(currentDate)) {
+      consecutiveDays++;
+      currentDate = currentDate.subtract(const Duration(days: 1));
     }
+
     return consecutiveDays;
   }
 }

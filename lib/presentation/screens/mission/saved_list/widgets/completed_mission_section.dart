@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/selected_day_mission_view.dart';
 
-class CompletedMissionSection extends StatelessWidget {
+class CompletedMissionSection extends ConsumerWidget {
   final DateTime? selectedDay;
   final Map<DateTime, Map<String, dynamic>> completedMissions;
 
@@ -14,7 +16,7 @@ class CompletedMissionSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final selectedDate = selectedDay != null
         ? DateTime.utc(selectedDay!.year, selectedDay!.month, selectedDay!.day)
         : null;
@@ -32,8 +34,15 @@ class CompletedMissionSection extends StatelessWidget {
           action: missionData == null
               ? null
               : IconButton(
-                  onPressed: () {
-                    context.push('/mission-create', extra: missionData);
+                  onPressed: () async {
+                    final result = await context.push(
+                      '/mission-create',
+                      extra: missionData,
+                    );
+                    // MissionCreateScreen에서 true를 반환하면 (작업 완료) 데이터를 새로고침
+                    if (result == true && context.mounted) {
+                      ref.invalidate(userMissionsProvider);
+                    }
                   },
                   icon: const Icon(
                     CupertinoIcons.square_pencil_fill,
