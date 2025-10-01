@@ -143,7 +143,8 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
       }
 
       if (mounted) {
-        context.pop();
+        // 작업이 성공적으로 완료되었음을 이전 화면에 알리기 위해 true를 전달합니다.
+        context.pop(true);
       }
     } catch (e) {
       // 에러 처리 (예: 스낵바 표시)
