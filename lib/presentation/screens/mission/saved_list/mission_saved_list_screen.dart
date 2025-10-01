@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,27 +9,20 @@ import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/complete
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class MissionSavedListScreen extends ConsumerStatefulWidget {
+/// `focusedDay` 상태를 관리하는 Provider. 캘린더에서 현재 보여지는 월을 추적합니다.
+final focusedDayProvider = StateProvider<DateTime>((ref) => DateTime.now());
+
+/// `selectedDay` 상태를 관리하는 Provider. 사용자가 캘린더에서 선택한 날짜를 추적합니다.
+final selectedDayProvider = StateProvider<DateTime?>((ref) => DateTime.now());
+
+class MissionSavedListScreen extends ConsumerWidget {
   const MissionSavedListScreen({super.key});
 
   @override
-  ConsumerState<MissionSavedListScreen> createState() =>
-      _MissionSavedListScreenState();
-}
-
-class _MissionSavedListScreenState
-    extends ConsumerState<MissionSavedListScreen> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final userMissionsAsync = ref.watch(userMissionsProvider);
-    final daysInMonth = DateTime(
-      _focusedDay.year,
-      _focusedDay.month + 1,
-      0,
-    ).day;
+    final focusedDay = ref.watch(focusedDayProvider);
+    final selectedDay = ref.watch(selectedDayProvider);
 
     return Scaffold(
       appBar: CommonAppBar(
@@ -56,7 +50,9 @@ class _MissionSavedListScreenState
               else
                 _buildCalendarAndMissionSection(
                   userMissionsAsync.value ?? [],
-                  daysInMonth,
+                  ref,
+                  focusedDay,
+                  selectedDay,
                 ),
             ],
           ),
@@ -67,27 +63,31 @@ class _MissionSavedListScreenState
 
   Widget _buildCalendarAndMissionSection(
     List<Map<String, dynamic>> missions,
-    int daysInMonth,
+    WidgetRef ref,
+    DateTime focusedDay,
+    DateTime? selectedDay,
   ) {
     final completedMissions = _mapMissionsToCalendarEvents(missions);
+    final totalCompletedMissionsForMonth =
+        _calculateTotalCompletedMissionsForMonth(missions, focusedDay);
+    final daysInMonth = _getDaysInMonth(focusedDay);
 
     return Column(
       children: [
         CalendarView(
-          focusedDay: _focusedDay,
-          selectedDay: _selectedDay,
-          totalCompletedMissions: missions.length,
+          focusedDay: focusedDay,
+          selectedDay: selectedDay,
+          totalCompletedMissions: totalCompletedMissionsForMonth,
           daysInMonth: daysInMonth,
           consecutiveSuccessDays: _calculateConsecutiveDays(
             completedMissions.keys,
           ),
-          onDaySelected: (selectedDay, focusedDay) {
-            if (!isSameDay(_selectedDay, selectedDay)) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-            }
+          onDaySelected: (selected, focused) {
+            ref.read(selectedDayProvider.notifier).state = selected;
+            ref.read(focusedDayProvider.notifier).state = focused;
+          },
+          onPageChanged: (focused) {
+            ref.read(focusedDayProvider.notifier).state = focused;
           },
           eventLoader: (day) {
             final date = DateTime.utc(day.year, day.month, day.day);
@@ -112,7 +112,7 @@ class _MissionSavedListScreenState
             },
             markerBuilder: (context, day, events) {
               if (events.isNotEmpty) {
-                final isSelected = isSameDay(_selectedDay, day);
+                final isSelected = isSameDay(selectedDay, day);
                 return Align(
                   alignment: Alignment.topCenter,
                   child: Container(
@@ -133,17 +133,11 @@ class _MissionSavedListScreenState
         ),
         const SizedBox(height: 24),
         CompletedMissionSection(
-          selectedDay: _selectedDay,
+          selectedDay: selectedDay,
           completedMissions: completedMissions,
         ),
       ],
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDay = _focusedDay;
   }
 
   Map<DateTime, Map<String, dynamic>> _mapMissionsToCalendarEvents(
@@ -151,7 +145,8 @@ class _MissionSavedListScreenState
   ) {
     final Map<DateTime, Map<String, dynamic>> eventMap = {};
     for (var mission in missions) {
-      final completedAt = mission['missioncreatedate']?.toDate();
+      final completedAt = (mission['missioncreatedate'] as Timestamp?)
+          ?.toDate();
       if (completedAt != null) {
         final date = DateTime.utc(
           completedAt.year,
@@ -165,26 +160,49 @@ class _MissionSavedListScreenState
     return eventMap;
   }
 
+  int _getDaysInMonth(DateTime date) {
+    return DateTime(date.year, date.month + 1, 0).day;
+  }
+
+  int _calculateTotalCompletedMissionsForMonth(
+    List<Map<String, dynamic>> missions,
+    DateTime focusedDay,
+  ) {
+    return missions.where((m) {
+      final completedAt = m['missioncreatedate']?.toDate();
+      if (completedAt == null) return false;
+      return completedAt.year == focusedDay.year &&
+          completedAt.month == focusedDay.month;
+    }).length;
+  }
+
   int _calculateConsecutiveDays(Iterable<DateTime> dates) {
-    if (dates.isEmpty) {
+    if (dates.isEmpty) return 0;
+
+    final sortedDates = dates.toList()..sort((a, b) => b.compareTo(a));
+
+    final today = DateTime.now();
+    final todayUtc = DateTime.utc(today.year, today.month, today.day);
+    final yesterdayUtc = todayUtc.subtract(const Duration(days: 1));
+
+    // 가장 최근 성공일이 오늘이나 어제가 아니면 연속 기록은 0
+    if (sortedDates.first != todayUtc && sortedDates.first != yesterdayUtc) {
       return 0;
     }
 
-    final sortedDates = dates.toList()..sort((a, b) => b.compareTo(a));
-    int consecutiveDays = 1;
-    DateTime lastDate = sortedDates.first;
+    int consecutiveDays = 0;
+    // 시작 날짜를 정함 (오늘 미션을 했으면 오늘부터, 안했으면 어제부터 카운트 시작)
+    DateTime lastDate = sortedDates.first == todayUtc ? todayUtc : yesterdayUtc;
 
-    // 오늘 날짜가 포함되어 있는지 확인
-    final today = DateTime.now();
-    if (!isSameDay(lastDate, today) &&
-        !isSameDay(lastDate, today.subtract(const Duration(days: 1)))) {
-      return 0; // 마지막 성공일이 어제나 오늘이 아니면 연속 성공 아님
-    }
-
-    for (int i = 1; i < sortedDates.length; i++) {
-      if (lastDate.difference(sortedDates[i]).inDays == 1) {
+    // 정렬된 날짜 목록을 순회하며 연속된 날짜인지 확인
+    for (final date in sortedDates) {
+      if (lastDate.difference(date).inDays == 1) {
         consecutiveDays++;
-        lastDate = sortedDates[i];
+        lastDate = date;
+      } else if (date == lastDate) {
+        // 시작 날짜와 같은 경우
+        consecutiveDays++;
+        lastDate = date;
       } else {
         break;
       }
