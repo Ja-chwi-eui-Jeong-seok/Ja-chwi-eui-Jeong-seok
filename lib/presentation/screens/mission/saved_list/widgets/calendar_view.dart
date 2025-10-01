@@ -6,6 +6,7 @@ class CalendarView extends StatelessWidget {
   final DateTime focusedDay;
   final DateTime? selectedDay;
   final Function(DateTime, DateTime) onDaySelected;
+  final Function(DateTime) onPageChanged;
   final List<dynamic> Function(DateTime)? eventLoader;
   final CalendarBuilders builders;
 
@@ -18,6 +19,7 @@ class CalendarView extends StatelessWidget {
     required this.focusedDay,
     required this.selectedDay,
     required this.onDaySelected,
+    required this.onPageChanged,
     this.eventLoader,
     this.builders = const CalendarBuilders(),
     required this.totalCompletedMissions,
@@ -59,6 +61,7 @@ class CalendarView extends StatelessWidget {
             selectedDayPredicate: (day) => isSameDay(selectedDay, day),
             holidayPredicate: (day) => day.weekday == DateTime.sunday,
             onDaySelected: onDaySelected,
+            onPageChanged: onPageChanged,
             eventLoader: eventLoader,
             calendarBuilders: CalendarBuilders(
               selectedBuilder: builders.selectedBuilder,
