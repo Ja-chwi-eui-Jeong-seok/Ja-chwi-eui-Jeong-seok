@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 // // 1. 일반 페이지 → 탭 표시
 // BottomNav(mode: BottomNavMode.tab);
 
@@ -21,13 +20,15 @@ class BottomNav extends StatelessWidget {
   final String? confirmRoute; // confirm 모드에서 이동할 경로
   final VoidCallback? onConfirm; // ✅ 추가
   final Map<String, dynamic>? userData; // 추가
+  final GlobalKey missionKey = GlobalKey();
+  final GlobalKey communityKey = GlobalKey();
 
-  const BottomNav({
+  BottomNav({
     super.key,
     this.mode = BottomNavMode.tab,
     this.confirmRoute,
     this.onConfirm,
-    this.userData
+    this.userData,
   });
 
   @override
@@ -67,24 +68,45 @@ class BottomNav extends StatelessWidget {
             type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
             onTap: (index) {
-            final routes = ['/home', '/mission', '/community', '/profile-detail'];
-            context.go(
-              routes[index],
-              extra: userData, // null 방지
-            );
-            print('BottomNav onTap: index=$index, userData=$userData');
-           },
-            selectedItemColor: Colors.red,      // 선택된 아이콘 + 텍스트 색상
-            unselectedItemColor: Colors.grey,   // 선택되지 않은 아이콘 색상
+              final routes = [
+                '/home',
+                '/mission',
+                '/community',
+                '/profile-detail',
+              ];
+              context.go(
+                routes[index],
+                extra: userData, // null 방지
+              );
+              print('BottomNav onTap: index=$index, userData=$userData');
+            },
+            selectedItemColor: Colors.red, // 선택된 아이콘 + 텍스트 색상
+            unselectedItemColor: Colors.grey, // 선택되지 않은 아이콘 색상
             backgroundColor: Colors.transparent,
             elevation: 0,
             showSelectedLabels: false,
             showUnselectedLabels: false,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home_outlined, size: 30.0), label: "홈"),
-              BottomNavigationBarItem(icon: Icon(Icons.article_outlined, size: 30.0), label: "미션"),
-              BottomNavigationBarItem(icon: Icon(Icons.groups_outlined, size: 30.0), label: "커뮤니티"),
-              BottomNavigationBarItem(icon: Icon(Icons.person_rounded, size: 30.0), label: "내 정보"),
+            items: [
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined, size: 30.0),
+                label: "홈",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.article_outlined, size: 30.0, key: missionKey),
+                label: "미션",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.groups_outlined,
+                  size: 30.0,
+                  key: communityKey,
+                ),
+                label: "커뮤니티",
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.person_rounded, size: 30.0),
+                label: "내 정보",
+              ),
             ],
           ),
         ),
@@ -103,10 +125,10 @@ class BottomNav extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       child: OutlinedButton(
-        onPressed: () {               
+        onPressed: () {
           if (onConfirm != null) {
             onConfirm!(); // ✅ 프로필 저장 실행
-          }  
+          }
           if (confirmRoute != null) {
             context.go(confirmRoute!);
           }
