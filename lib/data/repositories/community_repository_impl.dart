@@ -19,7 +19,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
       communityDetail: d.communityDetail,
       createUser: d.createUser,
       location: d.location,
-      communityCreateDate: d.communityCreateDate.toDate(),
+      communityCreateDate: d.communityCreateDate.toDate().toUtc(),
       communityUpdateDate: d.communityUpdateDate?.toDate(),
       communityDeleteDate: d.communityDeleteDate?.toDate(),
       communityDeleteYn: d.communityDeleteYn,

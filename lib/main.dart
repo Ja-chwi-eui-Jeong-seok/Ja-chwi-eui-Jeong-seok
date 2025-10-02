@@ -6,7 +6,8 @@ import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/core/config/theme/app_theme.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
 import 'package:ja_chwi/firebase_options.dart';
-
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +15,10 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // 금지어 CSV 로딩
   await XssFilter.loadBannedWordsFromCSV();
-  // api key 
+  // api key
   await dotenv.load(fileName: "assets/config/env/setting.env");
-  //
+  //타임존
+  tz.initializeTimeZones();
   runApp(
     const ProviderScope(
       // Riverpod의 전역 상태 관리 루트
@@ -24,6 +26,9 @@ Future<void> main() async {
     ),
   );
 }
+
+//전역접근용
+final tz.Location kSeoul = tz.getLocation('Asia/Seoul');
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

@@ -26,7 +26,7 @@ class CommentDto {
     this.commentLog,
   });
 
-  //댓글 불러오기
+  //댓글 불러오기(firebase에서 읽기)
   factory CommentDto.fromFirebase(String id, Map<String, dynamic> d) {
     return CommentDto(
       id: id,
@@ -65,4 +65,26 @@ class CommentDto {
     'comment_delete_yn': true,
     'comment_delete_date': FieldValue.serverTimestamp(),
   };
+
+  CommentDto copyWith({
+    String? noteDetail,
+    int? likeCount,
+    Timestamp? updateAt,
+    Timestamp? deleteAt,
+    bool? deleteYn,
+    List<String>? commentLog,
+  }) {
+    return CommentDto(
+      id: id,
+      communityId: communityId,
+      uid: uid,
+      noteDetail: noteDetail ?? this.noteDetail,
+      likeCount: likeCount ?? this.likeCount,
+      createAt: createAt,
+      updateAt: updateAt ?? this.updateAt,
+      deleteAt: deleteAt ?? this.deleteAt,
+      deleteYn: deleteYn ?? this.deleteYn,
+      commentLog: commentLog ?? this.commentLog,
+    );
+  }
 }
