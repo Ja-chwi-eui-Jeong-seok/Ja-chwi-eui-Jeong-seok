@@ -7,6 +7,11 @@ import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_write.dart';
+import 'package:timezone/timezone.dart' as tz;
+
+//타임존
+final tz.Location _seoul = tz.getLocation('Asia/Seoul');
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
@@ -124,7 +129,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     //날짜 포맷
     final created = st.post == null
         ? '09.17 17:47'
-        : DateFormat('MM.dd HH:mm').format(st.post!.communityCreateDate);
+        : DateFormat('MM.dd HH:mm').format(
+            tz.TZDateTime.from(st.post!.communityCreateDate.toUtc(), _seoul),
+          );
     final body = st.post?.communityDetail ?? '게시글내용';
 
     return DefaultTabController(
@@ -143,6 +150,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        //제목
                         Text(
                           title,
                           style: const TextStyle(
@@ -154,7 +162,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         _HeaderRow(
                           // 기존 주석 유지
                           author: author,
-                          created: created,
+                          createdAt: created,
                           authorImg: authorImg == ""
                               ? 'assets/images/m_profile/m_black.png'
                               : 'assets/images/m_profile/m_black.png',
@@ -235,11 +243,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 class _HeaderRow extends StatelessWidget {
   const _HeaderRow({
     required this.author,
-    required this.created,
+    required this.createdAt,
     required this.authorImg,
   });
   final String author;
-  final String created;
+  final String createdAt;
   final String authorImg;
 
   @override
@@ -256,7 +264,7 @@ class _HeaderRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text(author),
           const Spacer(),
-          Text(created),
+          Text(createdAt),
         ],
       ),
     );
@@ -280,124 +288,6 @@ class _PostBody extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       child: Text(body),
-    );
-  }
-}
-
-// 입력창
-class CommentWrite extends ConsumerWidget {
-  const CommentWrite({
-    super.key,
-    required this.commentController,
-    required this.submit,
-    required this.currentUid,
-  });
-  final TextEditingController commentController;
-  final VoidCallback submit;
-  final String currentUid;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    //uid 기반 프로필정보 로드(유저정보,위치정보)
-    final profileAv = ref.watch(profileByUidProvider(currentUid));
-    final profileImg = profileAv.when(
-      loading: () => CircularProgressIndicator(),
-      error: (error, _) => Image.asset('assets/images/m_profile/m_black.png'),
-      data: (data) => Image.asset(data.thumbUrl),
-    );
-    return Padding(
-      // 키보드 높이만큼 올리기
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Material(
-        elevation: 8,
-        type: MaterialType.transparency,
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 상단 그라데이션 (필요시 높이 조절)
-              Container(
-                height: 60,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color.fromARGB(0, 255, 255, 255), Colors.white],
-                  ),
-                ),
-              ),
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 25,
-                  vertical: 20,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 36,
-                      width: 36,
-
-                      child: profileImg,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: commentController,
-                                minLines: 1,
-                                maxLines: 6,
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: '댓글을 입력하세요',
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              height: 46,
-                              width: 64,
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: GestureDetector(
-                                onTap: submit,
-                                child: const Center(
-                                  child: Text(
-                                    '확인',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

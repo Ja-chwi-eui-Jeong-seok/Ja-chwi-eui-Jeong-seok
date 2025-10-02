@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
@@ -81,6 +82,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                   ),
                   TextFormField(
                     controller: _titleController,
+                    maxLength: 50,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: "제목",
@@ -88,6 +91,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
+                      //카운터삭제
+                      // counterText: '',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -95,6 +100,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                     controller: _contentController,
                     minLines: 5,
                     maxLines: 10,
+                    maxLength: 500,
+
                     decoration: const InputDecoration(
                       hintText: "게시글을 작성해주세요!",
                       border: InputBorder.none,
