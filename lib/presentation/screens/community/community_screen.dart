@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/nick_name.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/no_location_view.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 //커뮤니티 화면 (카테고리 탭 2단구조 + 게시글 패치)
 class CommunityScreen extends ConsumerStatefulWidget {
@@ -360,9 +360,16 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                     );
                   }
                   final x = st.items[i];
-                  final date = DateFormat(
-                    'yyyy.MM.dd',
-                  ).format(x.communityCreateDate);
+                  final tz.Location seoul = tz.getLocation('Asia/Seoul');
+                  final date =
+                      DateFormat(
+                        'yyyy.MM.dd',
+                      ).format(
+                        tz.TZDateTime.from(
+                          x.communityCreateDate.toUtc(),
+                          seoul,
+                        ),
+                      );
 
                   //댓글수
                   final countFuture = _commentCountFutures.putIfAbsent(

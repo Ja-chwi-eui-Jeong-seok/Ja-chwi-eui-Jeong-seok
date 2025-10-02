@@ -1,15 +1,11 @@
 // --- 댓글 리스트 ---
 // 기존 CommentCard의 주석과 형태를 유지하되, VM 데이터로 교체
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/RelativeTimeTextKst.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/heart_button.dart';
-import 'package:timezone/timezone.dart' as tz;
-
-final tz.Location _seoul = tz.getLocation('Asia/Seoul');
 
 class CommentList extends ConsumerWidget {
   const CommentList({
