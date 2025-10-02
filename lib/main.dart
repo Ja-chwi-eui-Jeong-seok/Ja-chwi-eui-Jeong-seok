@@ -7,14 +7,13 @@ import 'package:ja_chwi/core/config/theme/app_theme.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
 import 'package:ja_chwi/firebase_options.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Firebase 초기화
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // 금지어 CSV 로딩
   await XssFilter.loadBannedWordsFromCSV();
-  // api key 
+  // api key
   await dotenv.load(fileName: "assets/config/env/setting.env");
   //
   runApp(
@@ -24,6 +23,8 @@ Future<void> main() async {
     ),
   );
 }
+
+class OpenAI {}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
