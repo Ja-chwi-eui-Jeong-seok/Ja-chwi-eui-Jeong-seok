@@ -159,17 +159,16 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           ),
                         ),
                         const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                        //작성자정보 날짜정보 프로필정보
                         _HeaderRow(
-                          // 기존 주석 유지
                           author: author,
                           createdAt: created,
                           authorImg: authorImg == ""
                               ? 'assets/images/m_profile/m_black.png'
-                              : 'assets/images/m_profile/m_black.png',
+                              : authorImg,
                         ),
                         const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
                         _PostBody(
-                          // 기존 주석 유지
                           body: body,
                         ),
                       ],
