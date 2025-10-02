@@ -10,14 +10,6 @@ class PagedComments {
 }
 
 abstract interface class CommentRepository {
-  Future<String> create(Comment input);
-
-  Future<String> createMinimal({
-    required String communityId,
-    required String uid,
-    required String noteDetail,
-  });
-
   /// ✅ 생성 직후 서버값까지 반영된 Comment 반환
   Future<Comment> createAndGetMinimal({
     required String communityId,
