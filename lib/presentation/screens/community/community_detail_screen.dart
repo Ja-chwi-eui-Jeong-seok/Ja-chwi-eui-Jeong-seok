@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +7,7 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
-import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widfet/comment_list.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
@@ -64,11 +64,39 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     commentController.clear();
   }
 
+  Widget _pagedList(WidgetRef ref, CommunityDetailState st) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (n) {
+        if (n is ScrollUpdateNotification) {
+          final remain = n.metrics.maxScrollExtent - n.metrics.pixels;
+          if (remain < 200 && !st.loadingComments && st.hasMore) {
+            ref.read(provider.notifier).loadMore(ref);
+          }
+        }
+        return false;
+      },
+      child: CommentList(
+        itemCount: st.comments.length,
+        likeCountOf: (i) => st.comments[i].likeCount,
+        uidOf: (i) => st.comments[i].uid,
+        textOf: (i) => st.comments[i].noteDetail,
+        loading: st.loadingComments,
+        isLikedOf: (i) => st.likedIds.contains(st.comments[i].id),
+        onToggleLike: (i) =>
+            ref.read(provider.notifier).toggleLike(ref, st.comments[i].id),
+        createdAtOf: (i) => st.comments[i].createAt,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final st = ref.watch(provider);
+    //현재유저의 uid 정보
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
 
     // 화면 헤더 데이터 구성
+    //게시글과 게시글 작성자 정보
     final title = st.post?.communityName ?? '제목';
     final authorUid = st.post?.createUser;
     final author = authorUid == null
@@ -76,6 +104,15 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         : ref
               .watch(profileByUidProvider(authorUid))
               .maybeWhen(data: (p) => p.nickname, orElse: () => '작성자');
+    final authorImg = authorUid == null
+        ? 'assets/images/m_profile/m_black.png'
+        : ref
+              .watch(profileByUidProvider(authorUid))
+              .maybeWhen(
+                data: (p) => p.thumbUrl,
+                orElse: () => 'assets/images/m_profile/m_black.png',
+              );
+    //날짜 포맷
     final created = st.post == null
         ? '09.17 17:47'
         : DateFormat('MM.dd HH:mm').format(st.post!.communityCreateDate);
@@ -109,6 +146,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           // 기존 주석 유지
                           author: author,
                           created: created,
+                          authorImg: authorImg,
                         ),
                         const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
                         _PostBody(
@@ -157,35 +195,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   TabBarView(
                     children: [
                       //최신순
-                      CommentList(
-                        itemCount: st.comments.length,
-                        likeCountOf: (i) => st.comments[i].likeCount,
-                        uidOf: (i) => st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
-                        textOf: (i) => st.comments[i].noteDetail,
-                        loading: st.loadingComments,
-                        isLikedOf: (i) =>
-                            st.likedIds.contains(st.comments[i].id),
-                        onToggleLike: (i) => ref
-                            .read(provider.notifier)
-                            .toggleLike(ref, st.comments[i].id),
-                        createdAtOf: (i) =>
-                            st.comments[i].createAt, // or .createdAt
-                      ),
+                      _pagedList(ref, st),
                       //추천순
-                      CommentList(
-                        itemCount: st.comments.length,
-                        likeCountOf: (i) => st.comments[i].likeCount,
-                        uidOf: (i) => st.comments[i].uid, //TODO:UID 키로 닉네임가져와야함
-                        textOf: (i) => st.comments[i].noteDetail,
-                        loading: st.loadingComments,
-                        isLikedOf: (i) =>
-                            st.likedIds.contains(st.comments[i].id),
-                        onToggleLike: (i) => ref
-                            .read(provider.notifier)
-                            .toggleLike(ref, st.comments[i].id),
-                        createdAtOf: (i) =>
-                            st.comments[i].createAt, // or .createdAt
-                      ),
+                      _pagedList(ref, st),
                     ],
                   ),
             ),
@@ -198,6 +210,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               child: CommentWrite(
                 commentController: commentController,
                 submit: submit,
+                currentUid: currentUid!,
               ),
             ),
           ],
@@ -209,9 +222,14 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
 //헤더
 class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({required this.author, required this.created});
+  const _HeaderRow({
+    required this.author,
+    required this.created,
+    required this.authorImg,
+  });
   final String author;
   final String created;
+  final String authorImg;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +240,7 @@ class _HeaderRow extends StatelessWidget {
           SizedBox(
             height: 35,
             width: 35,
-            child: Image.asset('assets/images/m_profile/m_black.png'),
+            child: Image.asset(authorImg),
           ),
           const SizedBox(width: 8),
           Text(author),
@@ -256,17 +274,26 @@ class _PostBody extends StatelessWidget {
 }
 
 // 입력창
-class CommentWrite extends StatelessWidget {
+class CommentWrite extends ConsumerWidget {
   const CommentWrite({
     super.key,
     required this.commentController,
     required this.submit,
+    required this.currentUid,
   });
   final TextEditingController commentController;
   final VoidCallback submit;
+  final String currentUid;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    //uid 기반 프로필정보 로드(유저정보,위치정보)
+    final profileAv = ref.watch(profileByUidProvider(currentUid));
+    final profileImg = profileAv.when(
+      loading: () => CircularProgressIndicator(),
+      error: (error, _) => Image.asset('assets/images/m_profile/m_black.png'),
+      data: (data) => Image.asset(data.thumbUrl),
+    );
     return Padding(
       // 키보드 높이만큼 올리기
       padding: EdgeInsets.only(
@@ -304,8 +331,8 @@ class CommentWrite extends StatelessWidget {
                     SizedBox(
                       height: 36,
                       width: 36,
-                      //TODO: 사용자 이미지로 바꾸기
-                      child: Image.asset('assets/images/m_profile/m_black.png'),
+
+                      child: profileImg,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
