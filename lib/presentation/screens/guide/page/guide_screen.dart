@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide1.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide2.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide3.dart';
@@ -8,11 +7,9 @@ import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide4.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide5.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
 import 'package:ja_chwi/presentation/screens/home/page/home_screen.dart';
-import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class GuideScreen extends StatefulWidget {
   const GuideScreen({super.key, this.extra});
-
   final Map<String, dynamic>? extra;
 
   @override
@@ -26,7 +23,13 @@ class _GuideScreenState extends State<GuideScreen> {
   late final String? imageFullUrl;
   late final String? thumbUrl;
   late final String? color;
-  late final BottomNav bottomNav;
+
+  // 🔹 GlobalKey 생성
+  final GlobalKey missionKey = GlobalKey();
+  final GlobalKey communityKey = GlobalKey();
+
+  Offset missionIconPos = Offset.zero;
+  Offset communityIconPos = Offset.zero;
 
   @override
   void initState() {
@@ -37,27 +40,18 @@ class _GuideScreenState extends State<GuideScreen> {
     imageFullUrl = args?['imageFullUrl'];
     thumbUrl = args?['thumbUrl'];
     color = args?['color'];
-    bottomNav = BottomNav();
 
-    print('GuideScreen initState');
-    print('uid: $uid, nickname: $nickname');
-    print('imageFullUrl: $imageFullUrl, color: $color');
+    // 🔹 프레임 렌더링 이후에 위치 계산
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        missionIconPos = _getWidgetCenter(missionKey);
+        communityIconPos = _getWidgetCenter(communityKey);
+      });
+    });
   }
 
-  // Mission 아이콘 위치
-  Offset getMissionIconPosition() {
-    final renderBox =
-        bottomNav.missionKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      return renderBox.localToGlobal(renderBox.size.center(Offset.zero));
-    }
-    return Offset.zero;
-  }
-
-  // Community 아이콘 위치
-  Offset getCommunityIconPosition() {
-    final renderBox =
-        bottomNav.communityKey.currentContext?.findRenderObject() as RenderBox?;
+  Offset _getWidgetCenter(GlobalKey key) {
+    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       return renderBox.localToGlobal(renderBox.size.center(Offset.zero));
     }
@@ -87,16 +81,10 @@ class _GuideScreenState extends State<GuideScreen> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final stackWidth = constraints.maxWidth;
-        final stackHeight = constraints.maxHeight;
-        final circleCenter = GuideCircleConfig.getCenter(
-          Size(stackWidth, stackHeight),
-        );
-        final circleRadius = GuideCircleConfig.getRadius(
-          Size(stackWidth, stackHeight),
-        );
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        final circleCenter = GuideCircleConfig.getCenter(size);
+        final circleRadius = GuideCircleConfig.getRadius(size);
 
-        // 단계별 위젯
         final steps = [
           (next) => Guide1(
             uid: uid,
@@ -131,7 +119,7 @@ class _GuideScreenState extends State<GuideScreen> {
             thumbUrl: thumbUrl,
             color: color,
             onNext: next,
-            circleCenter: getMissionIconPosition(), // ← BottomNav 실제 위치
+            circleCenter: missionIconPos,
             circleRadius: 30,
           ),
           (next) => Guide5(
@@ -141,7 +129,7 @@ class _GuideScreenState extends State<GuideScreen> {
             thumbUrl: thumbUrl,
             color: color,
             onNext: next,
-            circleCenter: getCommunityIconPosition(), // ← BottomNav 실제 위치
+            circleCenter: communityIconPos,
             circleRadius: 30,
           ),
         ];
@@ -156,8 +144,13 @@ class _GuideScreenState extends State<GuideScreen> {
                 'thumbUrl': thumbUrl,
                 'color': color,
               },
+              // 🔹 키 전달
+              missionKey: missionKey,
+              communityKey: communityKey,
             ),
-            steps[current](_nextStep),
+            if (missionIconPos != Offset.zero &&
+                communityIconPos != Offset.zero)
+              steps[current](_nextStep),
           ],
         );
       },
