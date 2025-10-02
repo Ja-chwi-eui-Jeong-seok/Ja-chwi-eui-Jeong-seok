@@ -51,6 +51,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         if (parents.isEmpty) {
           return const Scaffold(body: Center(child: Text('카테고리가 없습니다')));
         }
+        //오름차순 정렬
+        parents.sort((a, b) => a.categoryCode.compareTo(b.categoryCode));
         return DefaultTabController(
           length: parents.length,
           child: Scaffold(
