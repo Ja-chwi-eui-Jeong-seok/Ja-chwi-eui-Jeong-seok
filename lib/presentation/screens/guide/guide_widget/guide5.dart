@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
 
 class Guide5 extends StatelessWidget {
   final VoidCallback onNext;

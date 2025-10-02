@@ -20,15 +20,17 @@ class BottomNav extends StatelessWidget {
   final String? confirmRoute; // confirm 모드에서 이동할 경로
   final VoidCallback? onConfirm; // ✅ 추가
   final Map<String, dynamic>? userData; // 추가
-  final GlobalKey missionKey = GlobalKey();
-  final GlobalKey communityKey = GlobalKey();
+  final GlobalKey? missionKey;
+  final GlobalKey? communityKey;
 
-  BottomNav({
+  const BottomNav({
     super.key,
     this.mode = BottomNavMode.tab,
     this.confirmRoute,
     this.onConfirm,
     this.userData,
+    this.missionKey,
+    this.communityKey,
   });
 
   @override
