@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/providers/auth_provider.dart';
-import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_mock_viewmodel.dart';
-// import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_view_model.dart'
-//     hide AuthStatus;
+import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_view_model.dart';
+
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AppleLoginButton extends ConsumerWidget {
