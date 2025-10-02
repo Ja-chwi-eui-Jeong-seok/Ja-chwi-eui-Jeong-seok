@@ -174,6 +174,9 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
         if (subs.isEmpty) {
           return const Center(child: Text('하위 카테고리가 없습니다'));
         }
+        subs.sort(
+          (a, b) => a.categoryDetailCode.compareTo(b.categoryDetailCode),
+        );
         return DefaultTabController(
           length: subs.length,
           child: Column(

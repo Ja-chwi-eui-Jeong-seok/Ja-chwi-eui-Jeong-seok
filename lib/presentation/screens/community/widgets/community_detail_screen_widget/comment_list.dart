@@ -28,21 +28,6 @@ class CommentList extends ConsumerWidget {
   final bool Function(int) isLikedOf;
   final void Function(int) onToggleLike;
   final DateTime Function(int) createdAtOf;
-  //댓글 시간표시 핼퍼
-  // String timeAgo(DateTime dt) {
-  //   final now = DateTime.now();
-  //   Duration diff = now.difference(dt);
-  //   if (diff.isNegative) diff = Duration.zero; // 서버시간 오차 가드
-
-  //   final mins = diff.inMinutes;
-  //   if (mins < 60) return '${mins <= 0 ? 1 : mins}분 전';
-
-  //   final hours = diff.inHours;
-  //   if (hours < 24) return '$hours시간 전';
-
-  //   final days = diff.inDays;
-  //   return '$days일 전';
-  // }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -147,7 +132,7 @@ class CommentList extends ConsumerWidget {
           },
           child: Container(
             color: Colors.white,
-            height: 80,
+            // height: 80,
             child: Row(
               children: [
                 SizedBox(
@@ -224,7 +209,7 @@ class CommentList extends ConsumerWidget {
                       Text(
                         //댓글내용
                         textOf(i),
-                        maxLines: 2,
+                        maxLines: 5,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],

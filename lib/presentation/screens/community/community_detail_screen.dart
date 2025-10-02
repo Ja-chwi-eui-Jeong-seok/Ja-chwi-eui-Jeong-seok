@@ -48,8 +48,13 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   void submit() async {
     if (!mounted) return;
     final text = commentController.text.trim();
-    if (text.isEmpty) return;
-
+    // 빈값 가드
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('댓글을 입력하세요')),
+      );
+      return;
+    }
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,7 +62,6 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       );
       return;
     }
-
     await ref
         .read(provider.notifier)
         .createComment(
@@ -159,7 +163,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           ),
                         ),
                         const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
-                        //작성자정보 날짜정보 프로필정보
+                        //작성자정보 날짜정보
                         _HeaderRow(
                           author: author,
                           createdAt: created,
