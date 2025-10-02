@@ -6,7 +6,7 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/description_input_field.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/photo_upload_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/public_toggle_switch.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart'; // missionRepositoryProvider를 위해 추가
+import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 
 class MissionCreateScreen extends ConsumerStatefulWidget {
   const MissionCreateScreen({super.key});
@@ -98,8 +98,6 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
 
     try {
       User? user = FirebaseAuth.instance.currentUser;
-      // 앱 정책상 사용자는 항상 로그인 되어 있어야 합니다.
-      // user가 null인 경우는 예외적인 상황으로 간주하고 에러를 발생시킵니다.
       if (user == null) {
         throw Exception("사용자 인증 정보가 없습니다. 다시 로그인해주세요.");
       }
@@ -143,11 +141,9 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
       }
 
       if (mounted) {
-        // 작업이 성공적으로 완료되었음을 이전 화면에 알리기 위해 true를 전달합니다.
         context.pop(true);
       }
     } catch (e) {
-      // 에러 처리 (예: 스낵바 표시)
       debugPrint('미션 제출 오류: $e');
       _showSnackBar('업로드에 실패했습니다: ${e.toString()}');
     } finally {

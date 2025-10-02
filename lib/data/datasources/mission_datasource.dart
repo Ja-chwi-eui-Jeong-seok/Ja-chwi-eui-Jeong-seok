@@ -32,4 +32,9 @@ abstract class MissionDataSource {
 
   /// 오늘의 미션 달성자 목록을 가져옵니다.
   Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers();
+
+  /// 주간 미션 랭커 목록을 가져옵니다.
+  Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
+    DateTime dateForWeek,
+  );
 }

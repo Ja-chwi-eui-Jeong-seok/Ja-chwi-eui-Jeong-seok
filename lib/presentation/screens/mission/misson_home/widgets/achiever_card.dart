@@ -39,7 +39,6 @@ class AchieverCard extends StatelessWidget {
             color: Color(0xFF2C2C2C),
             shape: BoxShape.circle,
           ),
-          // TODO: 실제 캐릭터 이미지로 교체
         ),
         const SizedBox(width: 12),
         // 레벨과 닉네임

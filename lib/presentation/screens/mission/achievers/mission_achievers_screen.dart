@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-// import 'package:ja_chwi/presentation/screens/mission/achievers/widgets/category_tabs.dart';
+import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
@@ -17,14 +17,11 @@ class MissionAchieversScreen extends ConsumerStatefulWidget {
 
 class MissionAchieversScreenState
     extends ConsumerState<MissionAchieversScreen> {
-  // TODO: 실제 미션 데이터는 상태관리(Provider, BLoC 등)를 통해 가져와야 합니다.
   bool _showAllAchievers = false;
-  // int _selectedCategoryIndex = 0;
-  // final List<String> _categories = ['요리', '청소', '운동'];
 
   @override
   Widget build(BuildContext context) {
-    final achieversAsync = ref.watch(achieversProvider);
+    final achieversAsync = ref.watch(weeklyAchieversProvider);
 
     return Scaffold(
       appBar: CommonAppBar(
@@ -34,28 +31,56 @@ class MissionAchieversScreenState
         ),
         actions: [
           RefreshIconButton(
-            onPressed: () => ref.invalidate(achieversProvider),
+            onPressed: () => ref.invalidate(weeklyAchieversProvider),
           ),
         ],
       ),
       body: achieversAsync.when(
         data: (achievers) {
+          final selectedWeek = ref.watch(selectedWeekProvider);
+          final startOfWeek = selectedWeek.subtract(
+            Duration(days: selectedWeek.weekday - 1),
+          );
+          final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+          final weekString =
+              '${DateFormat('yyyy년 MM월 dd일').format(startOfWeek)} ~ ${DateFormat('MM월 dd일').format(endOfWeek)}';
+
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                // CategoryTabs(
-                //   categories: _categories,
-                //   selectedIndex: _selectedCategoryIndex,
-                //   onCategorySelected: (index) {
-                //     setState(() {
-                //       _selectedCategoryIndex = index;
-                //     });
-                //   },
-                // ),
-                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new, size: 16),
+                      onPressed: () {
+                        ref.read(selectedWeekProvider.notifier).state =
+                            selectedWeek.subtract(const Duration(days: 7));
+                      },
+                    ),
+                    const SizedBox(width: 20),
+                    Text(
+                      weekString,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onPressed: () {
+                        ref.read(selectedWeekProvider.notifier).state =
+                            selectedWeek.add(const Duration(days: 7));
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 _buildRankingSection(achievers),
                 const SizedBox(height: 24),
                 Expanded(
@@ -94,9 +119,25 @@ class MissionAchieversScreenState
                                     width: 48,
                                     height: 48,
                                     child: ClipOval(
-                                      child: Image.asset(
-                                        achiever.imageFullUrl,
+                                      child: Image(
+                                        image:
+                                            (achiever.imageFullUrl.startsWith(
+                                                      'http',
+                                                    )
+                                                    ? NetworkImage(
+                                                        achiever.imageFullUrl,
+                                                      )
+                                                    : AssetImage(
+                                                        achiever.imageFullUrl,
+                                                      ))
+                                                as ImageProvider,
                                         fit: BoxFit.contain,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                  Icons.person,
+                                                  size: 30,
+                                                ),
                                       ),
                                     ),
                                   ),
@@ -114,6 +155,11 @@ class MissionAchieversScreenState
                                     ),
                                   ),
                                   const Spacer(),
+                                  Text(
+                                    '${achiever.weekCount}회',
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(width: 8),
                                   TextButton(
                                     onPressed: () {
                                       // achiever.userId를 사용하여 uid를 가져옵니다.
@@ -192,9 +238,10 @@ class MissionAchieversScreenState
   Widget _buildRankingSection(List<MissionAchiever> achievers) {
     final _placeholderAchiever = MissionAchiever(
       userId: '',
-      name: '?',
-      time: '',
+      name: '미정',
       level: 'Lv.?',
+      missionCount: 0,
+      weekCount: 0,
       imageFullUrl: 'assets/images/profile/black.png', // 기본 이미지
     );
 
@@ -272,19 +319,22 @@ class MissionAchieversScreenState
               width: circleSize * 1.2,
               height: circleSize * 1.2,
               child: ClipOval(
-                child: achiever.name == '미정'
-                    ? Container(
-                        color: Colors.grey[200],
-                        child: Icon(
-                          Icons.person_outline,
-                          size: circleSize * 0.6,
-                          color: Colors.grey[600],
-                        ),
-                      )
-                    : Image.asset(
-                        achiever.imageFullUrl,
-                        fit: BoxFit.contain,
-                      ),
+                child: Image(
+                  image:
+                      (achiever.imageFullUrl.startsWith('http')
+                              ? NetworkImage(achiever.imageFullUrl)
+                              : AssetImage(achiever.imageFullUrl))
+                          as ImageProvider,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.person_outline,
+                      size: circleSize * 0.6,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
               ),
             ),
             Positioned(
@@ -321,6 +371,12 @@ class MissionAchieversScreenState
           achiever.name,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${achiever.weekCount}회',
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
           textAlign: TextAlign.center,
         ),
       ],
