@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/ai_chat_circle.dart';
+import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_card.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart';
@@ -93,8 +94,12 @@ class _HomeScreenState extends State<HomeScreen> {
           final stackWidth = constraints.maxWidth;
           final stackHeight = constraints.maxHeight;
 
-          final circleCenter = Offset(stackWidth * 0.73, stackHeight * 0.464);
-          final circleRadius = stackWidth * 0.05;
+          final circleCenter = AiChatCircleConfig.getCenter(
+            Size(stackWidth, stackHeight),
+          );
+          final circleRadius = AiChatCircleConfig.getRadius(
+            Size(stackWidth, stackHeight),
+          );
 
           return Stack(
             children: [
