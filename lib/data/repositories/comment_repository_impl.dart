@@ -14,42 +14,12 @@ class CommentRepositoryImpl implements CommentRepository {
     uid: d.uid,
     noteDetail: d.noteDetail,
     likeCount: d.likeCount,
-    createAt: d.createAt.toDate(),
+    createAt: d.createAt.toDate().toUtc(),
     updateAt: d.updateAt?.toDate(),
     deleteAt: d.deleteAt?.toDate(),
     deleteYn: d.deleteYn,
     commentLog: d.commentLog,
   );
-
-  @override
-  Future<String> create(Comment input) {
-    final dto = CommentDto(
-      id: '',
-      communityId: input.communityId,
-      uid: input.uid,
-      noteDetail: input.noteDetail,
-      likeCount: input.likeCount,
-      createAt: Timestamp.now(), // 실제 저장은 serverTimestamp로 덮임
-      updateAt: null,
-      deleteAt: null,
-      deleteYn: false,
-      commentLog: input.commentLog,
-    );
-    return ds.create(dto);
-  }
-
-  @override
-  Future<String> createMinimal({
-    required String communityId,
-    required String uid,
-    required String noteDetail,
-  }) {
-    return ds.createMinimal(
-      communityId: communityId,
-      uid: uid,
-      noteDetail: noteDetail,
-    );
-  }
 
   @override
   Future<Comment> createAndGetMinimal({

@@ -19,7 +19,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
       communityDetail: d.communityDetail,
       createUser: d.createUser,
       location: d.location,
-      communityCreateDate: d.communityCreateDate.toDate(),
+      communityCreateDate: d.communityCreateDate.toDate().toUtc(),
       communityUpdateDate: d.communityUpdateDate?.toDate(),
       communityDeleteDate: d.communityDeleteDate?.toDate(),
       communityDeleteYn: d.communityDeleteYn,
@@ -85,7 +85,7 @@ class CommunityRepositoryImpl implements CommunityRepository {
     final page = await ds.fetchCommunities(
       categoryCode: categoryCode,
       categoryDetailCode: categoryDetailCode,
-      location: location, //동작구 넣기 ui에서
+      location: location,
       limit: limit,
       startAfterDoc: startAfter,
       orderDesc: desc,
