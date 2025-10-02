@@ -374,7 +374,10 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                           return;
                         }
 
-                        context.push('/community-detail', extra: res.newId);
+                        context.pushReplacement(
+                          '/community-detail',
+                          extra: res.newId,
+                        );
                       },
                       child: Opacity(
                         opacity: submitState ? 0.6 : 1,
