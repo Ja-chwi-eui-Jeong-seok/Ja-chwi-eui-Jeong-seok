@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
 
 class Guide4 extends StatelessWidget {
   final VoidCallback onNext;
@@ -8,6 +9,8 @@ class Guide4 extends StatelessWidget {
   final String? imageFullUrl;
   final String? thumbUrl;
   final String? color;
+  final Offset circleCenter;
+  final double circleRadius;
   const Guide4({
     super.key,
     required this.onNext,
@@ -16,6 +19,8 @@ class Guide4 extends StatelessWidget {
     this.imageFullUrl,
     this.thumbUrl,
     this.color,
+    required this.circleCenter,
+    required this.circleRadius,
   });
 
   @override
@@ -23,8 +28,8 @@ class Guide4 extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     // 강조 원 위치/크기
-    final circleCenter = Offset(size.width * 0.385, size.height * 0.918);
-    final circleRadius = min(size.width, size.height) * 0.07;
+    final circleCenter = Guide4CircleConfig.getCenter(size);
+    final circleRadius = Guide4CircleConfig.getRadius(size);
 
     // 텍스트 위치
     final textLeft = size.width * 0.10;
