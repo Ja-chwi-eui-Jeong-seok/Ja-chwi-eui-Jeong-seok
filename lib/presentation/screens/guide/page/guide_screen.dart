@@ -8,6 +8,7 @@ import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide4.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide5.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
 import 'package:ja_chwi/presentation/screens/home/page/home_screen.dart';
+import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
 class GuideScreen extends StatefulWidget {
   const GuideScreen({super.key, this.extra});
@@ -25,6 +26,7 @@ class _GuideScreenState extends State<GuideScreen> {
   late final String? imageFullUrl;
   late final String? thumbUrl;
   late final String? color;
+  late final BottomNav bottomNav;
 
   @override
   void initState() {
@@ -35,10 +37,31 @@ class _GuideScreenState extends State<GuideScreen> {
     imageFullUrl = args?['imageFullUrl'];
     thumbUrl = args?['thumbUrl'];
     color = args?['color'];
+    bottomNav = BottomNav();
 
     print('GuideScreen initState');
     print('uid: $uid, nickname: $nickname');
     print('imageFullUrl: $imageFullUrl, color: $color');
+  }
+
+  // Mission 아이콘 위치
+  Offset getMissionIconPosition() {
+    final renderBox =
+        bottomNav.missionKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      return renderBox.localToGlobal(renderBox.size.center(Offset.zero));
+    }
+    return Offset.zero;
+  }
+
+  // Community 아이콘 위치
+  Offset getCommunityIconPosition() {
+    final renderBox =
+        bottomNav.communityKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      return renderBox.localToGlobal(renderBox.size.center(Offset.zero));
+    }
+    return Offset.zero;
   }
 
   void _nextStep() {
@@ -108,12 +131,8 @@ class _GuideScreenState extends State<GuideScreen> {
             thumbUrl: thumbUrl,
             color: color,
             onNext: next,
-            circleCenter: Guide4CircleConfig.getCenter(
-              Size(stackWidth, stackHeight),
-            ),
-            circleRadius: Guide4CircleConfig.getRadius(
-              Size(stackWidth, stackHeight),
-            ),
+            circleCenter: getMissionIconPosition(), // ← BottomNav 실제 위치
+            circleRadius: 30,
           ),
           (next) => Guide5(
             uid: uid,
@@ -122,12 +141,8 @@ class _GuideScreenState extends State<GuideScreen> {
             thumbUrl: thumbUrl,
             color: color,
             onNext: next,
-            circleCenter: Guide5CircleConfig.getCenter(
-              Size(stackWidth, stackHeight),
-            ),
-            circleRadius: Guide5CircleConfig.getRadius(
-              Size(stackWidth, stackHeight),
-            ),
+            circleCenter: getCommunityIconPosition(), // ← BottomNav 실제 위치
+            circleRadius: 30,
           ),
         ];
 

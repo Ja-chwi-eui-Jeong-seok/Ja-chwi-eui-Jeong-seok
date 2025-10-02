@@ -27,10 +27,6 @@ class Guide5 extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // 강조 원 위치/크기
-    final circleCenter = Guide5CircleConfig.getCenter(size);
-    final circleRadius = Guide5CircleConfig.getRadius(size);
-
     // 텍스트 위치
     final textLeft = size.width * 0.23;
     final textTop = size.height * 0.7;
