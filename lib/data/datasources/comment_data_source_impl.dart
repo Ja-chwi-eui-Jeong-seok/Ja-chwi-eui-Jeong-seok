@@ -11,30 +11,6 @@ class CommentDataSourceImpl implements CommentDataSource {
       fs.collection('community_comments');
 
   @override
-  Future<String> create(CommentDto dto) async {
-    final ref = await col.add(dto.toCreateMap());
-    return ref.id;
-  }
-
-  @override
-  Future<String> createMinimal({
-    required String communityId,
-    required String uid,
-    required String noteDetail,
-  }) async {
-    //'community_comments'에 댓글 추가 후 댓글 doc.id 반환
-    final ref = await col.add({
-      'community_id': communityId,
-      'uid': uid,
-      'note_detail': noteDetail,
-      'like_count': 0,
-      'comment_create_date': FieldValue.serverTimestamp(),
-      'comment_delete_yn': false,
-    });
-    return ref.id;
-  }
-
-  @override
   //댓글 생성
   Future<CommentDto> createAndGetMinimal({
     required String communityId,
