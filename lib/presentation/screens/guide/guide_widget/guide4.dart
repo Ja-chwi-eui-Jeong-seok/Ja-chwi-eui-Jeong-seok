@@ -8,32 +8,38 @@ class Guide4 extends StatelessWidget {
   final String? imageFullUrl;
   final String? thumbUrl;
   final String? color;
-  const Guide4({super.key, 
-    required this.onNext, 
+  final Offset circleCenter;
+  final double circleRadius;
+
+  const Guide4({
+    super.key,
+    required this.onNext,
     required this.uid,
     required this.nickname,
     this.imageFullUrl,
     this.thumbUrl,
-    this.color});
+    this.color,
+    required this.circleCenter,
+    required this.circleRadius,
+  });
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // 강조 원 위치/크기
-    final circleCenter = Offset(size.width * 0.385, size.height * 0.918);
-    final circleRadius = min(size.width, size.height) * 0.07;
+    // ❌ 여기서 다시 Guide4CircleConfig로 덮어쓰지 않음!
+    // final circleCenter = Guide4CircleConfig.getCenter(size); // 삭제
+    // final circleRadius = Guide4CircleConfig.getRadius(size); // 삭제
 
     // 텍스트 위치
     final textLeft = size.width * 0.10;
     final textTop = size.height * 0.7;
 
-    // TextSpan으로 제각각 크기
     final guideTextSpan = TextSpan(
-      children: [
+      children: const [
         TextSpan(
           text: '무엇을 ',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -41,7 +47,7 @@ class Guide4 extends StatelessWidget {
         ),
         TextSpan(
           text: '했는지, 해야하는지\n',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -49,7 +55,7 @@ class Guide4 extends StatelessWidget {
         ),
         TextSpan(
           text: '미션 탭',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -57,7 +63,7 @@ class Guide4 extends StatelessWidget {
         ),
         TextSpan(
           text: '을 이용하여 확인해봐요!',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -66,7 +72,6 @@ class Guide4 extends StatelessWidget {
       ],
     );
 
-    // TextPainter로 화살표 위치 계산
     final textPainter = TextPainter(
       text: guideTextSpan,
       textDirection: TextDirection.ltr,
@@ -74,28 +79,22 @@ class Guide4 extends StatelessWidget {
 
     final arrowTarget = Offset(
       textLeft + textPainter.width / 2,
-      textTop + textPainter.height + 12, // arrowMargin
+      textTop + textPainter.height + 16,
     );
 
-    // 곡선 화살표 제어점
-    const curveStrength = 0.3;
     final control = Offset(
-      (circleCenter.dx + arrowTarget.dx) / 1 - size.width * curveStrength * 1.2,
-      (circleCenter.dy + arrowTarget.dy) / 2 -
-          size.height * curveStrength * 0.04,
+      (circleCenter.dx + arrowTarget.dx) / 2 - size.width * 0.15,
+      (circleCenter.dy + arrowTarget.dy) / 2 - size.height * 0.05,
     );
 
     return GestureDetector(
       onTap: onNext,
       child: Stack(
         children: [
-          // 강조 원 + Glow
           CustomPaint(
             size: size,
             painter: _GlowCirclePainter(circleCenter, circleRadius),
           ),
-
-          // 곡선 화살표
           CustomPaint(
             size: size,
             painter: _CurvedArrowPainter(
@@ -104,15 +103,10 @@ class Guide4 extends StatelessWidget {
               control: control,
             ),
           ),
-
-          // 텍스트
           Positioned(
             left: textLeft,
             top: textTop,
-            child: RichText(
-              text: guideTextSpan,
-              textAlign: TextAlign.center,
-            ),
+            child: RichText(text: guideTextSpan),
           ),
         ],
       ),
@@ -120,7 +114,7 @@ class Guide4 extends StatelessWidget {
   }
 }
 
-/// 강조 원 + Glow 효과
+// (Glow + Arrow painter들은 기존 코드 그대로 사용)
 class _GlowCirclePainter extends CustomPainter {
   final Offset center;
   final double radius;
@@ -129,26 +123,21 @@ class _GlowCirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
-
-    // 반투명 배경
     final overlayPaint = Paint()
       ..color = Colors.black54
       ..style = PaintingStyle.fill;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), overlayPaint);
 
-    // Glow 효과
     final glowPaint = Paint()
       ..shader = RadialGradient(
-        colors: [Colors.white, Colors.transparent],
+        colors: [Colors.white.withOpacity(0.8), Colors.transparent],
       ).createShader(Rect.fromCircle(center: center, radius: radius * 3))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius * 1.5, glowPaint);
 
-    // 강조 원 (투명)
     final clearPaint = Paint()..blendMode = BlendMode.clear;
     canvas.drawCircle(center, radius, clearPaint);
-
     canvas.restore();
   }
 
@@ -156,12 +145,10 @@ class _GlowCirclePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// 기존 곡선 화살표
 class _CurvedArrowPainter extends CustomPainter {
   final Offset start;
   final Offset end;
   final Offset control;
-
   const _CurvedArrowPainter({
     required this.start,
     required this.end,
@@ -174,14 +161,13 @@ class _CurvedArrowPainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
-
-    final path = Path();
-    path.moveTo(start.dx, start.dy);
-    path.quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
+    final path = Path()
+      ..moveTo(start.dx, start.dy)
+      ..quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
     canvas.drawPath(path, paint);
 
-    final arrowLength = 16.0;
-    final arrowAngle = pi / 4;
+    const arrowLength = 16.0;
+    const arrowAngle = pi / 4;
     final direction = (end - control).direction;
 
     final line1End = Offset(

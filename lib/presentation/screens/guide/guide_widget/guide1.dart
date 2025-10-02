@@ -7,13 +7,15 @@ class Guide1 extends StatelessWidget {
   final String? imageFullUrl;
   final String? thumbUrl;
   final String? color;
-  const Guide1({super.key, 
-    required this.onNext, 
+  const Guide1({
+    super.key,
+    required this.onNext,
     required this.uid,
     required this.nickname,
     this.imageFullUrl,
     this.thumbUrl,
-    this.color});
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {

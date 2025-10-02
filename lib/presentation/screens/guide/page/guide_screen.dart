@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // 다시보지 않기용
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide1.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide2.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide3.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide4.dart';
 import 'package:ja_chwi/presentation/screens/guide/guide_widget/guide5.dart';
+import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
 import 'package:ja_chwi/presentation/screens/home/page/home_screen.dart';
 
 class GuideScreen extends StatefulWidget {
-
-  const GuideScreen({super.key,this.extra});
-
+  const GuideScreen({super.key, this.extra});
   final Map<String, dynamic>? extra;
-  
+
   @override
   State<GuideScreen> createState() => _GuideScreenState();
 }
@@ -26,7 +24,12 @@ class _GuideScreenState extends State<GuideScreen> {
   late final String? thumbUrl;
   late final String? color;
 
-  late final List<Widget Function(VoidCallback)> steps;
+  // 🔹 GlobalKey 생성
+  final GlobalKey missionKey = GlobalKey();
+  final GlobalKey communityKey = GlobalKey();
+
+  Offset missionIconPos = Offset.zero;
+  Offset communityIconPos = Offset.zero;
 
   @override
   void initState() {
@@ -37,147 +40,120 @@ class _GuideScreenState extends State<GuideScreen> {
     imageFullUrl = args?['imageFullUrl'];
     thumbUrl = args?['thumbUrl'];
     color = args?['color'];
-    // steps = [
-    //   (next) => Guide1(onNext: next),
-    //   (next) => Guide2(onNext: next),
-    //   (next) => Guide3(onNext: next),
-    //   (next) => Guide4(onNext: next),
-    //   (next) => Guide5(onNext: next),
-    // ];
-     print('GuideScreen initState');
-     print('uid: $uid, nickname: $nickname');
-     print('imageFullUrl: $imageFullUrl, color: $color');
-    steps = [
-    (next) => Guide1(
-          uid: uid,
-          nickname: nickname,
-          imageFullUrl: imageFullUrl,
-          thumbUrl: thumbUrl,
-          color: color,
-          onNext: next,
-        ),
-    (next) => Guide2(
-          uid: uid,
-          nickname: nickname,
-          imageFullUrl: imageFullUrl,
-          thumbUrl: thumbUrl,
-          color: color,
-          onNext: next,
-        ),
-    (next) => Guide3(
-          uid: uid,
-          nickname: nickname,
-          imageFullUrl: imageFullUrl,
-          thumbUrl: thumbUrl,
-          color: color,
-          onNext: next,
-        ),
-    (next) => Guide4(
-          uid: uid,
-          nickname: nickname,
-          imageFullUrl: imageFullUrl,
-          thumbUrl: thumbUrl,
-          color: color,
-          onNext: next,
-        ),
-    (next) => Guide5(
-          uid: uid,
-          nickname: nickname,
-          imageFullUrl: imageFullUrl,
-          thumbUrl: thumbUrl,
-          color: color,
-          onNext: next,
-        ),
-  ];
+
+    // 🔹 프레임 렌더링 이후에 위치 계산
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        missionIconPos = _getWidgetCenter(missionKey);
+        communityIconPos = _getWidgetCenter(communityKey);
+      });
+    });
+  }
+
+  Offset _getWidgetCenter(GlobalKey key) {
+    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      return renderBox.localToGlobal(renderBox.size.center(Offset.zero));
+    }
+    return Offset.zero;
   }
 
   void _nextStep() {
     setState(() {
-      if (current < steps.length - 1) {
+      if (current < 4) {
         current++;
       } else {
-        GoRouter.of(context).go('/home',
-         extra: {
-          'uid': uid,
-          'nickname': nickname,
-          'imageFullUrl': imageFullUrl,
-          'thumbUrl': thumbUrl,
-          'color': color,
-        },
+        GoRouter.of(context).go(
+          '/home',
+          extra: {
+            'uid': uid,
+            'nickname': nickname,
+            'imageFullUrl': imageFullUrl,
+            'thumbUrl': thumbUrl,
+            'color': color,
+          },
         );
       }
     });
   }
 
-  // Future<void> _closeGuide({bool dontShowAgain = false}) async {
-  //   if (dontShowAgain) {
-  //     final prefs = await SharedPreferences.getInstance();
-  //     await prefs.setBool('dontShowGuide', true);
-  //   }
-  //   if (!mounted) return; // 🔒 context 안전성 확보
-  //   GoRouter.of(context).go('/home');
-  // }
-
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        const HomeScreen(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        final circleCenter = GuideCircleConfig.getCenter(size);
+        final circleRadius = GuideCircleConfig.getRadius(size);
 
-        // 현재 단계 가이드
-        steps[current](_nextStep),
+        final steps = [
+          (next) => Guide1(
+            uid: uid,
+            nickname: nickname,
+            imageFullUrl: imageFullUrl,
+            thumbUrl: thumbUrl,
+            color: color,
+            onNext: next,
+          ),
+          (next) => Guide2(
+            uid: uid,
+            nickname: nickname,
+            imageFullUrl: imageFullUrl,
+            thumbUrl: thumbUrl,
+            color: color,
+            onNext: next,
+          ),
+          (next) => Guide3(
+            uid: uid,
+            nickname: nickname,
+            imageFullUrl: imageFullUrl,
+            thumbUrl: thumbUrl,
+            color: color,
+            onNext: next,
+            circleCenter: circleCenter,
+            circleRadius: circleRadius,
+          ),
+          (next) => Guide4(
+            uid: uid,
+            nickname: nickname,
+            imageFullUrl: imageFullUrl,
+            thumbUrl: thumbUrl,
+            color: color,
+            onNext: next,
+            circleCenter: missionIconPos,
+            circleRadius: 30,
+          ),
+          (next) => Guide5(
+            uid: uid,
+            nickname: nickname,
+            imageFullUrl: imageFullUrl,
+            thumbUrl: thumbUrl,
+            color: color,
+            onNext: next,
+            circleCenter: communityIconPos,
+            circleRadius: 30,
+          ),
+        ];
 
-        // 우측 세로 점 인디케이터
-        // Positioned(
-        //   bottom: 100,
-        //   right: 20,
-        //   child: Column(
-        //     mainAxisSize: MainAxisSize.min,
-        //     children: List.generate(steps.length, (index) {
-        //       final isActive = index == current;
-        //       return AnimatedContainer(
-        //         duration: const Duration(milliseconds: 300),
-        //         margin: const EdgeInsets.symmetric(vertical: 6),
-        //         width: isActive ? 16 : 12,
-        //         height: isActive ? 16 : 12,
-        //         decoration: BoxDecoration(
-        //           color: isActive ? Colors.white : Colors.white54,
-        //           shape: BoxShape.circle,
-        //         ),
-        //       );
-        //     }),
-        //   ),
-        // ),
-
-        // 마지막 가이드에서만 확인 버튼
-        // if (current == steps.length - 1)
-        //   Positioned(
-        //     bottom: 50, // 위치조절
-        //     right: 20,
-        //     child: Center(
-        //       child: GestureDetector(
-        //         onTap: () => _closeGuide(dontShowAgain: false),
-        //         child: Container(
-        //           padding: const EdgeInsets.symmetric(
-        //             horizontal: 16,
-        //             vertical: 10,
-        //           ),
-        //           decoration: BoxDecoration(
-        //             color: Colors.black45,
-        //             borderRadius: BorderRadius.circular(8),
-        //           ),
-        //           child: const Text(
-        //             '확인',
-        //             style: TextStyle(
-        //               color: Colors.white,
-        //               fontSize: 16,
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-      ],
+        return Stack(
+          children: [
+            HomeScreen(
+              extra: {
+                'uid': uid,
+                'nickname': nickname,
+                'imageFullUrl': imageFullUrl,
+                'thumbUrl': thumbUrl,
+                'color': color,
+              },
+              // 🔹 키 전달
+              missionKey: missionKey,
+              communityKey: communityKey,
+            ),
+            if (missionIconPos != Offset.zero &&
+                communityIconPos != Offset.zero)
+              steps[current](_nextStep),
+          ],
+        );
+      },
     );
   }
 }
