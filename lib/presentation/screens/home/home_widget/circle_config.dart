@@ -24,24 +24,24 @@ class GuideCircleConfig {
   }
 }
 
-// Guide4
-class Guide4CircleConfig {
-  static Offset getCenter(Size size) {
-    return Offset(size.width * 0.385, size.height * 0.921);
-  }
+// // Guide4
+// class Guide4CircleConfig {
+//   static Offset getCenter(Size size) {
+//     return Offset(size.width * 0.385, size.height * 0.921);
+//   }
 
-  static double getRadius(Size size) {
-    return min(size.width, size.height) * 0.07;
-  }
-}
+//   static double getRadius(Size size) {
+//     return min(size.width, size.height) * 0.07;
+//   }
+// }
 
-// Guide5
-class Guide5CircleConfig {
-  static Offset getCenter(Size size) {
-    return Offset(size.width * 0.613, size.height * 0.921);
-  }
+// // Guide5
+// class Guide5CircleConfig {
+//   static Offset getCenter(Size size) {
+//     return Offset(size.width * 0.613, size.height * 0.921);
+//   }
 
-  static double getRadius(Size size) {
-    return min(size.width, size.height) * 0.07;
-  }
-}
+//   static double getRadius(Size size) {
+//     return min(size.width, size.height) * 0.07;
+//   }
+// }
