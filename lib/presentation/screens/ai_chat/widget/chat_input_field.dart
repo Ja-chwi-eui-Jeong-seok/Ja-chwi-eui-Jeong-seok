@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
 
-class ChatInputField extends StatelessWidget {
-  const ChatInputField({super.key});
+class ChatInputField extends StatefulWidget {
+  final Function(String) onSend;
+
+  const ChatInputField({super.key, required this.onSend});
+
+  @override
+  State<ChatInputField> createState() => _ChatInputFieldState();
+}
+
+class _ChatInputFieldState extends State<ChatInputField> {
+  final TextEditingController _controller = TextEditingController();
+
+  void _handleSend() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    widget.onSend(text); // 부모에게 전달
+    _controller.clear(); // 입력창 비우기
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +30,6 @@ class ChatInputField extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // IconButton(
-            //   icon: const Icon(Icons.image),
-            //   onPressed: () {},
-            // ),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -24,19 +37,19 @@ class ChatInputField extends StatelessWidget {
                   border: Border.all(color: Colors.grey.shade400),
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Comming Soon',
+                child: TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(
+                    hintText: '메시지를 입력하세요...',
                     border: InputBorder.none,
                   ),
+                  onSubmitted: (_) => _handleSend(),
                 ),
               ),
             ),
             IconButton(
               icon: const Icon(Icons.send),
-              onPressed: () {
-                print('채팅 보내기');
-              },
+              onPressed: _handleSend,
             ),
           ],
         ),

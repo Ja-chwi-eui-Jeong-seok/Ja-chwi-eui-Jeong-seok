@@ -8,13 +8,15 @@ class Guide4 extends StatelessWidget {
   final String? imageFullUrl;
   final String? thumbUrl;
   final String? color;
-  const Guide4({super.key, 
-    required this.onNext, 
+  const Guide4({
+    super.key,
+    required this.onNext,
     required this.uid,
     required this.nickname,
     this.imageFullUrl,
     this.thumbUrl,
-    this.color});
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +30,12 @@ class Guide4 extends StatelessWidget {
     final textLeft = size.width * 0.10;
     final textTop = size.height * 0.7;
 
-    // TextSpan으로 제각각 크기
+    // TextSpan
     final guideTextSpan = TextSpan(
-      children: [
+      children: const [
         TextSpan(
           text: '무엇을 ',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -41,7 +43,7 @@ class Guide4 extends StatelessWidget {
         ),
         TextSpan(
           text: '했는지, 해야하는지\n',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -49,7 +51,7 @@ class Guide4 extends StatelessWidget {
         ),
         TextSpan(
           text: '미션 탭',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -57,7 +59,7 @@ class Guide4 extends StatelessWidget {
         ),
         TextSpan(
           text: '을 이용하여 확인해봐요!',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -66,23 +68,22 @@ class Guide4 extends StatelessWidget {
       ],
     );
 
-    // TextPainter로 화살표 위치 계산
+    // Text 크기 측정
     final textPainter = TextPainter(
       text: guideTextSpan,
       textDirection: TextDirection.ltr,
     )..layout();
 
+    // 화살표 끝점 = 텍스트 하단 중앙
     final arrowTarget = Offset(
       textLeft + textPainter.width / 2,
-      textTop + textPainter.height + 12, // arrowMargin
+      textTop + textPainter.height + 16,
     );
 
-    // 곡선 화살표 제어점
-    const curveStrength = 0.3;
+    // 곡선 화살표 제어점 (자연스러운 C자 곡선)
     final control = Offset(
-      (circleCenter.dx + arrowTarget.dx) / 1 - size.width * curveStrength * 1.2,
-      (circleCenter.dy + arrowTarget.dy) / 2 -
-          size.height * curveStrength * 0.04,
+      (circleCenter.dx + arrowTarget.dx) / 2 - size.width * 0.15,
+      (circleCenter.dy + arrowTarget.dy) / 2 - size.height * 0.05,
     );
 
     return GestureDetector(
@@ -105,7 +106,7 @@ class Guide4 extends StatelessWidget {
             ),
           ),
 
-          // 텍스트
+          // 설명 텍스트
           Positioned(
             left: textLeft,
             top: textTop,
@@ -120,6 +121,7 @@ class Guide4 extends StatelessWidget {
   }
 }
 
+/// 강조 원 + Glow 효과
 /// 강조 원 + Glow 효과
 class _GlowCirclePainter extends CustomPainter {
   final Offset center;
@@ -139,9 +141,9 @@ class _GlowCirclePainter extends CustomPainter {
     // Glow 효과
     final glowPaint = Paint()
       ..shader = RadialGradient(
-        colors: [Colors.white, Colors.transparent],
+        colors: [Colors.white.withOpacity(0.8), Colors.transparent],
       ).createShader(Rect.fromCircle(center: center, radius: radius * 3))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 25)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius * 1.5, glowPaint);
 
@@ -156,7 +158,7 @@ class _GlowCirclePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// 기존 곡선 화살표
+/// 곡선 화살표
 class _CurvedArrowPainter extends CustomPainter {
   final Offset start;
   final Offset end;
@@ -175,13 +177,14 @@ class _CurvedArrowPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
 
-    final path = Path();
-    path.moveTo(start.dx, start.dy);
-    path.quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
+    final path = Path()
+      ..moveTo(start.dx, start.dy)
+      ..quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
     canvas.drawPath(path, paint);
 
-    final arrowLength = 16.0;
-    final arrowAngle = pi / 4;
+    // 화살촉
+    const arrowLength = 16.0;
+    const arrowAngle = pi / 4;
     final direction = (end - control).direction;
 
     final line1End = Offset(

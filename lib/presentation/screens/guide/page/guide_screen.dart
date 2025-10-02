@@ -118,65 +118,23 @@ class _GuideScreenState extends State<GuideScreen> {
   //   GoRouter.of(context).go('/home');
   // }
 
+  // 홈 캐릭터 생상 불러오기 완료
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const HomeScreen(),
+        HomeScreen(
+          extra: {
+            'uid': uid,
+            'nickname': nickname,
+            'imageFullUrl': imageFullUrl,
+            'thumbUrl': thumbUrl,
+            'color': color,
+          },
+        ),
 
         // 현재 단계 가이드
         steps[current](_nextStep),
-
-        // 우측 세로 점 인디케이터
-        // Positioned(
-        //   bottom: 100,
-        //   right: 20,
-        //   child: Column(
-        //     mainAxisSize: MainAxisSize.min,
-        //     children: List.generate(steps.length, (index) {
-        //       final isActive = index == current;
-        //       return AnimatedContainer(
-        //         duration: const Duration(milliseconds: 300),
-        //         margin: const EdgeInsets.symmetric(vertical: 6),
-        //         width: isActive ? 16 : 12,
-        //         height: isActive ? 16 : 12,
-        //         decoration: BoxDecoration(
-        //           color: isActive ? Colors.white : Colors.white54,
-        //           shape: BoxShape.circle,
-        //         ),
-        //       );
-        //     }),
-        //   ),
-        // ),
-
-        // 마지막 가이드에서만 확인 버튼
-        // if (current == steps.length - 1)
-        //   Positioned(
-        //     bottom: 50, // 위치조절
-        //     right: 20,
-        //     child: Center(
-        //       child: GestureDetector(
-        //         onTap: () => _closeGuide(dontShowAgain: false),
-        //         child: Container(
-        //           padding: const EdgeInsets.symmetric(
-        //             horizontal: 16,
-        //             vertical: 10,
-        //           ),
-        //           decoration: BoxDecoration(
-        //             color: Colors.black45,
-        //             borderRadius: BorderRadius.circular(8),
-        //           ),
-        //           child: const Text(
-        //             '확인',
-        //             style: TextStyle(
-        //               color: Colors.white,
-        //               fontSize: 16,
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ),
       ],
     );
   }
