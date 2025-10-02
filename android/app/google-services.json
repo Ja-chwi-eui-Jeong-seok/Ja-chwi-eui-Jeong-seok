@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "932235207263",
+    "project_id": "ja-chwi-eui-jeong-seok",
+    "storage_bucket": "ja-chwi-eui-jeong-seok.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:932235207263:android:3954c863ac7609ba41b1ea",
+        "android_client_info": {
+          "package_name": "com.example.ja_chwi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "932235207263-5apr5jrb8jtsv6aes11u0k174p6f8esf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ja_chwi",
+            "certificate_hash": "d349c2e64d8c71aa1ad22c6b92b91d7164d5ed6d"
+          }
+        },
+        {
+          "client_id": "932235207263-7ispukhkf563rl6v46tn4krtqsuhbsdc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ja_chwi",
+            "certificate_hash": "992a0d67a21f01b8aa9d780d69ccb1aef8a3fd99"
+          }
+        },
+        {
+          "client_id": "932235207263-tbq40tdroj0pvrq96tkf6hv0ebfkq0df.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ja_chwi",
+            "certificate_hash": "4288559039fe1a3b6268841024e0377ae436d6f2"
+          }
+        },
+        {
+          "client_id": "932235207263-2q9p985tfgrg969j5km0l08of9u5bdcb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqwwq_FYET2yy-okN_pMDEJ0EAVUDIWY8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "932235207263-2q9p985tfgrg969j5km0l08of9u5bdcb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "932235207263-ls86slhic1mfi5big5h46hv35r83egtb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.jaChwi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
