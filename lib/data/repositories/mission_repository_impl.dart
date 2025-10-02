@@ -1,7 +1,6 @@
 import 'package:ja_chwi/data/datasources/mission_datasource.dart';
 import 'package:ja_chwi/domain/repositories/mission_repository.dart';
-
-import '../../presentation/screens/mission/core/model/mission_model.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.dart';
 
 class MissionRepositoryImpl implements MissionRepository {
   final MissionDataSource dataSource;
@@ -29,9 +28,14 @@ class MissionRepositoryImpl implements MissionRepository {
   @override
   Future<void> updateMission({
     required String userId,
+    required String docId,
     required Map<String, dynamic> missionData,
   }) {
-    return dataSource.updateMission(userId: userId, missionData: missionData);
+    return dataSource.updateMission(
+      userId: userId,
+      docId: docId,
+      missionData: missionData,
+    );
   }
 
   @override
@@ -50,4 +54,11 @@ class MissionRepositoryImpl implements MissionRepository {
   @override
   Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers() =>
       dataSource.fetchTodayMissionAchievers();
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
+    DateTime dateForWeek,
+  ) {
+    return dataSource.fetchWeeklyMissionRankers(dateForWeek);
+  }
 }

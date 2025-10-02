@@ -60,7 +60,7 @@ class MissionDataSourceImpl implements MissionDataSource {
         .doc(docId)
         .set(dataWithTimestamp);
 
-    // 프로필의 mission_count를 1 증가시킵니다.
+    // 프로필의 mission_count를 1 증가
     await _firestore.collection('profiles').doc(userId).update({
       'mission_count': FieldValue.increment(1),
     });
@@ -69,13 +69,14 @@ class MissionDataSourceImpl implements MissionDataSource {
   @override
   Future<void> updateMission({
     required String userId,
+    required String docId,
     required Map<String, dynamic> missionData,
   }) async {
-    final docId = _generateDocId(userId);
-    // 업데이트 시에는 생성 날짜와 userId를 제외합니다.
-    final dataToUpdate = Map<String, dynamic>.from(missionData)
-      ..remove('missioncreatedate')
-      ..remove('userId');
+    // 업데이트 시에는 생성 날짜와 userId를 제외
+    final dataToUpdate =
+        Map<String, dynamic>.from(missionData) // 복사본 생성
+          ..remove('missioncreatedate')
+          ..remove('userId');
 
     await _firestore
         .collection('user_missions')
@@ -86,9 +87,9 @@ class MissionDataSourceImpl implements MissionDataSource {
   @override
   Future<Mission> fetchTodayMission(
     String userId, {
-    DateTime? debugNow, // 테스트를 위한 시간 주입용 파라미터
+    DateTime? debugNow,
   }) async {
-    // 1. 전체 미션 개수를 가져옵니다. (미션 코드가 순환하기 위해 필요)
+    // 1. 전체 미션 개수
     final missionConfigDoc = await _firestore
         .collection('daily_mission_config')
         .doc('config')
@@ -98,13 +99,13 @@ class MissionDataSourceImpl implements MissionDataSource {
     }
     final int totalMissions = missionConfigDoc.data()?['total_missions'] ?? 1;
 
-    // 2. 유틸리티 함수를 사용하여 오늘의 미션 코드를 계산합니다.
+    // 2. 유틸리티 함수를 사용하여 오늘의 미션 코드를 계산
     final int todayMissionCode = calculateTodayMissionCode(
       totalMissions: totalMissions,
       now: debugNow,
     );
 
-    // 3. 계산된 코드로 오늘의 미션을 가져옵니다.
+    // 3. 계산된 코드로 오늘의 미션 가져옴
     final missionQuery = await _firestore
         .collection('mission')
         .where('missioncode', isEqualTo: todayMissionCode)
@@ -139,7 +140,7 @@ class MissionDataSourceImpl implements MissionDataSource {
     final startOfToday = DateTime(now.year, now.month, now.day);
     final endOfToday = startOfToday.add(const Duration(days: 1));
 
-    // 1. 오늘 생성된 미션 문서를 가져옵니다.
+    // 1. 오늘 생성된 미션 문서
     final missionSnapshot = await _firestore
         .collection('user_missions')
         .where('missioncreatedate', isGreaterThanOrEqualTo: startOfToday)
@@ -151,7 +152,7 @@ class MissionDataSourceImpl implements MissionDataSource {
       return [];
     }
 
-    // 2. 미션 문서에서 userId와 완료 시간을 Map 형태로 추출합니다. (Key: userId, Value: completedAt)
+    // 2. 미션 문서에서 userId와 완료 시간을 Map 형태로 추출 (Key: userId, Value: completedAt)
     final Map<String, DateTime> achieverCompletionTimes = {
       for (var doc in missionSnapshot.docs)
         doc.data()['userId'] as String:
@@ -199,5 +200,108 @@ class MissionDataSourceImpl implements MissionDataSource {
     });
 
     return result;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
+    DateTime dateForWeek,
+  ) async {
+    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산합니다.
+    final startOfWeek = dateForWeek.subtract(
+      Duration(days: dateForWeek.weekday - 1),
+    );
+    final startOfMonday = DateTime.utc(
+      startOfWeek.year,
+      startOfWeek.month,
+      startOfWeek.day,
+    );
+    // 일요일 23:59:59까지 포함하도록 수정
+    final endOfWeek = startOfMonday.add(
+      const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
+    );
+
+    // 2. 해당 주에 생성된 모든 미션을 가져옵니다.
+    final missionSnapshot = await _firestore
+        .collection('user_missions')
+        .where('missioncreatedate', isGreaterThanOrEqualTo: startOfMonday)
+        .where('missioncreatedate', isLessThanOrEqualTo: endOfWeek)
+        .get();
+
+    if (missionSnapshot.docs.isEmpty) {
+      return [];
+    }
+
+    // 3. 사용자별로 미션 개수와 마지막 미션 완료 시간을 집계합니다.
+    final Map<String, Map<String, dynamic>> userStats = {};
+    for (final doc in missionSnapshot.docs) {
+      final data = doc.data();
+      final userId = data['userId'] as String;
+      final completedAt = (data['missioncreatedate'] as Timestamp).toDate();
+
+      userStats.update(
+        userId,
+        (value) {
+          final newCount = (value['count'] as int) + 1;
+          final lastDate = (value['lastCompleted'] as DateTime);
+          return {
+            'count': newCount,
+            'lastCompleted': completedAt.isAfter(lastDate)
+                ? completedAt
+                : lastDate,
+          };
+        },
+        ifAbsent: () => {'count': 1, 'lastCompleted': completedAt},
+      );
+    }
+
+    // 4. 사용자 프로필 정보를 가져와 Map으로 변환합니다.
+    final userIds = userStats.keys.toList();
+    if (userIds.isEmpty) return [];
+
+    final Map<String, Map<String, dynamic>> profiles = {};
+    const chunkSize = 30;
+    for (var i = 0; i < userIds.length; i += chunkSize) {
+      final chunk = userIds.sublist(
+        i,
+        i + chunkSize > userIds.length ? userIds.length : i + chunkSize,
+      );
+      if (chunk.isEmpty) continue;
+
+      final profileSnapshot = await _firestore
+          .collection('profiles')
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+
+      for (final profileDoc in profileSnapshot.docs) {
+        profiles[profileDoc.id] = profileDoc.data();
+      }
+    }
+
+    // 5. userStats를 기준으로 rankers 목록을 생성하고 프로필 정보를 결합합니다.
+    final List<Map<String, dynamic>> rankers = [];
+    for (final userId in userIds) {
+      final profileData = profiles[userId] ?? {}; // 프로필이 없으면 빈 맵
+      rankers.add({
+        'nickname': profileData['nickname'], // null일 수 있음
+        'imageFullUrl': profileData['imageFullUrl'], // null일 수 있음
+        'missionCount': profileData['mission_count'] ?? 0,
+        'userId': userId,
+        'weekCount': userStats[userId]!['count'],
+        'lastCompleted': userStats[userId]!['lastCompleted'],
+      });
+    }
+
+    // 6. 정렬: 1. 주간 미션 개수(내림차순), 2. 마지막 완료일(내림차순)
+    rankers.sort((a, b) {
+      final countCompare = (b['weekCount'] as int).compareTo(
+        a['weekCount'] as int,
+      );
+      if (countCompare != 0) return countCompare;
+      return (b['lastCompleted'] as DateTime).compareTo(
+        a['lastCompleted'] as DateTime,
+      );
+    });
+
+    return rankers;
   }
 }

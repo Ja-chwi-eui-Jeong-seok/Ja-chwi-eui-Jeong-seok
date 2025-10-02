@@ -17,6 +17,7 @@ abstract class MissionRepository {
   /// 기존 미션을 수정합니다.
   Future<void> updateMission({
     required String userId,
+    required String docId,
     required Map<String, dynamic> missionData,
   });
 
@@ -31,4 +32,9 @@ abstract class MissionRepository {
 
   /// 오늘의 미션 달성자 목록을 가져옵니다.
   Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers();
+
+  /// 주간 미션 랭커 목록을 가져옵니다.
+  Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
+    DateTime dateForWeek,
+  );
 }
