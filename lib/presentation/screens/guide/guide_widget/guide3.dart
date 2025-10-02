@@ -8,21 +8,23 @@ class Guide3 extends StatelessWidget {
   final String? imageFullUrl;
   final String? thumbUrl;
   final String? color;
-  const Guide3({super.key, 
-    required this.onNext, 
+  final Offset circleCenter;
+  final double circleRadius;
+  const Guide3({
+    super.key,
+    required this.onNext,
     required this.uid,
     required this.nickname,
     this.imageFullUrl,
     this.thumbUrl,
-    this.color});
+    this.color,
+    required this.circleCenter,
+    required this.circleRadius,
+  });
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    // 강조 원 위치/크기
-    final circleCenter = Offset(size.width * 0.73, size.height * 0.464);
-    final circleRadius = min(size.width, size.height) * 0.07;
 
     // 텍스트 위치
     final textLeft = size.width * 0.12;
@@ -118,11 +120,11 @@ class Guide3 extends StatelessWidget {
     // 화살표 끝점 = 텍스트 하단 중앙
     const arrowMargin = 12.0;
     final arrowTarget = Offset(
-      textLeft + textWidth + arrowMargin,
-      textTop + textHeight / 1.5,
+      textLeft + textWidth + arrowMargin, //x
+      textTop + textHeight / 1.5, //y top에서 heigh
     );
 
-    // 휘어짐 강도
+    // 휘어짐 강도// 비효율적인 식 // 완만하게 만드려면 여러 점을 지정해서 둥글게
     const curveStrength = 0.3;
     final control = Offset(
       (circleCenter.dx + arrowTarget.dx) / 1 - size.width * curveStrength * 2,

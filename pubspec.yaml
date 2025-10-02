@@ -72,7 +72,9 @@ dependencies:
   flutter_dotenv: ^6.0.0
   csv: ^6.0.0
   cached_network_image: ^3.4.1
+  dart_openai: ^5.1.0
   timezone: ^0.10.1
+
 
 dev_dependencies:
   flutter_test:

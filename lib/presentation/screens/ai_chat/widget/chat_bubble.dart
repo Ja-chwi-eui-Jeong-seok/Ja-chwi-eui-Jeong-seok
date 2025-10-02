@@ -5,6 +5,8 @@ class ChatBubble extends StatefulWidget {
   final String message;
   final String time;
   final bool isFailed;
+  final void Function(String)? onRetry;
+  final void Function(String)? onDelete;
 
   const ChatBubble({
     super.key,
@@ -12,6 +14,8 @@ class ChatBubble extends StatefulWidget {
     required this.message,
     required this.time,
     this.isFailed = false,
+    this.onRetry,
+    this.onDelete,
   });
 
   @override
@@ -24,7 +28,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   void initState() {
     super.initState();
-    _isFailed = widget.isFailed; // 초기 상태
+    _isFailed = widget.isFailed;
   }
 
   @override
@@ -35,115 +39,101 @@ class _ChatBubbleState extends State<ChatBubble> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // AI 프로필
-          if (!widget.isUser) ...[
+          if (!widget.isUser)
             const CircleAvatar(
               radius: 18,
               backgroundImage: AssetImage(
                 'assets/images/m_profile/m_black.png',
               ),
             ),
-            const SizedBox(width: 8),
-          ],
+          if (!widget.isUser) const SizedBox(width: 8),
 
-          // 말풍선 + 시간/실패 아이콘
           Flexible(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (!widget.isUser) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(widget.message),
-                  ),
+                  _buildAiBubble(),
                   const SizedBox(width: 4),
-                  Text(
-                    widget.time,
-                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                  ),
+                  _buildTime(),
                 ] else ...[
-                  if (_isFailed) ...[
-                    Container(
-                      padding: const EdgeInsets.all(2), // 최소 패딩
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8), // 작게
-                        border: Border.all(
-                          color: Colors.grey,
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              print('다시보내기: ${widget.message}');
-                              setState(() {
-                                _isFailed = false;
-                              });
-                            },
-                            child: const Icon(
-                              Icons.refresh,
-                              size: 12, // 아이콘 아주 작게
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(width: 2), // 아이콘 간격 최소화
-                          GestureDetector(
-                            onTap: () {
-                              print('삭제: ${widget.message}');
-                            },
-                            child: const Icon(
-                              Icons.close,
-                              size: 12,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                  ] else ...[
-                    Text(
-                      widget.time,
-                      style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                    ),
+                  if (_isFailed)
+                    _buildFailedActions()
+                  else ...[
+                    _buildTime(),
                     const SizedBox(width: 4),
                   ],
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(widget.message),
-                  ),
+                  _buildUserBubble(),
                 ],
               ],
             ),
           ),
 
-          if (widget.isUser) ...[
-            const SizedBox(width: 8),
+          if (widget.isUser) const SizedBox(width: 8),
+          if (widget.isUser)
             const CircleAvatar(
               radius: 18,
-              backgroundImage: AssetImage(''),
+              backgroundImage: AssetImage(
+                'assets/images/m_profile/m_black.png',
+              ),
             ),
-          ],
         ],
       ),
     );
   }
+
+  Widget _buildAiBubble() => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    decoration: BoxDecoration(
+      color: Colors.grey.shade200,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      widget.message,
+      style: TextStyle(fontSize: 14),
+      softWrap: true,
+      overflow: TextOverflow.visible,
+    ),
+  );
+
+  Widget _buildUserBubble() => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    decoration: BoxDecoration(
+      color: Colors.black,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(widget.message, style: const TextStyle(color: Colors.white)),
+  );
+
+  Widget _buildTime() => Text(
+    widget.time,
+    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+  );
+
+  Widget _buildFailedActions() => Container(
+    padding: const EdgeInsets.all(2),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey, width: 1),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () {
+            widget.onRetry?.call(widget.message);
+            setState(() => _isFailed = false);
+          },
+          child: const Icon(Icons.refresh, size: 12, color: Colors.black),
+        ),
+        const SizedBox(width: 2),
+        GestureDetector(
+          onTap: () => widget.onDelete?.call(widget.message),
+          child: const Icon(Icons.close, size: 12, color: Colors.black),
+        ),
+      ],
+    ),
+  );
 }

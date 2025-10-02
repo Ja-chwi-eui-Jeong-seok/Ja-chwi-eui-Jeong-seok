@@ -8,21 +8,23 @@ class Guide5 extends StatelessWidget {
   final String? imageFullUrl;
   final String? thumbUrl;
   final String? color;
-  const Guide5({super.key, 
-    required this.onNext, 
+  final Offset circleCenter;
+  final double circleRadius;
+  const Guide5({
+    super.key,
+    required this.onNext,
     required this.uid,
     required this.nickname,
     this.imageFullUrl,
     this.thumbUrl,
-    this.color});
+    this.color,
+    required this.circleCenter,
+    required this.circleRadius,
+  });
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    // 강조 원 위치/크기
-    final circleCenter = Offset(size.width * 0.613, size.height * 0.918);
-    final circleRadius = min(size.width, size.height) * 0.07;
 
     // 텍스트 위치
     final textLeft = size.width * 0.23;
