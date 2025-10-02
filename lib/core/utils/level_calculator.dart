@@ -8,7 +8,7 @@
 /// - 결과는 "Lv.X" 형태로 반환됩니다.
 String calculateLevel(int missionCount) {
   int level = (missionCount / 7).floor() + 1;
-  if (level > 10) {
+  if (level >= 10) {
     level = 10; // 최대 레벨 10으로 제한
   }
   return 'Lv.$level';
