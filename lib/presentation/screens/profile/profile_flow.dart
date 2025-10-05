@@ -12,20 +12,27 @@ import 'package:go_router/go_router.dart';
 
 final stepProvider = StateProvider<int>((ref) => 0);
 
+/// --------------------
+/// 닉네임 입력 위젯
+/// --------------------
 class NicknameInput extends ConsumerStatefulWidget {
+  final TextEditingController controller;
   final Future<void> Function(String)? onNext;
-  const NicknameInput({super.key, this.onNext});
+  const NicknameInput({
+    super.key,
+    required this.controller,
+    this.onNext,
+  });
 
   @override
   ConsumerState<NicknameInput> createState() => _NicknameInputState();
 }
 
 class _NicknameInputState extends ConsumerState<NicknameInput> {
-  final TextEditingController _controller = TextEditingController();
   String? errorText;
 
   Future<bool> validateAndProceed() async {
-    final input = _controller.text.trim();
+    final input = widget.controller.text.trim();
     final sanitized = XssFilter.sanitize(input);
 
     if (sanitized.isEmpty) {
@@ -37,6 +44,18 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
     if (bannedResult['hasBannedWord'] == true) {
       setState(() => errorText =
           "사용할 수 없는 단어가 포함되어 있습니다: ${bannedResult['matchedWords'].join(', ')}");
+      return false;
+    }
+
+    final isDuplicate =
+        await ref.read(profileRepositoryProvider).isNicknameDuplicate(input);
+    if (isDuplicate) {
+      setState(() => errorText = "중복된 닉네임입니다");
+      return false;
+    }
+
+    if (input.length < 2 || input.length > 8) {
+      setState(() => errorText = "닉네임은 2자 이상 8자 이하로 입력해주세요");
       return false;
     }
 
@@ -66,21 +85,15 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(height: 8),
               const Text(
-                '집먼지의 이름을 \n 만들어 주세요..', 
-                 style: const TextStyle(
+                '집먼지의 이름을 \n 만들어 주세요..',
+                style: TextStyle(
                   color: Colors.black,
                   fontSize: 40,
                   fontWeight: FontWeight.w900,
-                  fontFamily: 'gamjaflower', // ✅ pubspec.yaml에 등록한 폰트 이름
+                  fontFamily: 'gamjaflower',
                 ),
-                
-               // style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-                // style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                //   color: Colors.black,
-                //   fontSize: 40,
-                //   fontWeight: FontWeight.w900,)
               ),
             ],
           ),
@@ -93,7 +106,7 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
           ),
         ),
         TextField(
-          controller: _controller,
+          controller: widget.controller,
           decoration: InputDecoration(
             hintText: "집먼지의 이름을 지어주세요",
             border: OutlineInputBorder(
@@ -112,6 +125,109 @@ class _NicknameInputState extends ConsumerState<NicknameInput> {
   }
 }
 
+/// --------------------
+/// Step 2: 동 검색 + 선택 위젯
+/// --------------------
+class DongSearchWidget extends StatefulWidget {
+  final List<Map<String, String>> dongList;
+  final void Function(String) onSelect;
+  final String? initialValue;
+
+  const DongSearchWidget({
+    super.key,
+    required this.dongList,
+    required this.onSelect,
+    this.initialValue,
+  });
+
+  @override
+  State<DongSearchWidget> createState() => _DongSearchWidgetState();
+}
+
+class _DongSearchWidgetState extends State<DongSearchWidget> {
+  final TextEditingController _controller = TextEditingController();
+  List<String> searchResults = [];
+  String? selected;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialValue != null) {
+      _controller.text = widget.initialValue!;
+      selected = widget.initialValue;
+    }
+  }
+
+  void performSearch() {
+    final input = _controller.text.trim();
+    if (input.isEmpty) {
+      setState(() => searchResults = []);
+      return;
+    }
+
+    final results = <String>[];
+    for (var item in widget.dongList) {
+      final sido = item['sido']!;
+      final sigun = item['sigun']!;
+      final fullName = '$sido $sigun';
+
+      // Like 검색
+      if (sido.contains(input) || sigun.contains(input) || fullName.contains(input)) {
+        results.add(fullName);
+      }
+    }
+
+    setState(() => searchResults = results);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextField(
+          controller: _controller,
+          decoration: InputDecoration(
+            hintText: "동명을 입력하세요",
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: performSearch, // 돋보기 클릭
+            ),
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (_) => performSearch(),
+        ),
+        const SizedBox(height: 4),
+        if (searchResults.isNotEmpty)
+          ListView.separated(
+            shrinkWrap: true,
+            itemCount: searchResults.length,
+            separatorBuilder: (_, __) =>
+                const Divider(height: 1, color: Colors.grey),
+            itemBuilder: (context, index) {
+              final item = searchResults[index];
+              final isSelected = selected == item;
+              return ListTile(
+                title: Text(item),
+                trailing: isSelected ? const Icon(Icons.check, color: Colors.blue) : null,
+                onTap: () {
+                  setState(() {
+                    selected = item;
+                    _controller.text = item;
+                    searchResults.clear();
+                  });
+                  widget.onSelect(item);
+                },
+              );
+            },
+          ),
+      ],
+    );
+  }
+}
+
+/// --------------------
+/// ProfileFlowPage
+/// --------------------
 class ProfileFlowPage extends ConsumerStatefulWidget {
   final String uid;
   const ProfileFlowPage({super.key, required this.uid, Map<String, dynamic>? extra});
@@ -124,8 +240,11 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
   String? dongName;
   String? selectedNickname;
   List<Map<String, String>> dongList = [];
+
   final GlobalKey<_NicknameInputState> nicknameKey =
       GlobalKey<_NicknameInputState>();
+
+  final TextEditingController nicknameController = TextEditingController();
 
   @override
   void initState() {
@@ -133,36 +252,27 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
     loadDongList();
   }
 
+  @override
+  void dispose() {
+    nicknameController.dispose();
+    super.dispose();
+  }
+
   Future<void> loadDongList() async {
-    final jsonStr = await rootBundle.loadString('assets/config/json/sido.json');
+    final jsonStr =
+        await rootBundle.loadString('assets/config/json/sido.json');
     final List<dynamic> jsonData = json.decode(jsonStr);
     setState(() {
       dongList = jsonData
-          .map((e) => {"sido": e['sido'] as String, "sigun": e['sigun'] as String})
+          .map((e) => {
+                "sido": e['sido'] as String,
+                "sigun": e['sigun'] as String,
+              })
           .toList();
     });
   }
 
   Future<void> onNicknameNext(String nickname) async {
-    final isDuplicate =
-        await ref.read(profileRepositoryProvider).isNicknameDuplicate(nickname);
-
-    if (isDuplicate) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("중복된 닉네임입니다")),
-      );
-      return;
-    }
-
-    if (nickname.length < 2 || nickname.length > 8) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("닉네임은 2자 이상 8자 이하로 입력해주세요")),
-      );
-      return;
-    }
-
     setState(() {
       selectedNickname = nickname;
     });
@@ -202,7 +312,6 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
 
   Future<void> onConfirm() async {
     await saveProfile();
-
     if (!mounted) return;
 
     final selectedImage = ref.read(selectedImageProvider);
@@ -227,63 +336,82 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
     final selectedImage = ref.watch(selectedImageProvider);
 
     return Scaffold(
-      appBar: ProfileFlowAppBar(step: step),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (step == 0) ProfileHeader(step: step),
-              const SizedBox(height: 16),
-              if (step == 0) ...[
-                const Text(
-                  "캐릭터 선택",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                const ProfileGrid(),
-              ],
-              if (step == 1)
-                NicknameInput(key: nicknameKey, onNext: onNicknameNext),
-              if (step == 2) ...[
-                if (selectedImage != null && selectedNickname != null)
-                  Column(
-                    children: [
-                      Image.asset(selectedImage.thumbUrl, width: 60, height: 60),
-                      const SizedBox(width: 8),
-                      Text(
-                        selectedNickname!+'의 집은 \n 어디인가요? ',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 40,
-                          fontWeight: FontWeight.w900,
-                          fontFamily: 'gamjaflower', // ✅ pubspec.yaml에 등록한 폰트 이름
+      appBar: ProfileFlowAppBar(
+        step: step,
+        onStepBack: () {
+          final currentStep = ref.read(stepProvider);
+          if (currentStep > 0) {
+            ref.read(stepProvider.notifier).state = currentStep - 1;
+          } else {
+            Navigator.of(context).maybePop();
+          }
+        },
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: IndexedStack(
+          index: step,
+          children: [
+            // Step 0: 캐릭터 선택
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ProfileHeader(step: 0),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "캐릭터 선택",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const ProfileGrid(),
+                ],
+              ),
+            ),
+            // Step 1: 닉네임 입력
+            SingleChildScrollView(
+              child: NicknameInput(
+                key: nicknameKey,
+                controller: nicknameController,
+                onNext: onNicknameNext,
+              ),
+            ),
+            // Step 2: 동 선택
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (selectedImage != null && selectedNickname != null)
+                    Column(
+                      children: [
+                        Image.asset(selectedImage.thumbUrl,
+                            width: 60, height: 60),
+                        const SizedBox(height: 8),
+                        Text(
+                          '$selectedNickname의 집은 \n 어디인가요?',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 40,
+                            fontWeight: FontWeight.w900,
+                            fontFamily: 'gamjaflower',
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                const SizedBox(height: 16),
-                if (dongList.isNotEmpty)
-                Center(
-                    child: DropdownMenu<String>(
-                    initialSelection: dongName,                    
-                    label: const Text("동 선택"),
-                    dropdownMenuEntries: dongList
-                        .map((e) => DropdownMenuEntry(
-                            value: e['sigun']!, label: "${e['sido']} ${e['sigun']}"))
-                        .toList(),
-                    onSelected: (value) {
-                      setState(() {
-                        dongName = value;
-                      });
-                    },
-                  ),
-                )
-        
-              ],
-            ],
-          ),
+                      ],
+                    ),
+                  const SizedBox(height: 16),
+                  if (dongList.isNotEmpty)
+                    DongSearchWidget(
+                      dongList: dongList,
+                      initialValue: dongName,
+                      onSelect: (value) {
+                        setState(() {
+                          dongName = value;
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: Padding(
@@ -302,14 +430,15 @@ class _ProfileFlowPageState extends ConsumerState<ProfileFlowPage> {
             }
           },
           style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.black, // 글자/아이콘 색
+            foregroundColor: Colors.black,
             minimumSize: const Size.fromHeight(52),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
-            ),   side: const BorderSide(
-      color: Colors.black, // 테두리 색
-      width: 1, // 테두리 두께
-    ),
+            ),
+            side: const BorderSide(
+              color: Colors.black,
+              width: 1,
+            ),
           ),
           child: Text(
             step == 2 ? "완료" : "다음",

@@ -1,27 +1,32 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/add_mission/add_mission_list.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/page/ai_chat.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/login_screen.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/privacy_policy_page.dart';
 import 'package:ja_chwi/presentation/screens/block/block_user.dart';
-import 'package:ja_chwi/presentation/screens/block/my_block_user.dart';
+import 'package:ja_chwi/presentation/screens/block/blocks.dart';
+import 'package:ja_chwi/presentation/screens/block/my_block.dart';
+import 'package:ja_chwi/presentation/screens/category/category.dart';
 import 'package:ja_chwi/presentation/screens/community/community_create_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/community/community_screen.dart';
 import 'package:ja_chwi/presentation/screens/guide/page/guide_screen.dart';
+import 'package:ja_chwi/presentation/screens/help/help_admin.dart';
+import 'package:ja_chwi/presentation/screens/help/help_page.dart';
 import 'package:ja_chwi/presentation/screens/home/page/home_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/mission_create_screen.dart';
-// import 'package:ja_chwi/presentation/screens/mission/mission_edit_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_list_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_home_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_flow.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_screen.dart';
-import 'package:ja_chwi/presentation/screens/admin/admin_screen.dart';
+import 'package:ja_chwi/presentation/screens/admin/admin.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/my_reports.dart';
+import 'package:ja_chwi/presentation/screens/report/reports.dart';
 import 'package:ja_chwi/presentation/screens/report/report_user.dart';
+import 'package:ja_chwi/presentation/screens/setting/setting.dart';
 import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 import 'package:ja_chwi/presentation/widgets/location_auto.dart';
 import 'package:ja_chwi/presentation/widgets/location_search.dart';
@@ -49,7 +54,6 @@ final GoRouter router = GoRouter(
       name: '가이드',
       builder: (context, state) {
         final args = state.extra as Map<String, dynamic>?;
-
         return GuideScreen(extra: args);
       },
     ),
@@ -69,10 +73,6 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
        return HomeScreen(extra: data);
-      // builder: (context, state) {
-      //   final args = state.extra as Map<String, dynamic>?;
-
-      //   return HomeScreen(extra: args);
       },
     ),
     GoRoute(
@@ -86,13 +86,7 @@ final GoRouter router = GoRouter(
        builder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
         return MissionHomeScreen(extra: data);
-  },
-      // builder: (context, state) {
-      //   final args = state.extra as Map<String, dynamic>?;
-
-      //   return MissionHomeScreen(extra: args);
-      // },
-      //builder: (context, state) => const MissionHomeScreen(),
+      },
     ),
     GoRoute(
       path: '/mission-create',
@@ -133,36 +127,37 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const CommunityCreateScreen(),
     ),
     GoRoute(
+      path: '/profile-flow',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>?; // extra 전체 받기
+        debugPrint("넘어온 데이터: $data");
 
-  path: '/profile-flow',
-  builder: (context, state) {
-    final data = state.extra as Map<String, dynamic>?; // extra 전체 받기
-    debugPrint("넘어온 데이터: $data");
+        final uid = data?['uid'] as String?;
+        if (uid == null) {
+          context.go('/login');
+          return const SizedBox.shrink();
+        }
 
-    final uid = data?['uid'] as String?;
-    if (uid == null) {
-      context.go('/login');
-      return const SizedBox.shrink();
-    }
-
-    return ProfileFlowPage(
-      uid: uid,
-      extra: data,
-    );
-  },
-),
-
+        return ProfileFlowPage(
+          uid: uid,
+          extra: data,
+        );
+      },
+    ),
     GoRoute(
       path: '/profile',
       name: '프로필',
-      builder: (context, state) => const ProfileScreen(),
+       builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return ProfileScreen(extra: data);
+      },
     ),
-        GoRoute(
+    GoRoute(
       path: '/location',
       name: '동명 불러오기',
       builder: (context, state) => const LocationSearchPage(),
     ),
-        GoRoute(
+     GoRoute(
       path: '/location_search',
       name: ' 불러오기',
       builder: (context, state) => const LocationAutocompleteWidget(),
@@ -173,25 +168,35 @@ final GoRouter router = GoRouter(
       name: '프로필 상세',
        builder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-       return ProfileDetail(extra: data);
-  
+       return ProfileDetail(extra: data);  
       },
-     // builder: (context, state) => const ProfileDetail(),
     ),
     GoRoute(
       path: '/admin',
       name: '관리자 메뉴',
-      builder: (context, state) => const AdminScreen(),
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return AdminScreen(extra: data);
+      },
     ),
     GoRoute(
       path: '/my-report',
-      name: '내가신고내역',
-      builder: (context, state) => MyReportsPage(
-          myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
-      ),
+      name: '내가신고한내역',
+     builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return MyReportsPage(extra: data);
+      },
     ),
     GoRoute(
-      path: '/report',
+      path: '/all-reports',
+      name: '전체신고내역',
+     builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return ReportsPage(extra: data);
+      },
+    ),
+    GoRoute(
+      path: '/report-user',
       name: '신고등록',
       builder: (context, state) => const ReportUserPage(
                 myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
@@ -200,18 +205,68 @@ final GoRouter router = GoRouter(
     //관리자가 uid 불러와 차단하는경우 
     GoRoute(
       path: '/block-user',
-      name: '차단등록',
-      builder: (context, state) => BlockUserPage(
-        myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
-      ),
+      name: '차단등록', 
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return BlockUserPage(extra: data);
+      },
     ),
     GoRoute(
       path: '/my-block',
-      name: '차단내역',
+      name: '내가차단한내역',
       builder: (context, state) {
-        final uid = FirebaseAuth.instance.currentUser!.uid;
-        return MyBlockedUsersPage(myUid: uid);
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return MyBlocksPage(extra: data);
       },
-),
+    ),   
+    GoRoute(
+      path: '/all-block',
+      name: '전체차단내역',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return BlocksPage(extra: data);
+      },
+    ),  
+     GoRoute(
+      path: '/settings',
+      name: '설정',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return SettingsPage(extra: data);
+      },
+    ),
+    // 도움말
+    GoRoute(
+      path: '/help',
+      name: '도움말',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return HelpPage(extra: data);
+      },
+    ),
+    GoRoute(
+      path: '/help-admin',
+      name: '도움말 등록',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return HelpAdminPage(extra: data);
+      },
+    ),
+    GoRoute(
+      path: '/mission-list',
+      name: '미션 리스트',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return AddMissionList(extra: data);
+      },
+    ),    
+    GoRoute(
+      path: '/category',
+      name: '카테고리 리스트',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+       return CategoryPage(extra: data);
+      },
+    ),
   ],
 );
