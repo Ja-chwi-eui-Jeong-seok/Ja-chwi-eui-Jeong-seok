@@ -3,16 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
-class MyReportsPage extends StatefulWidget {
+class ReportsPage extends StatefulWidget {
   final Map<String, dynamic> extra;
 
-  const MyReportsPage({super.key, required this.extra});
+  const ReportsPage({super.key, required this.extra});
 
   @override
-  State<MyReportsPage> createState() => _MyReportsPageState();
+  State<ReportsPage> createState() => _ReportsPageState();
 }
 
-class _MyReportsPageState extends State<MyReportsPage> {
+class _ReportsPageState extends State<ReportsPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   // UID -> 닉네임 캐시
@@ -43,24 +43,18 @@ class _MyReportsPageState extends State<MyReportsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final myUid = widget.extra['uid'] ?? '';
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('내가 신고한 내역'),
+        title: const Text('전체 신고 내역 집계'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            context.go('/settings', extra: widget.extra);
+            context.go('/admin', extra: widget.extra);
           },
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: firestore
-            .collection('reports')
-            .where('userId', isEqualTo: myUid) // 내가 신고한 내역만 필터
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
+        stream: firestore.collection('reports').orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
@@ -73,10 +67,14 @@ class _MyReportsPageState extends State<MyReportsPage> {
           for (var doc in reports) {
             final data = doc.data() as Map<String, dynamic>;
             final targetId = data['targetId'] ?? '';
+            final userId = data['userId'] ?? '';
             groupedReports.putIfAbsent(targetId, () => []).add(data);
+
             allUids.add(targetId);
+            allUids.add(userId);
           }
 
+          // 캐시 로딩
           return FutureBuilder(
             future: preloadProfiles(allUids.toList()),
             builder: (context, snapshot) {
@@ -88,16 +86,19 @@ class _MyReportsPageState extends State<MyReportsPage> {
                 final targetId = entry.key;
                 final reportsList = entry.value;
 
+                // 신고자 수 및 총 신고 횟수 계산
+                final uniqueUsers = reportsList.map((e) => e['userId']).toSet().length;
                 final totalReports = reportsList.length;
+
                 final targetNickname = nicknameCache[targetId] ?? 'Unknown';
                 final targetThumbUrl = thumbCache[targetId];
 
                 return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 2,
+                  elevation: 4,
                   child: ExpansionTile(
-                    tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     collapsedBackgroundColor: Colors.grey[100],
                     backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -110,18 +111,28 @@ class _MyReportsPageState extends State<MyReportsPage> {
                             child: targetThumbUrl != null
                                 ? Image.asset(targetThumbUrl, fit: BoxFit.cover)
                                 : Image.asset('assets/images/m_profile/m_black.png', fit: BoxFit.cover),
+                                
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          targetNickname,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              targetNickname,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            Text(
+                              targetId, // 다음 줄에 targetId
+                              style: const TextStyle(fontSize: 12, color: Colors.black54),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                     subtitle: Text(
-                      '신고 횟수: $totalReports',
-                      style: const TextStyle(color: Colors.black54, fontSize: 13),
+                      '신고자 수: $uniqueUsers | 총 신고 횟수: $totalReports',
+                      style: const TextStyle(color: Colors.black54),
                     ),
                     children: reportsList.map((report) {
                       final createdAt = report['createdAt'] != null
@@ -130,24 +141,43 @@ class _MyReportsPageState extends State<MyReportsPage> {
                       final formattedDate = createdAt != null
                           ? DateFormat('yyyy-MM-dd HH:mm').format(createdAt)
                           : '';
+                      final userId = report['userId'] ?? '';
+                      final userNickname = nicknameCache[userId] ?? 'Unknown';
+                      final userThumbUrl = thumbCache[userId];
 
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: const BoxDecoration(
                           border: Border(bottom: BorderSide(color: Colors.grey, width: 0.3)),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            ClipOval(
+                              child: SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: userThumbUrl != null
+                                    ? Image.asset(userThumbUrl, fit: BoxFit.cover)
+                                    : Image.asset('assets/images/m_profile/m_black.png', fit: BoxFit.cover),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
-                              child: Text(
-                                '사유: ${report['reason'] ?? ''}',
-                                style: const TextStyle(fontSize: 13),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    userNickname,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text('사유: ${report['reason'] ?? ''}'),
+                                ],
                               ),
                             ),
                             Text(
                               formattedDate,
-                              style: const TextStyle(color: Colors.grey, fontSize: 11),
+                              style: const TextStyle(color: Colors.grey, fontSize: 12),
                             ),
                           ],
                         ),
@@ -156,9 +186,8 @@ class _MyReportsPageState extends State<MyReportsPage> {
                   ),
                 );
               }).toList();
-
               return ListView(
-                padding: const EdgeInsets.only(top: 12, bottom: 12),
+                padding: const EdgeInsets.only(top: 16, bottom: 16),
                 children: cards,
               );
             },

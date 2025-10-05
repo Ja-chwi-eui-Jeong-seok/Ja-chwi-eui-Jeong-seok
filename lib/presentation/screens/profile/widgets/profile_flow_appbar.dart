@@ -17,50 +17,36 @@ class ProfileFlowAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 2,
-      title: null,
-      leadingWidth: 100,
+      automaticallyImplyLeading: false, // 기본 뒤로가기 제거
+      leading: step > 0
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              color: Colors.black,
+              onPressed: () {
+                if (onStepBack != null) {
+                  onStepBack!();
+                } else {
+                  Navigator.of(context).maybePop();
+                }
+              },
+            )
+          : null, // ✅ step == 0이면 버튼 안 보임
       flexibleSpace: SafeArea(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // 중앙 ProgressBar
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: FractionallySizedBox(
-                  widthFactor: 0.6,
-                  child: SizedBox(
-                    height: 6,
-                    child: LinearProgressIndicator(
-                      value: (step + 1) / totalSteps,
-                      backgroundColor: Colors.grey[300],
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
-                    ),
-                  ),
+        child: Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: FractionallySizedBox(
+              widthFactor: 0.6,
+              child: SizedBox(
+                height: 6,
+                child: LinearProgressIndicator(
+                  value: (step + 1) / totalSteps,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.black),
                 ),
               ),
             ),
-
-            // 버튼 영역
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                if (step > 0)
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    color: Colors.black,
-                    onPressed: () {
-                      if (onStepBack != null) {
-                        onStepBack!(); // ✅ 이전 스텝으로 이동
-                      } else {
-                        Navigator.pop(context); // fallback
-                      }
-                    },
-                  )
-                
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

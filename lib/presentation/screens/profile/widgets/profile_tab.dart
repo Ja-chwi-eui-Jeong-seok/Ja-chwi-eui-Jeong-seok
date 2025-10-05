@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProfileTap extends StatefulWidget {
-  const ProfileTap({super.key});
+  const ProfileTap({super.key, required Null Function(dynamic index) onTabChanged});
 
   @override
   State<ProfileTap> createState() => _ProfileTapState();
