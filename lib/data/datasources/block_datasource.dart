@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ja_chwi/data/models/block_model.dart';
 
+/// 🔹 추상 데이터소스 정의 (인터페이스 역할)
 abstract class BlockDataSource {
   Future<void> blockUser({
     required String userId,
@@ -11,9 +12,11 @@ abstract class BlockDataSource {
   Future<void> unblockUser(String blockId);
 
   Future<List<BlockModel>> fetchBlockedUsers();
-  // 추가: 내가 블록한 사람 조회
+
   Future<List<BlockModel>> fetchBlockedUsersByMe(String myUid);
 }
+
+/// 🔹 실제 Firestore 구현부
 class FirebaseBlockDataSource implements BlockDataSource {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -23,58 +26,75 @@ class FirebaseBlockDataSource implements BlockDataSource {
     required String blockedBy,
     String? reason,
   }) async {
-    await firestore.collection('blocks').add({
-      'userId': userId,
-      'blockedBy': blockedBy,
-      'reason': reason,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    // ✅ 중복 차단 방지 로직 추가
+    final existing = await firestore
+        .collection('blocks')
+        .where('userId', isEqualTo: userId)
+        .where('blockedBy', isEqualTo: blockedBy)
+        .limit(1)
+        .get();
+
+    if (existing.docs.isEmpty) {
+      await firestore.collection('blocks').add({
+        'userId': userId,
+        'blockedBy': blockedBy,
+        'reason': reason,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      print("차단 완료: $userId");
+    } else {
+      print("이미 차단된 사용자입니다: $userId");
+    }
   }
 
   @override
   Future<void> unblockUser(String blockId) async {
     await firestore.collection('blocks').doc(blockId).delete();
+    print("차단 해제 완료: $blockId");
   }
 
   @override
   Future<List<BlockModel>> fetchBlockedUsers() async {
-    final snapshot = await firestore.collection('blocks').orderBy('createdAt', descending: true).get();
+    final snapshot = await firestore
+        .collection('blocks')
+        .orderBy('createdAt', descending: true)
+        .get();
+
     return snapshot.docs.map((doc) {
       final data = doc.data();
+      final timestamp = data['createdAt'] as Timestamp?;
       return BlockModel(
         id: doc.id,
-        userId: data['userId'],
-        blockedBy: data['blockedBy'],
-        reason: data['reason'],
-        createdAt: (data['createdAt'] as Timestamp).toDate(),
+        userId: data['userId'] ?? '',
+        blockedBy: data['blockedBy'] ?? '',
+        reason: data['reason'] ?? '',
+        createdAt: timestamp?.toDate() ?? DateTime.now(),
       );
     }).toList();
   }
-  //내가 차단한 리스트 
+
   @override
   Future<List<BlockModel>> fetchBlockedUsersByMe(String myUid) async {
-      print('fetchBlockedUsersByMe 호출, myUid: $myUid'); // ✅ 확인용 출력
-      
+    print('📡 fetchBlockedUsersByMe 호출, myUid: $myUid');
 
-  final snapshot = await firestore
-      .collection('blocks')
-      .where('blockedBy', isEqualTo: myUid)
-      .orderBy('createdAt', descending: true)
-      .get();
+    final snapshot = await firestore
+        .collection('blocks')
+        .where('blockedBy', isEqualTo: myUid)
+        .orderBy('createdAt', descending: true)
+        .get();
+
     print('쿼리 결과 docs 수: ${snapshot.docs.length}');
 
-  return snapshot.docs.map((doc) {
-    final data = doc.data();
-    final timestamp = data['createdAt'] as Timestamp?;
-    return BlockModel(
-      id: doc.id,
-      userId: data['userId'] as String,
-      blockedBy: data['blockedBy'] as String,
-      reason: data['reason'] as String?,
-      createdAt: timestamp?.toDate() ?? DateTime.now(),
-    );
-    
-  }).toList();
-}
-
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      final timestamp = data['createdAt'] as Timestamp?;
+      return BlockModel(
+        id: doc.id,
+        userId: data['userId'] ?? '',
+        blockedBy: data['blockedBy'] ?? '',
+        reason: data['reason'] ?? '',
+        createdAt: timestamp?.toDate() ?? DateTime.now(),
+      );
+    }).toList();
+  }
 }
