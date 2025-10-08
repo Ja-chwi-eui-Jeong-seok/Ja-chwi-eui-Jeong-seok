@@ -9,7 +9,6 @@ import 'package:ja_chwi/firebase_options.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Firebase 초기화
