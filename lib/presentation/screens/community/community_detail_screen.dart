@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
@@ -111,6 +112,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final st = ref.watch(provider);
     //현재유저의 uid 정보
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    //작성자가 유저와 일치하는지
+    final isOwner =
+        st.post != null &&
+        currentUid != null &&
+        st.post!.createUser == currentUid;
 
     // 화면 헤더 데이터 구성
     //게시글과 게시글 작성자 정보
@@ -142,7 +148,17 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       // TabBar/TabBarView 연결
       length: 2,
       child: Scaffold(
-        appBar: CommonAppBar(),
+        appBar: CommonAppBar(
+          actions: [
+            if (isOwner)
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  context.push('/community-create', extra: st.post!.id);
+                },
+              ),
+          ],
+        ),
         body: Stack(
           children: [
             NestedScrollView(
