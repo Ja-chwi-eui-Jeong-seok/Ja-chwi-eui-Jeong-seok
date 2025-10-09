@@ -130,7 +130,7 @@ final GoRouter router = GoRouter(
       name: '커뮤니티 수정',
       builder: (context, state) {
         final id = state.extra as String;
-        return CommunityCreateScreen(id: id); // ← const 붙이지 않기
+        return CommunityCreateScreen(id: id);
       },
     ),
     GoRoute(
