@@ -173,33 +173,4 @@ class MissionSavedListScreen extends ConsumerWidget {
           completedAt.month == focusedDay.month;
     }).length;
   }
-
-  int _calculateConsecutiveDays(Iterable<DateTime> dates) {
-    if (dates.isEmpty) {
-      return 0;
-    }
-
-    final completedDatesSet = dates.toSet();
-    final today = DateTime.now();
-    final todayUtc = DateTime.utc(today.year, today.month, today.day);
-
-    // 시작 날짜를 정합니다. 오늘 미션을 완료했으면 오늘부터, 아니면 어제부터 확인
-    DateTime currentDate = completedDatesSet.contains(todayUtc)
-        ? todayUtc
-        : todayUtc.subtract(const Duration(days: 1));
-
-    // 시작 날짜의 미션이 완료되지 않았다면 연속일은 0
-    if (!completedDatesSet.contains(currentDate)) {
-      return 0;
-    }
-
-    int consecutiveDays = 0;
-    // currentDate부터 과거로 하루씩 이동하며 연속된 날짜인지 확인
-    while (completedDatesSet.contains(currentDate)) {
-      consecutiveDays++;
-      currentDate = currentDate.subtract(const Duration(days: 1));
-    }
-
-    return consecutiveDays;
-  }
 }
