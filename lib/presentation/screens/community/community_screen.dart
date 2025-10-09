@@ -26,6 +26,19 @@ class CommunityScreen extends ConsumerStatefulWidget {
 
 class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final extra = GoRouterState.of(context).extra;
+      if (extra is Map && extra['deleted'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('삭제가 완료되었습니다.')),
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final extra = widget.extra;
     if (kDebugMode) debugPrint('CommunityScreen extra: $extra');

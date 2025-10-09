@@ -181,7 +181,10 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         ).showSnackBar(SnackBar(content: Text(err)));
                       } else {
                         if (!context.mounted) return;
-                        context.pushReplacement('/community'); // 삭제 후 목록으로 이동
+                        context.pushReplacement(
+                          '/community',
+                          extra: {'deleted': true},
+                        ); // 삭제 후 목록으로 이동 , 스낵바용true전달
                       }
                     }
 
