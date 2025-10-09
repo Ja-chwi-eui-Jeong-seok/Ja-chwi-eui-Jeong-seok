@@ -266,16 +266,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant _PostsPlaceholder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // location이 뒤늦게 생기거나 변경되면 재초기화
-    if (oldWidget.location != widget.location) {
-      _ready = false;
-      _maybeInitProviderAndLoad();
-    }
-  }
-
   void _maybeInitProviderAndLoad() {
     final loc = widget.location;
     if (loc == null || loc.isEmpty) return; // 아직 준비 안됨
