@@ -1,11 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
-import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 
@@ -439,10 +437,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                 final err = await vmState.update(
                                   title: _titleController.text,
                                   content: _contentController.text,
-                                  categoryCode:
-                                      vmState.categoryCode, // VM이 들고있는 선택값
-                                  subCategoryCode: vmState
-                                      .categoryDetailCode, // VM이 들고있는 선택값
+                                  categoryCode: vmState.categoryCode,
+                                  subCategoryCode: vmState.categoryDetailCode,
                                 );
                                 if (!context.mounted) return;
                                 if (err != null) {
@@ -472,7 +468,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                   content: _contentController.text,
                                   categoryCode: vmState.categoryCode,
                                   subCategoryCode: vmState.categoryDetailCode,
-                                  createUser: uid!,
+                                  createUser: uid,
                                   location: profile.dongName,
                                 );
                                 if (!context.mounted) return;
