@@ -461,6 +461,10 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                     extra: vmState.postId,
                                   );
                                 });
+                                //게시글 리스트 초기화
+                                ref
+                                    .read(communityChangedTickProvider.notifier)
+                                    .state++;
 
                                 //생성분기
                               } else {
@@ -472,7 +476,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                   createUser: uid,
                                   location: profile.dongName,
                                 );
-
+                                //게시글 리스트 초기화
                                 ref
                                     .read(communityChangedTickProvider.notifier)
                                     .state++;
