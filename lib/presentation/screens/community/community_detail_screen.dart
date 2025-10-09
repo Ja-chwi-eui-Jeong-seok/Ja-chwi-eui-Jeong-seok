@@ -7,6 +7,7 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_write.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -153,13 +154,49 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         child: Scaffold(
           appBar: CommonAppBar(
             actions: [
-              if (isOwner)
+              IconButton(
+                icon: const Icon(Icons.bookmark),
+                onPressed: () {
+                  // TODO:북마크
+                },
+              ),
+              if (isOwner) ...[
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
                     context.push('/community-edit', extra: st.post!.id);
                   },
                 ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    softdelete() async {
+                      final err = await ref
+                          .read(provider.notifier)
+                          .softDelete(ref);
+                      if (!context.mounted) return;
+                      if (err != null) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(err)));
+                      } else {
+                        if (!context.mounted) return;
+                        context.pushReplacement('/community'); // 삭제 후 목록으로 이동
+                      }
+                    }
+
+                    await showAppConfirmDialog(
+                      context,
+                      title: '삭제하시겠어요?',
+                      message: '삭제하면 되돌릴 수 없어요.',
+                      primaryText: '삭제',
+                      secondaryText: '취소',
+                      destructive: true,
+                      onPrimary: softdelete,
+                    );
+                  },
+                ),
+              ],
             ],
           ),
           body: Stack(
@@ -243,17 +280,18 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     ),
               ),
 
-              //댓글 입력창
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: CommentWrite(
-                  commentController: commentController,
-                  submit: submit,
-                  currentUid: currentUid!,
+              //댓글 입력창(비로그인시 입력창 안보이게)
+              if (currentUid != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: CommentWrite(
+                    commentController: commentController,
+                    submit: submit,
+                    currentUid: currentUid,
+                  ),
                 ),
-              ),
             ],
           ),
         ),

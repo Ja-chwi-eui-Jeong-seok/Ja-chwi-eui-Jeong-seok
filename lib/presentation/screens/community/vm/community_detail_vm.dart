@@ -212,6 +212,19 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
 
     state = state.copyWith(likedIds: next, comments: updated);
   }
+
+  Future<String?> softDelete(WidgetRef ref) async {
+    final post = await ref.read(getCommunityByIdProvider).call(communityId);
+    if (post == null) return '게시글 정보가 없습니다.';
+
+    try {
+      final softDeleteUsecase = ref.read(softDeleteCommunityProvider);
+      await softDeleteUsecase.call(post.id);
+      return null; // 성공 시 null 반환
+    } catch (e) {
+      return '삭제 중 오류가 발생했습니다: $e';
+    }
+  }
 }
 
 /// Provider factory (communityId별 인스턴스)
