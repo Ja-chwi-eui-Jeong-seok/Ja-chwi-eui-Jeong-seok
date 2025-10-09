@@ -47,7 +47,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   }
 
   //댓글입력
-  void submit() async {
+  Future<void> submit() async {
     if (!mounted) return;
     final text = commentController.text.trim();
     // 빈값 가드

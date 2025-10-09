@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 
 class CommentWrite extends ConsumerStatefulWidget {
   const CommentWrite({
@@ -12,7 +14,7 @@ class CommentWrite extends ConsumerStatefulWidget {
     required this.currentUid,
   });
   final TextEditingController commentController;
-  final VoidCallback submit;
+  final Future<void> Function() submit;
   final String currentUid;
 
   @override
@@ -31,26 +33,35 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
     super.dispose();
   }
 
-  // 제출 공통 처리
-  void trySubmit() {
+  void trySubmit() async {
+    final sending = ref.read(commentSendingProvider);
+    if (sending) return;
+
     final text = widget.commentController.text.trim();
-    // 빈값 가드
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('댓글을 입력하세요')),
       );
       return;
     }
-    // 금지어/정화 검증(validator 트리거)
     if (!formKey.currentState!.validate()) return;
-    // 통과 시 실제 submit
-    widget.submit();
-    // 포커스 해제
-    FocusScope.of(context).unfocus();
+
+    ref.read(commentSendingProvider.notifier).state = true;
+    try {
+      await widget.submit();
+      if (!mounted) return;
+      FocusScope.of(context).unfocus();
+    } finally {
+      if (mounted) {
+        ref.read(commentSendingProvider.notifier).state = false;
+      }
+    }
+    ref.read(communityChangedTickProvider.notifier).state++;
   }
 
   @override
   Widget build(BuildContext context) {
+    final sending = ref.watch(commentSendingProvider);
     //uid 기반 프로필정보 로드(유저정보,위치정보)
     final profileAv = ref.watch(profileByUidProvider(widget.currentUid));
     final profileImg = profileAv.when(
@@ -121,6 +132,7 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
                               child: Form(
                                 key: formKey,
                                 child: TextFormField(
+                                  enabled: !sending,
                                   focusNode: _focus,
                                   controller: widget.commentController,
                                   autovalidateMode:
@@ -151,7 +163,7 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
                                     ),
                                   ),
                                   textInputAction: TextInputAction.done,
-                                  // 이전 코드: onFieldSubmitted: (_) => submit,  ← 실행 안 됨
+
                                   onFieldSubmitted: (_) =>
                                       trySubmit(), // ← 실제 실행
                                 ),
@@ -162,15 +174,27 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
                               borderRadius: BorderRadius.circular(25),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(25),
-                                onTap: trySubmit, // ← 검증 후 submit
-                                child: const SizedBox(
+                                onTap: sending
+                                    ? null
+                                    : trySubmit, // ← 검증 후 submit
+                                child: SizedBox(
                                   height: 46,
                                   width: 64,
                                   child: Center(
-                                    child: Text(
-                                      '확인',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
+                                    child: sending
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Text(
+                                            '확인',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ),
