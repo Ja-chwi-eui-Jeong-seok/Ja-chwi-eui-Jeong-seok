@@ -78,9 +78,6 @@ class MissionSavedListScreen extends ConsumerWidget {
           selectedDay: selectedDay,
           totalCompletedMissions: totalCompletedMissionsForMonth,
           daysInMonth: daysInMonth,
-          consecutiveSuccessDays: _calculateConsecutiveDays(
-            completedMissions.keys,
-          ),
           onDaySelected: (selected, focused) {
             ref.read(selectedDayProvider.notifier).state = selected;
             ref.read(focusedDayProvider.notifier).state = focused;
