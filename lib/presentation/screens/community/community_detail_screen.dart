@@ -154,7 +154,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
-                  context.push('/community-create', extra: st.post!.id);
+                  context.push('/community-edit', extra: st.post!.id);
                 },
               ),
           ],
