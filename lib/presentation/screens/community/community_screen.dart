@@ -239,6 +239,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
   // build에서 만들지 말고, 필드로 고정
   late NotifierProvider<CommunityListVM, CommunityListState> provider;
   bool _ready = false; // provider 준비 여부
+  ProviderSubscription<int>? _changedSub;
 
   // 댓글수 캐시
   final Map<String, Future<int>> _commentCountFutures = {};
@@ -247,6 +248,22 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
   void initState() {
     super.initState();
     _maybeInitProviderAndLoad();
+    // build 밖에서는 listenManual 사용
+    _changedSub = ref.listenManual<int>(
+      communityChangedTickProvider,
+      (prev, next) {
+        if (!_ready || !mounted) return;
+        ref.invalidate(provider);
+        Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    //해제
+    _changedSub?.close();
+    super.dispose();
   }
 
   @override
