@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ja_chwi/domain/entities/community.dart';
+import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
 
 class CommunityListState {
@@ -98,3 +99,11 @@ NotifierProvider<CommunityListVM, CommunityListState> communityListVmProvider({
 
 //리스트
 final communityChangedTickProvider = StateProvider<int>((ref) => 0);
+final commentCountByPostProvider = FutureProvider.family<int, String>((
+  ref,
+  postId,
+) {
+  // tick을 보며 변화 때마다 재요청
+  ref.watch(communityChangedTickProvider);
+  return ref.read(getCommentCountProvider).call(postId);
+});

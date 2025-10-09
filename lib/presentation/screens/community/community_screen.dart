@@ -241,9 +241,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
   bool _ready = false; // provider 준비 여부
   ProviderSubscription<int>? _changedSub;
 
-  // 댓글수 캐시
-  final Map<String, Future<int>> _commentCountFutures = {};
-
   @override
   void initState() {
     super.initState();
@@ -397,9 +394,15 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       );
 
                   //댓글수
-                  final countFuture = _commentCountFutures.putIfAbsent(
-                    x.id,
-                    () => ref.read(getCommentCountProvider).call(x.id),
+                  final countAv = ref.watch(commentCountByPostProvider(x.id));
+                  Widget commentCount = countAv.when(
+                    data: (c) => Text('$c'),
+                    loading: () => const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    error: (_, __) => const Text('0'),
                   );
                   return InkWell(
                     onTap: () => context.push(
@@ -460,23 +463,8 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                     const SizedBox(
                                       width: 4,
                                     ),
-                                    FutureBuilder(
-                                      future: countFuture,
-                                      builder: (_, snap) {
-                                        if (snap.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return const SizedBox(
-                                            width: 14,
-                                            height: 14,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          );
-                                        }
-                                        final c = snap.data ?? 0;
-                                        return Text('$c');
-                                      },
-                                    ),
+                                    //댓글수위젯
+                                    commentCount,
                                     //const SizedBox(width: 10),
                                     //TODO: 스크랩
                                     //const Icon(Icons.bookmark_border, size: 18),

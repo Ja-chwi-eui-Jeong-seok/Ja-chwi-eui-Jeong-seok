@@ -227,6 +227,8 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
   }
 }
 
+final commentSendingProvider = StateProvider.autoDispose<bool>((_) => false);
+
 /// Provider factory (communityId별 인스턴스)
 NotifierProvider<CommunityDetailVM, CommunityDetailState>
 communityDetailVmProvider(String communityId) {
