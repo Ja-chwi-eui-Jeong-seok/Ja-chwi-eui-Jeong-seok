@@ -144,114 +144,118 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           );
     final body = st.post?.communityDetail ?? '게시글내용';
 
-    return DefaultTabController(
-      // TabBar/TabBarView 연결
-      length: 2,
-      child: Scaffold(
-        appBar: CommonAppBar(
-          actions: [
-            if (isOwner)
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  context.push('/community-edit', extra: st.post!.id);
-                },
-              ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                //SliverToBoxAdapter제목,헤더,게시글 시작
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 15, 24, 50),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        //제목
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: DefaultTabController(
+        // TabBar/TabBarView 연결
+        length: 2,
+        child: Scaffold(
+          appBar: CommonAppBar(
+            actions: [
+              if (isOwner)
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    context.push('/community-edit', extra: st.post!.id);
+                  },
+                ),
+            ],
+          ),
+          body: Stack(
+            children: [
+              NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  //SliverToBoxAdapter제목,헤더,게시글 시작
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 15, 24, 50),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          //제목
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
-                        //작성자정보 날짜정보
-                        _HeaderRow(
-                          author: author,
-                          createdAt: created,
-                          authorImg: authorImg == ""
-                              ? 'assets/images/m_profile/m_black.png'
-                              : authorImg,
-                        ),
-                        const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
-                        _PostBody(
-                          body: body,
-                        ),
+                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          //작성자정보 날짜정보
+                          _HeaderRow(
+                            author: author,
+                            createdAt: created,
+                            authorImg: authorImg == ""
+                                ? 'assets/images/m_profile/m_black.png'
+                                : authorImg,
+                          ),
+                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          _PostBody(
+                            body: body,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  //SliverToBoxAdapter 제목,헤더,게시글 끝
+                  const SliverToBoxAdapter(
+                    child: Divider(thickness: 10, color: Color(0xFFEBEBEB)),
+                  ),
+                  //
+                  //SliverPersistentHeader 댓글해더 시작
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _PlainHeaderDelegate(
+                      height: 48,
+                      child: Builder(
+                        builder: (context) {
+                          return _SortTabs(
+                            onTap: (i) {
+                              // 탭 전환 시 TabBarView도 함께 전환
+                              final ctrl = DefaultTabController.of(context);
+                              ctrl.animateTo(i);
+
+                              // 정렬 스위치
+                              final ord = i == 0
+                                  ? CommentOrder.latest
+                                  : CommentOrder.popular;
+                              ref
+                                  .read(provider.notifier)
+                                  .refreshComments(ref, ord);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ), //SliverPersistentHeader 댓글해더 끝
+                ],
+                body:
+                    //댓글리스트
+                    TabBarView(
+                      children: [
+                        //최신순
+                        _pagedList(ref, st),
+                        //추천순
+                        _pagedList(ref, st),
                       ],
                     ),
-                  ),
-                ),
-
-                //SliverToBoxAdapter 제목,헤더,게시글 끝
-                const SliverToBoxAdapter(
-                  child: Divider(thickness: 10, color: Color(0xFFEBEBEB)),
-                ),
-                //
-                //SliverPersistentHeader 댓글해더 시작
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _PlainHeaderDelegate(
-                    height: 48,
-                    child: Builder(
-                      builder: (context) {
-                        return _SortTabs(
-                          onTap: (i) {
-                            // 탭 전환 시 TabBarView도 함께 전환
-                            final ctrl = DefaultTabController.of(context);
-                            ctrl.animateTo(i);
-
-                            // 정렬 스위치
-                            final ord = i == 0
-                                ? CommentOrder.latest
-                                : CommentOrder.popular;
-                            ref
-                                .read(provider.notifier)
-                                .refreshComments(ref, ord);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ), //SliverPersistentHeader 댓글해더 끝
-              ],
-              body:
-                  //댓글리스트
-                  TabBarView(
-                    children: [
-                      //최신순
-                      _pagedList(ref, st),
-                      //추천순
-                      _pagedList(ref, st),
-                    ],
-                  ),
-            ),
-
-            //댓글 입력창
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: CommentWrite(
-                commentController: commentController,
-                submit: submit,
-                currentUid: currentUid!,
               ),
-            ),
-          ],
+
+              //댓글 입력창
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: CommentWrite(
+                  commentController: commentController,
+                  submit: submit,
+                  currentUid: currentUid!,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
