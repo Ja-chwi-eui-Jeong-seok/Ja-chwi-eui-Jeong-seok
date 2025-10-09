@@ -471,6 +471,20 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                   createUser: uid,
                                   location: profile.dongName,
                                 );
+                                // 성공 후 다시 작성하러 돌아왔다면 선택칩도 비워주기
+                                ref
+                                        .read(
+                                          selectedCategoryCodeProvider.notifier,
+                                        )
+                                        .state =
+                                    null;
+                                ref
+                                        .read(
+                                          selectedSubCategoryCodeProvider
+                                              .notifier,
+                                        )
+                                        .state =
+                                    null;
                                 if (!context.mounted) return;
                                 if (res.error != null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -478,10 +492,8 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                   );
                                   return;
                                 }
-                                // 1) 편집 화면 닫기 -> 스택의 맨 위(Edit) 제거
-                                context.pop();
 
-                                // 2) 바로 다음 프레임에 '예전 상세'를 '새 상세'로 교체
+                                //'예전 상세'를 '새 상세'로 교체
                                 WidgetsBinding.instance.addPostFrameCallback((
                                   _,
                                 ) {
