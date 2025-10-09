@@ -95,3 +95,6 @@ NotifierProvider<CommunityListVM, CommunityListState> communityListVmProvider({
     () => CommunityListVM(categoryCode, detailCode, location),
   );
 }
+
+//리스트
+final communityChangedTickProvider = StateProvider<int>((ref) => 0);

@@ -9,6 +9,7 @@ import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 
 // VM 상태(provider) import
 import 'package:ja_chwi/presentation/screens/community/vm/community_create_vm.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 // ↑ 내부에서 categoryVMProvider를 외부 공개하고 있어야 함
 //   (앞서 만든 CategoryVM, CategoryState 구조 전제)
 
@@ -471,6 +472,11 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                   createUser: uid,
                                   location: profile.dongName,
                                 );
+
+                                ref
+                                    .read(communityChangedTickProvider.notifier)
+                                    .state++;
+
                                 // 성공 후 다시 작성하러 돌아왔다면 선택칩도 비워주기
                                 ref
                                         .read(
