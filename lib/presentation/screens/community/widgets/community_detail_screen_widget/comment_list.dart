@@ -1,9 +1,12 @@
 // --- 댓글 리스트 ---
 // 기존 CommentCard의 주석과 형태를 유지하되, VM 데이터로 교체
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/RelativeTimeTextKst.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/heart_button.dart';
 
@@ -59,7 +62,8 @@ class CommentList extends ConsumerWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-
+        final uid = uidOf(i);
+        final av = ref.watch(profileByUidProvider(uid));
         return GestureDetector(
           onLongPressStart: (details) async {
             //details = onLongPressStart했을떄 정보
@@ -123,7 +127,25 @@ class CommentList extends ConsumerWidget {
                 break;
               case 'block':
                 // 차단 처리
-                scaffold.showSnackBar(const SnackBar(content: Text('차단 완료')));
+                var nickname;
+                av.when(
+                  data: (data) {
+                    nickname = data.nickname;
+                  },
+                  error: (error, stackTrace) => nickname = 'error',
+                  loading: () => nickname = 'loading',
+                );
+                await showAppConfirmDialog(
+                  context,
+                  title: '$nickname 님을 차단하실건가요?',
+                  message: '차단시 사용자의 게시글과 댓글을 보지 못합니다.',
+                  primaryText: '확인',
+                  secondaryText: '취소',
+                  destructive: true,
+                  //onPrimary: ,
+                );
+
+                //scaffold.showSnackBar(const SnackBar(content: Text('차단 완료')));
                 break;
               case null:
                 // 메뉴 밖을 눌러 닫힘. 아무것도 하지 않음.
@@ -140,8 +162,6 @@ class CommentList extends ConsumerWidget {
                   width: 45,
                   child: Builder(
                     builder: (_) {
-                      final uid = uidOf(i);
-                      final av = ref.watch(profileByUidProvider(uid));
                       return av.when(
                         data: (p) => ClipRRect(
                           borderRadius: BorderRadius.circular(22.5),
@@ -178,7 +198,6 @@ class CommentList extends ConsumerWidget {
                           //작성자이름
                           Builder(
                             builder: (_) {
-                              final uid = uidOf(i);
                               final av = ref.watch(profileByUidProvider(uid));
                               final nickname = av.maybeWhen(
                                 data: (p) => p.nickname,
