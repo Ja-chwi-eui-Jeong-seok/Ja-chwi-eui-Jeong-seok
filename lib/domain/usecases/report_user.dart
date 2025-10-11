@@ -1,4 +1,3 @@
-import '../entities/report_entity.dart';
 import '../repositories/report_repository.dart';
 
 class ReportUser {

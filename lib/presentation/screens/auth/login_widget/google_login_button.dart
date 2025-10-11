@@ -64,7 +64,9 @@ class GoogleLoginButton extends ConsumerWidget {
 
           const SizedBox(height: 12),
 
-          AppleLoginButton(),
+          AppleLoginButton(
+            onLoginSuccess: onLoginSuccess,
+          ),
         ],
       ),
     );
