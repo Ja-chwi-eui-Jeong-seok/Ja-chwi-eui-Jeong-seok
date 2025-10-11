@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
-import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 

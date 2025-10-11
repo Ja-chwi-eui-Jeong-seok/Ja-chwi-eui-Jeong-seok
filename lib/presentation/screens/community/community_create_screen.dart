@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
-import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 
 // VM 상태(provider) import
