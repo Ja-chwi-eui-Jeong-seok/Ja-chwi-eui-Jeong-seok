@@ -30,6 +30,10 @@ class _WaveTextState extends State<WaveText>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
+    final fontSize = isLandscape ? 36.0 : 52.0; // 가로모드에서 폰트 크기 줄임
+
     return Wrap(
       alignment: WrapAlignment.center,
       children: List.generate(widget.text.length, (index) {
@@ -41,16 +45,17 @@ class _WaveTextState extends State<WaveText>
           animation: _controller,
           builder: (context, child) {
             double offsetY = // + 오른쪽부터, - 왼쪽부터 웨이브
-                sin((_controller.value * 2 * pi) - (index * 0.5)) * 10;
+                sin((_controller.value * 2 * pi) - (index * 0.5)) *
+                (isLandscape ? 6 : 10);
 
             return Transform.translate(
               offset: Offset(0, offsetY), // 글자당 위아래 움직임 조절
               child: Text(
                 widget.text[index],
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'GamjaFlower',
-                  fontSize: 52,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                 ),
               ),
