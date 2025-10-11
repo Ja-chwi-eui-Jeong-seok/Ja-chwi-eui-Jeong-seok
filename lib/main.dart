@@ -7,7 +7,6 @@ import 'package:ja_chwi/core/config/theme/app_theme.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
 import 'package:ja_chwi/firebase_options.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -36,8 +36,8 @@ class CommunityListState {
 class CommunityListVM extends Notifier<CommunityListState> {
   CommunityListVM(this.categoryCode, this.detailCode, this.location);
 
-  final int categoryCode;
-  final int detailCode;
+  final int? categoryCode;    // nullable로 변경
+  final int? detailCode;      // nullable로 변경
   final String location;
 
   @override
@@ -91,8 +91,8 @@ class CommunityListVM extends Notifier<CommunityListState> {
 
 /// provider 팩토리: (상위코드, 하위코드)별로 VM 생성
 NotifierProvider<CommunityListVM, CommunityListState> communityListVmProvider({
-  required int categoryCode,
-  required int detailCode,
+  int? categoryCode,    // nullable로 변경
+  int? detailCode,      // nullable로 변경
   required String location,
 }) {
   return NotifierProvider<CommunityListVM, CommunityListState>(

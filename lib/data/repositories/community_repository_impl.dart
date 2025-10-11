@@ -75,8 +75,8 @@ class CommunityRepositoryImpl implements CommunityRepository {
   //게시글불러오기
   @override
   Future<PagedCommunity> fetch({
-    required int categoryCode,
-    required int categoryDetailCode,
+    int? categoryCode,        // nullable로 변경
+    int? categoryDetailCode,  // nullable로 변경
     required String location,
     int limit = 10,
     DocumentSnapshot? startAfter,

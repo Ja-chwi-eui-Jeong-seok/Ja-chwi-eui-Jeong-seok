@@ -8,8 +8,8 @@ class FetchCommunities {
 
   Future<(List<Community> items, DocumentSnapshot? lastDoc, bool hasMore)>
   call({
-    required int categoryCode,
-    required int categoryDetailCode,
+    int? categoryCode,        // nullable로 변경
+    int? categoryDetailCode,  // nullable로 변경
     required String location,
     int limit = 10,
     DocumentSnapshot? startAfter,

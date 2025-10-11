@@ -90,55 +90,83 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
 
   @override
   Future<AuthModel?> signInWithApple() async {
-    // 1. rawNonce & hashedNonce 생성
-    final rawNonce = _generateNonce();
-    final hashedNonce = _sha256ofString(rawNonce);
+    try {
+      print('🍎 Apple 로그인 데이터소스 시작');
 
-    // 2. Apple 로그인 요청 (hashedNonce 전달)
-    final appleCredential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
-      ],
-      nonce: hashedNonce,
-    );
+      // iOS에서만 Apple 로그인 허용
 
-    // 3. Firebase OAuthCredential 생성 (idToken + rawNonce)
-    final oauthCredential = OAuthProvider("apple.com").credential(
-      idToken: appleCredential.identityToken,
-      rawNonce: rawNonce,
-    );
+      if (!Platform.isIOS) {
+        throw Exception('Apple 로그인은 iOS에서만 지원됩니다.');
+      }
 
-    // 4. Firebase Auth 로그인
-    final userCred = await _auth.signInWithCredential(oauthCredential);
-    final user = userCred.user;
-    if (user == null) return null;
+      // 1. rawNonce & hashedNonce 생성
+      final rawNonce = _generateNonce();
+      final hashedNonce = _sha256ofString(rawNonce);
+      print('🍎 Nonce 생성 완료');
 
-    // 5. Firestore 사용자 문서 처리
-    final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
-    final snapshot = await docRef.get();
-    final deviceName = await _getDeviceName();
-
-    if (!snapshot.exists) {
-      final newUser = AuthModel(
-        uid: user.uid,
-        accountData: user.displayName ?? '',
-        accountEmail: user.email ?? '',
-        accountType: 'apple',
-        createDevice: deviceName,
-        privacyConsent: true,
-        agreeToTermsOfService: true,
-        userCreateDate: DateTime.now(),
-        userUpdateDate: DateTime.now(),
-        userDeleteDate: null,
-        userDeleteNote: '',
-        managerType: false,
+      // 2. Apple 로그인 요청 (hashedNonce 전달)
+      print('🍎 Apple ID 자격 증명 요청 중...');
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
       );
-      print('Firestore 저장 데이터: ${newUser.toMap()}');
-      await docRef.set(newUser.toMap());
-      return newUser;
-    } else {
-      return AuthModel.fromMap(snapshot.data()!, snapshot.id);
+      print('🍎 Apple ID 자격 증명 받음: ${appleCredential.userIdentifier}');
+
+      // 3. Firebase OAuthCredential 생성 (idToken + rawNonce)
+      print('🍎 Firebase OAuth 자격 증명 생성 중...');
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
+      // 4. Firebase Auth 로그인
+      print('🍎 Firebase Auth 로그인 중...');
+      final userCred = await _auth.signInWithCredential(oauthCredential);
+      final user = userCred.user;
+      if (user == null) {
+        print('🍎 Firebase Auth 사용자 정보 없음');
+        return null;
+      }
+      print('🍎 Firebase Auth 로그인 성공: ${user.uid}');
+
+      // 5. Firestore 사용자 문서 처리
+      print('🍎 Firestore 사용자 문서 처리 중...');
+      final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
+      final snapshot = await docRef.get();
+      final deviceName = await _getDeviceName();
+
+      if (!snapshot.exists) {
+        print('🍎 신규 사용자 - Firestore에 저장');
+        final newUser = AuthModel(
+          uid: user.uid,
+          accountData: user.displayName ?? '',
+          accountEmail: user.email ?? '',
+          accountType: 'apple',
+          createDevice: deviceName,
+          privacyConsent: true,
+          agreeToTermsOfService: true,
+          userCreateDate: DateTime.now(),
+          userUpdateDate: DateTime.now(),
+          userDeleteDate: null,
+          userDeleteNote: '',
+          managerType: false,
+        );
+        print('🍎 Firestore 저장 데이터: ${newUser.toMap()}');
+        await docRef.set(newUser.toMap());
+        print('🍎 Apple 로그인 완료 - 신규 사용자');
+        return newUser;
+      } else {
+        print('🍎 기존 사용자 - Firestore에서 로드');
+        final existingUser = AuthModel.fromMap(snapshot.data()!, snapshot.id);
+        print('🍎 Apple 로그인 완료 - 기존 사용자');
+        return existingUser;
+      }
+    } catch (e) {
+      print('🍎 Apple 로그인 데이터소스 에러: $e');
+      rethrow;
     }
   }
 
