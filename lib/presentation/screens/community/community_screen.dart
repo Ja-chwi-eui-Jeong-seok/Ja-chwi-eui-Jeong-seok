@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:ja_chwi/domain/entities/category.dart';
 import 'package:ja_chwi/presentation/common/utils/string_utils.dart';
 import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
-import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:go_router/go_router.dart';

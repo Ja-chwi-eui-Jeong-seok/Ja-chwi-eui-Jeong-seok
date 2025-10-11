@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';

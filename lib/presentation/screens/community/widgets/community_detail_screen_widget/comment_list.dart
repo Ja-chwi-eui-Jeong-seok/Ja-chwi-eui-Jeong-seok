@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/RelativeTimeTextKst.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/heart_button.dart';
@@ -127,7 +127,7 @@ class CommentList extends ConsumerWidget {
                 break;
               case 'block':
                 // 차단 처리
-                var nickname;
+                late var nickname;
                 av.when(
                   data: (data) {
                     nickname = data.nickname;
@@ -143,6 +143,7 @@ class CommentList extends ConsumerWidget {
                   secondaryText: '취소',
                   destructive: true,
                   //onPrimary: ,
+                  //TODO: 차단로직삽입
                 );
 
                 //scaffold.showSnackBar(const SnackBar(content: Text('차단 완료')));
