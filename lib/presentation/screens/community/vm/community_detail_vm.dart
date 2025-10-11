@@ -1,15 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ja_chwi/domain/entities/bookmark_entity.dart';
 
 import 'package:ja_chwi/domain/entities/community.dart';
 import 'package:ja_chwi/domain/entities/comment.dart';
 
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
+import 'package:ja_chwi/presentation/providers/bookmark_provider.dart';
 import 'package:ja_chwi/presentation/providers/comment_like_providers.dart'; //as cl;
 import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 
 /// 상세 화면 상태
 class CommunityDetailState {
@@ -26,6 +30,10 @@ class CommunityDetailState {
   final Set<String> likedIds;
   //게시글작성 후 돌아오는게시글id
 
+  // 북마크 상태
+  final bool isBookmarked;
+  final bool loadingBookmark;
+
   const CommunityDetailState({
     this.post,
     this.loadingPost = false,
@@ -35,6 +43,8 @@ class CommunityDetailState {
     this.lastDoc,
     this.order = CommentOrder.latest,
     this.likedIds = const {},
+    this.isBookmarked = false,
+    this.loadingBookmark = false,
   });
 
   CommunityDetailState copyWith({
@@ -46,6 +56,8 @@ class CommunityDetailState {
     DocumentSnapshot? lastDoc,
     CommentOrder? order,
     Set<String>? likedIds,
+    bool? isBookmarked,
+    bool? loadingBookmark,
   }) => CommunityDetailState(
     post: post ?? this.post,
     loadingPost: loadingPost ?? this.loadingPost,
@@ -55,6 +67,8 @@ class CommunityDetailState {
     lastDoc: lastDoc ?? this.lastDoc,
     order: order ?? this.order,
     likedIds: likedIds ?? this.likedIds,
+    isBookmarked: isBookmarked ?? this.isBookmarked,
+    loadingBookmark: loadingBookmark ?? this.loadingBookmark,
   );
 }
 
@@ -66,15 +80,61 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
   @override
   CommunityDetailState build() => const CommunityDetailState();
 
-  /// 초기 로드: 게시글 + 댓글 + 좋아요집합
+  /// 북마크 토글
+  Future<void> toggleBookmark(WidgetRef ref) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      debugPrint('로그인이 필요합니다.');
+      return;
+    }
+
+    if (state.loadingBookmark) return; // 중복 요청 방지
+
+    state = state.copyWith(loadingBookmark: true);
+
+    try {
+      final bookmarkRepo = ref.read(bookmarkRepoProvider);
+
+      if (state.isBookmarked) {
+        // 북마크 제거
+        await bookmarkRepo.removeBookmark(
+          uid,
+          communityId,
+          BookmarkType.community,
+        );
+        state = state.copyWith(isBookmarked: false);
+      } else {
+        // 북마크 추가
+        final bookmark = BookmarkEntity(
+          id: communityId,
+          type: BookmarkType.community,
+          createdAt: DateTime.now(),
+        );
+        await bookmarkRepo.addBookmark(uid, bookmark);
+        state = state.copyWith(isBookmarked: true);
+      }
+      
+      // 북마크 상태 변경 후 community screen에 반영
+      ref.read(communityChangedTickProvider.notifier).state++;
+    } catch (e) {
+      debugPrint('북마크 토글 오류: $e');
+    } finally {
+      state = state.copyWith(loadingBookmark: false);
+    }
+  }
+
+  /// 초기 로드: 게시글 + 댓글 + 좋아요집합 + 북마크 상태
   Future<void> loadInitial(WidgetRef ref) async {
     // 게시글과 댓글은 병렬로 가져오되,
-    // 좋아요 집합은 "댓글이 로드된 후" 호출해야 한다.
+    // 좋아요 집합과 북마크 상태는 "댓글이 로드된 후" 호출해야 한다.
     await Future.wait([
       _loadPost(ref),
       _loadComments(ref, reset: true),
     ]);
-    await _loadLikedSet(ref);
+    await Future.wait([
+      _loadLikedSet(ref),
+      _loadBookmarkStatus(ref),
+    ]);
   }
 
   /// 단건 게시글 조회
@@ -135,6 +195,33 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
     } catch (e) {
       debugPrint('fetch liked set error: $e');
       state = state.copyWith(likedIds: {});
+    }
+  }
+
+  // 현재 게시글의 북마크 상태 로드
+  Future<void> _loadBookmarkStatus(WidgetRef ref) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      state = state.copyWith(isBookmarked: false);
+      return;
+    }
+
+    try {
+      final bookmarkRepo = ref.read(bookmarkRepoProvider);
+      final bookmarksStream = bookmarkRepo.getBookmarks(
+        uid,
+        BookmarkType.community,
+      );
+
+      // Stream의 첫 번째 값을 가져와서 북마크 상태 확인
+      final bookmarks = await bookmarksStream.first;
+      final isBookmarked = bookmarks.any(
+        (bookmark) => bookmark.id == communityId,
+      );
+      state = state.copyWith(isBookmarked: isBookmarked);
+    } catch (e) {
+      debugPrint('fetch bookmark status error: $e');
+      state = state.copyWith(isBookmarked: false);
     }
   }
 
@@ -212,7 +299,22 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
 
     state = state.copyWith(likedIds: next, comments: updated);
   }
+
+  Future<String?> softDelete(WidgetRef ref) async {
+    final post = await ref.read(getCommunityByIdProvider).call(communityId);
+    if (post == null) return '게시글 정보가 없습니다.';
+
+    try {
+      final softDeleteUsecase = ref.read(softDeleteCommunityProvider);
+      await softDeleteUsecase.call(post.id);
+      return null; // 성공 시 null 반환
+    } catch (e) {
+      return '삭제 중 오류가 발생했습니다: $e';
+    }
+  }
 }
+
+final commentSendingProvider = StateProvider.autoDispose<bool>((_) => false);
 
 /// Provider factory (communityId별 인스턴스)
 NotifierProvider<CommunityDetailVM, CommunityDetailState>

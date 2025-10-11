@@ -4,8 +4,8 @@ import 'package:ja_chwi/data/dto/community_dto.dart';
 
 abstract interface class CommunityDataSource {
   Future<PagedResult<CommunityDto>> fetchCommunities({
-    required int categoryCode,
-    required int categoryDetailCode,
+    int? categoryCode,        // nullable로 변경
+    int? categoryDetailCode,  // nullable로 변경
     required String location, //아직 셋팅안됌
     int limit, //기본페이지 크기 10
     DocumentSnapshot? startAfterDoc, //페이징커서

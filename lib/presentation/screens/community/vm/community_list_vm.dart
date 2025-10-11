@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ja_chwi/domain/entities/community.dart';
+import 'package:ja_chwi/domain/entities/bookmark_entity.dart';
+import 'package:ja_chwi/presentation/providers/bookmark_provider.dart';
+import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/community_usecase_provider.dart';
 
 class CommunityListState {
@@ -32,8 +36,8 @@ class CommunityListState {
 class CommunityListVM extends Notifier<CommunityListState> {
   CommunityListVM(this.categoryCode, this.detailCode, this.location);
 
-  final int categoryCode;
-  final int detailCode;
+  final int? categoryCode;    // nullable로 변경
+  final int? detailCode;      // nullable로 변경
   final String location;
 
   @override
@@ -87,11 +91,41 @@ class CommunityListVM extends Notifier<CommunityListState> {
 
 /// provider 팩토리: (상위코드, 하위코드)별로 VM 생성
 NotifierProvider<CommunityListVM, CommunityListState> communityListVmProvider({
-  required int categoryCode,
-  required int detailCode,
+  int? categoryCode,    // nullable로 변경
+  int? detailCode,      // nullable로 변경
   required String location,
 }) {
   return NotifierProvider<CommunityListVM, CommunityListState>(
     () => CommunityListVM(categoryCode, detailCode, location),
   );
 }
+
+//리스트
+final communityChangedTickProvider = StateProvider<int>((ref) => 0);
+final commentCountByPostProvider = FutureProvider.family<int, String>((
+  ref,
+  postId,
+) {
+  // tick을 보며 변화 때마다 재요청
+  ref.watch(communityChangedTickProvider);
+  return ref.read(getCommentCountProvider).call(postId);
+});
+
+// 북마크 상태 확인 provider
+final isBookmarkedProvider = FutureProvider.family<bool, String>((ref, postId) async {
+  // communityChangedTickProvider를 감지하여 북마크 상태 변경 시 재요청
+  ref.watch(communityChangedTickProvider);
+  
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) return false;
+  
+  try {
+    final bookmarkRepo = ref.read(bookmarkRepoProvider);
+    final bookmarksStream = bookmarkRepo.getBookmarks(uid, BookmarkType.community);
+    final bookmarks = await bookmarksStream.first;
+    return bookmarks.any((bookmark) => bookmark.id == postId);
+  } catch (e) {
+    debugPrint('북마크 상태 확인 오류: $e');
+    return false;
+  }
+});
