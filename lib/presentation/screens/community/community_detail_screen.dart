@@ -11,10 +11,8 @@ import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart
 import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_write.dart';
-import 'package:timezone/timezone.dart' as tz;
 
 //타임존
-final tz.Location _seoul = tz.getLocation('Asia/Seoul');
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
@@ -142,7 +140,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final created = st.post == null
         ? '09.17 17:47'
         : DateFormat('MM.dd HH:mm').format(
-            tz.TZDateTime.from(st.post!.communityCreateDate.toUtc(), _seoul),
+            st.post!.communityCreateDate.toLocal(),
           );
     final body = st.post?.communityDetail ?? '게시글내용';
 
@@ -343,7 +341,24 @@ class _HeaderRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text(author),
           const Spacer(),
-          Text(createdAt),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.access_time,
+                size: 14,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                createdAt,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
