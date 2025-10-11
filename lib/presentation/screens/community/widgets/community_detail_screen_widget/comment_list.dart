@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/providers/block_provider.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
@@ -70,7 +71,7 @@ class CommentList extends ConsumerWidget {
         }
         final me = FirebaseAuth.instance.currentUser?.uid;
         final targetUid = uidOf(i); // 이 댓글 작성자 uid
-        late final imageFullUrl;
+
         late final nickname;
         late final thumbUrl;
 
@@ -191,8 +192,22 @@ class CommentList extends ConsumerWidget {
                   switch (selected) {
                     case 'report':
                       // 신고 처리
-                      scaffold.showSnackBar(
-                        const SnackBar(content: Text('신고 완료')),
+                      if (me == null) {
+                        scaffold.showSnackBar(
+                          const SnackBar(content: Text('로그인이 필요합니다.')),
+                        );
+                        break;
+                      }
+
+                      // 신고하기 페이지로 이동
+                      context.push(
+                        '/report',
+                        extra: {
+                          'targetUserId': targetUid,
+                          'targetUserName': nickname,
+                          'targetContent': textOf(i),
+                          'targetCreatedAt': createdAtOf(i),
+                        },
                       );
                       break;
                     case 'block':

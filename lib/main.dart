@@ -29,8 +29,6 @@ Future<void> main() async {
 
 class OpenAI {}
 
-//전역접근용
-final tz.Location kSeoul = tz.getLocation('Asia/Seoul');
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
