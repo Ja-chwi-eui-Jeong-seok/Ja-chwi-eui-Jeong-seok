@@ -59,6 +59,7 @@ class AppleLoginButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState.status == AuthStatus.loading;
 
     // iOS에서만 Apple 로그인 버튼 표시
     //TODO : 안드로이드에서도 보여줄지 정하기
@@ -66,25 +67,34 @@ class AppleLoginButton extends ConsumerWidget {
     //   return SizedBox.shrink(); // Android에서는 버튼 숨김
     // }
 
-    return SizedBox(
-      height: 48,
+    return Container(
+      height: 56, // iPad에서 더 쉽게 터치할 수 있도록 높이 증가
       width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey, width: 1),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-
-          child: SignInWithAppleButton(
-            style: SignInWithAppleButtonStyle.black,
-            onPressed: authState.status == AuthStatus.loading
-                ? () {} // 로딩 중일 때 빈 함수
-                : () {
-                    print('🍎 Apple 로그인 버튼 클릭됨');
-                    _handleAppleLogin(context, ref);
-                  },
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.grey, width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(28),
+          onTap: isLoading
+              ? null
+              : () {
+                  print('🍎 Apple 로그인 버튼 클릭됨');
+                  _handleAppleLogin(context, ref);
+                },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: SignInWithAppleButton(
+              style: SignInWithAppleButtonStyle.black,
+              onPressed: () {
+                if (!isLoading) {
+                  print('🍎 Apple 로그인 버튼 클릭됨 (SignInWithAppleButton)');
+                  _handleAppleLogin(context, ref);
+                }
+              },
+            ),
           ),
         ),
       ),
