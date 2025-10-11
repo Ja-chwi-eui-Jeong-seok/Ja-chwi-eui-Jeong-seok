@@ -7,6 +7,7 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_write.dart';
@@ -155,10 +156,24 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           appBar: CommonAppBar(
             actions: [
               IconButton(
-                icon: const Icon(Icons.bookmark),
-                onPressed: () {
-                  // TODO:북마크
-                },
+                icon: st.loadingBookmark
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        st.isBookmarked
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: st.isBookmarked ? Colors.orange : null,
+                      ),
+                onPressed: st.loadingBookmark
+                    ? null
+                    : () {
+                        ref.read(provider.notifier).toggleBookmark(ref);
+                        ref.read(communityChangedTickProvider.notifier).state++;
+                      },
               ),
               if (isOwner) ...[
                 IconButton(

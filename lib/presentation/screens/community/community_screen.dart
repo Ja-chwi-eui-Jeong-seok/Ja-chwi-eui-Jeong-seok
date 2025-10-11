@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/domain/entities/category.dart';
 import 'package:ja_chwi/presentation/common/utils/string_utils.dart';
-import 'package:ja_chwi/presentation/providers/comment_usecase_provider.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
@@ -465,9 +464,9 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                     ),
                                     //댓글수위젯
                                     commentCount,
-                                    //const SizedBox(width: 10),
-                                    //TODO: 스크랩
-                                    //const Icon(Icons.bookmark_border, size: 18),
+                                    const SizedBox(width: 10),
+                                    // 북마크 아이콘
+                                    _BookmarkIcon(postId: x.id),
                                   ],
                                 ),
                               ],
@@ -541,6 +540,35 @@ class _CategoryDetailChips extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// 북마크 아이콘 위젯
+class _BookmarkIcon extends ConsumerWidget {
+  const _BookmarkIcon({required this.postId});
+  final String postId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bookmarkStatusAsync = ref.watch(isBookmarkedProvider(postId));
+    
+    return bookmarkStatusAsync.when(
+      data: (isBookmarked) => Icon(
+        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+        size: 18,
+        color: isBookmarked ? Colors.orange : Colors.grey,
+      ),
+      loading: () => const SizedBox(
+        width: 18,
+        height: 18,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      error: (_, __) => const Icon(
+        Icons.bookmark_border,
+        size: 18,
+        color: Colors.grey,
+      ),
     );
   }
 }
