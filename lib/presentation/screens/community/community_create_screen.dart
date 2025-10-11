@@ -112,13 +112,16 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
     //uid 기반 프로필정보 로드(유저정보,위치정보)
     final profileAv = ref.watch(profileByUidProvider(uid));
 
-    return Scaffold(
-      appBar: AppBar(title: Text(appBarTitle)),
-      body: st.loading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : SingleChildScrollView(
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: Scaffold(
+        appBar: AppBar(title: Text(appBarTitle)),
+        body: st.loading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : SingleChildScrollView(
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -551,6 +554,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                 ),
               ),
             ),
+      ),
     );
   }
 }
