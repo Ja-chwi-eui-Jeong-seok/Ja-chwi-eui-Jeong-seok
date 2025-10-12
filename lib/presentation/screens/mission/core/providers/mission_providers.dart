@@ -18,10 +18,31 @@ import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.dart';
 import 'package:image_picker/image_picker.dart';
 
-/// 오늘의 미션 달성자 목록을 비동기적으로 가져오는 FutureProvider
-final achieversProvider = FutureProvider<List<MissionAchiever>>((ref) async {
-  final usecase = ref.watch(fetchTodayMissionAchieversUseCaseProvider);
-  final achieversData = await usecase.execute();
+/// 현재 선택된 주(week)를 관리하는 StateProvider. 기본값은 이번 주.
+final selectedWeekProvider = StateProvider<DateTime>((ref) => DateTime.now());
+
+/// 주간 미션 랭커 목록을 비동기적으로 가져오는 FutureProvider
+final weeklyAchieversProvider = FutureProvider<List<MissionAchiever>>((
+  ref,
+) async {
+  final repository = ref.watch(missionRepositoryProvider);
+  final selectedWeek = ref.watch(selectedWeekProvider);
+
+  final achieversData = await repository.fetchWeeklyMissionRankers(
+    selectedWeek,
+  );
+  return achieversData.map((data) => MissionAchiever.fromMap(data)).toList();
+});
+
+/// 홈 화면의 주간 랭커 목록을 가져오는 FutureProvider (항상 이번 주)
+final currentWeekAchieversProvider = FutureProvider<List<MissionAchiever>>((
+  ref,
+) async {
+  final repository = ref.watch(missionRepositoryProvider);
+  // 항상 현재 시간을 기준으로 데이터를 가져옵니다.
+  final achieversData = await repository.fetchWeeklyMissionRankers(
+    DateTime.now(),
+  );
   return achieversData.map((data) => MissionAchiever.fromMap(data)).toList();
 });
 

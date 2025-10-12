@@ -7,7 +7,7 @@ import 'package:ja_chwi/domain/entities/block_entity.dart';
 class MyBlockedUsersPage extends StatefulWidget {
   final String myUid; // 현재 로그인한 UID
 
-  const MyBlockedUsersPage({super.key, required this.myUid});
+  const MyBlockedUsersPage({super.key, required this.myUid, required Map<String, dynamic> extra});
 
   @override
   State<MyBlockedUsersPage> createState() => _MyBlockedUsersPageState();

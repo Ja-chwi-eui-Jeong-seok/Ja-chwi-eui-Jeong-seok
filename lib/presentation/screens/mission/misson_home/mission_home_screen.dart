@@ -17,10 +17,7 @@ class MissionHomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // extra 사용 가능
-    print('MissionHomeScreen extra: $extra');
-
-    final achievers = ref.watch(achieversProvider);
+    final currentWeekAchievers = ref.watch(currentWeekAchieversProvider);
 
     final todayMissionAsync = ref.watch(todayMissionProvider);
     return Scaffold(
@@ -34,7 +31,7 @@ class MissionHomeScreen extends ConsumerWidget {
               await Future.delayed(const Duration(milliseconds: 50));
               // 의존하는 다른 Provider들을 새로고침합니다.
               ref.invalidate(todayMissionProvider);
-              ref.invalidate(achieversProvider);
+              ref.invalidate(currentWeekAchieversProvider);
             },
           ),
         ],
@@ -55,8 +52,8 @@ class MissionHomeScreen extends ConsumerWidget {
               const ProfileSection(),
               const SizedBox(height: 32),
               _buildTodayMissionSection(context, todayMissionAsync),
-              const SizedBox(height: 20),
-              _buildMissionAchieversSection(context, achievers),
+              const SizedBox(height: 40),
+              _buildMissionAchieversSection(context, ref, currentWeekAchievers),
               const SizedBox(height: 20), // 40
               /// 임시 로그아웃
               Align(
@@ -136,15 +133,15 @@ class MissionHomeScreen extends ConsumerWidget {
 
   Widget _buildMissionAchieversSection(
     BuildContext context,
-    AsyncValue<List<MissionAchiever>> achieversAsync,
+    WidgetRef ref,
+    AsyncValue<List<MissionAchiever>> currentWeekAchieversAsync,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
         _buildSectionHeader(
           context,
-          '오늘의 미션 달성자',
+          '주간 미션 랭킹',
           action: TextButton(
             onPressed: () => context.push('/mission-achievers'),
             style: TextButton.styleFrom(
@@ -160,10 +157,11 @@ class MissionHomeScreen extends ConsumerWidget {
             ),
           ),
         ),
-        achieversAsync.when(
+        const SizedBox(height: 16),
+        currentWeekAchieversAsync.when(
           data: (achievers) {
             if (achievers.isEmpty) {
-              return const Center(child: Text('오늘의 첫 달성자가 되어보세요!'));
+              return const Center(child: Text('이번 주 미션 달성자가 없습니다.'));
             }
             return Column(
               children: List.generate(achievers.take(3).length, (i) {
@@ -171,54 +169,58 @@ class MissionHomeScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(
-                        width: 24,
+                        width: 32,
                         child: Text(
                           '${i + 1}',
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       SizedBox(
                         width: 48,
                         height: 48,
                         child: ClipOval(
-                          child: Image.asset(
-                            achiever.imageFullUrl,
+                          child: Image(
+                            image:
+                                (achiever.imageFullUrl.startsWith('http')
+                                        ? NetworkImage(achiever.imageFullUrl)
+                                        : AssetImage(achiever.imageFullUrl))
+                                    as ImageProvider,
                             fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.person, size: 30),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            achiever.level,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                              fontSize: 16,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              achiever.level,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            achiever.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                            const SizedBox(height: 4),
+                            Text(
+                              achiever.name,
+                              style: const TextStyle(fontSize: 14),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      const Spacer(),
                       Text(
-                        achiever.time,
+                        '${achiever.weekCount}회',
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 12,

@@ -7,6 +7,7 @@ import 'package:ja_chwi/domain/repositories/comment_repository.dart';
 import 'package:ja_chwi/domain/usecases/create_comment.dart';
 import 'package:ja_chwi/domain/usecases/fetch_comments.dart';
 import 'package:ja_chwi/domain/usecases/get_comment_count.dart';
+import 'package:ja_chwi/domain/usecases/soft_delete_comment.dart';
 
 final commentDsProvider = Provider<CommentDataSource>(
   (ref) => CommentDataSourceImpl(FirebaseFirestore.instance),
@@ -26,4 +27,9 @@ final fetchCommentsProvider = Provider(
 //게시글 댓글수
 final getCommentCountProvider = Provider<GetCommentCount>(
   (ref) => GetCommentCount(ref.read(commentRepoProvider)),
+);
+
+//댓글 삭제
+final softDeleteCommentProvider = Provider<SoftDeleteComment>(
+  (ref) => SoftDeleteComment(ref.read(commentRepoProvider)),
 );

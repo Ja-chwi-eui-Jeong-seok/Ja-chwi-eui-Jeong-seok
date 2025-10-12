@@ -47,20 +47,32 @@
 	<true/>
 	<key>CFBundleURLTypes</key>
 	<array>
-  		<dict>
-    		<key>CFBundleTypeRole</key>
-    		<string>Editor</string>
-    		<key>CFBundleURLSchemes</key>
-    		<array>
-      			<string>com.googleusercontent.apps.932235207263-ls86slhic1mfi5big5h46hv35r83egtb</string>
-    		</array>
-  		</dict>
+		<!-- Google Sign-In URL Scheme -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>google-signin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.932235207263-ls86slhic1mfi5big5h46hv35r83egtb</string>
+			</array>
+		</dict>
+		<!-- Apple Sign In URL Scheme -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>apple-signin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.example.jaChwi</string>
+			</array>
+		</dict>
 	</array>
 
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-  		<string>google</string>
-  		<string>com.googleusercontent.apps.932235207263-ls86slhic1mfi5big5h46hv35r83egtb</string>
+		<string>google</string>
+		<string>com.googleusercontent.apps.932235207263-ls86slhic1mfi5big5h46hv35r83egtb</string>
 	</array>
 
 </dict>

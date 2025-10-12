@@ -23,7 +23,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title, style: titleTextStyle),
       titleSpacing: titleSpacing,
-      centerTitle: centerTitle,
+      // centerTitle: centerTitle,
       actions: actions,
       leading: leading,
     );
