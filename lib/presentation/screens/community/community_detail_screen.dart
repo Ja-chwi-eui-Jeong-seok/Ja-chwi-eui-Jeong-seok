@@ -103,6 +103,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         onToggleLike: (i) =>
             ref.read(provider.notifier).toggleLike(ref, st.comments[i].id),
         createdAtOf: (i) => st.comments[i].createAt,
+        comments: st.comments,
+        detailVmProvider: provider,
       ),
     );
   }

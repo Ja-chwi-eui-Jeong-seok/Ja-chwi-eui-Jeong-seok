@@ -2,8 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/domain/entities/comment.dart';
 import 'package:ja_chwi/presentation/providers/block_provider.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/RelativeTimeTextKst.dart';
@@ -25,6 +27,8 @@ class CommentList extends ConsumerWidget {
     required this.isLikedOf,
     required this.onToggleLike,
     required this.createdAtOf,
+    required this.comments,
+    required this.detailVmProvider,
   });
 
   final int itemCount;
@@ -35,6 +39,9 @@ class CommentList extends ConsumerWidget {
   final bool Function(int) isLikedOf;
   final void Function(int) onToggleLike;
   final DateTime Function(int) createdAtOf;
+  final List<Comment> comments;
+  final NotifierProvider<CommunityDetailVM, CommunityDetailState>
+  detailVmProvider;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -251,11 +258,38 @@ class CommentList extends ConsumerWidget {
 
                       break;
                     case 'delete':
-                      //TODO: 삭제 처리
-                      scaffold.showSnackBar(
-                        const SnackBar(content: Text('삭제 완료')),
+                      // 삭제 확인 다이얼로그 표시
+                      final shouldDelete = await showAppConfirmDialog(
+                        context,
+                        title: '댓글 삭제',
+                        message: '댓글을 삭제하시겠습니까?\n삭제된 댓글은 복구할 수 없습니다.',
+                        primaryText: '삭제',
+                        secondaryText: '취소',
                       );
-                      ref.read(communityChangedTickProvider.notifier).state++;
+
+                      if (shouldDelete == true) {
+                        try {
+                          // ViewModel의 댓글 삭제 메서드 사용
+                          await ref
+                              .read(detailVmProvider.notifier)
+                              .deleteComment(
+                                ref,
+                                comments[i].id,
+                              );
+
+                          if (context.mounted) {
+                            scaffold.showSnackBar(
+                              const SnackBar(content: Text('댓글이 삭제되었습니다')),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            scaffold.showSnackBar(
+                              SnackBar(content: Text('삭제 중 오류가 발생했습니다: $e')),
+                            );
+                          }
+                        }
+                      }
                       break;
                     case null:
                       // 메뉴 밖을 눌러 닫힘. 아무것도 하지 않음.
