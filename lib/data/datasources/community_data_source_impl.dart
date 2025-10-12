@@ -29,17 +29,25 @@ class CommunityDataSourceImpl implements CommunityDataSource {
   // 조회(페이징)
   @override
   Future<PagedResult<CommunityDto>> fetchCommunities({
-    required int categoryCode,
-    required int categoryDetailCode,
+    int? categoryCode, // nullable로 변경
+    int? categoryDetailCode, // nullable로 변경
     required String location,
     int limit = 10,
     DocumentSnapshot<Object?>? startAfterDoc,
     bool orderDesc = true,
   }) async {
-    Query<Map<String, dynamic>> q = col
-        .where('category_code', isEqualTo: categoryCode)
-        .where('category_detail_code', isEqualTo: categoryDetailCode)
-        .where('community_delete_yn', isEqualTo: false);
+    Query<Map<String, dynamic>> q = col.where(
+      'community_delete_yn',
+      isEqualTo: false,
+    );
+
+    // 카테고리 필터링 (null이 아닐 때만)
+    if (categoryCode != null) {
+      q = q.where('category_code', isEqualTo: categoryCode);
+    }
+    if (categoryDetailCode != null) {
+      q = q.where('category_detail_code', isEqualTo: categoryDetailCode);
+    }
 
     //날짜 임시로 동작구
     if (location.isNotEmpty) {

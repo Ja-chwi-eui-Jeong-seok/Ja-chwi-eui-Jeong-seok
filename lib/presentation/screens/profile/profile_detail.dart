@@ -3,43 +3,66 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_header_indicator.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_tab.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_card.dart';
-import 'package:ja_chwi/presentation/screens/setting/setting.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
-
-class ProfileDetail extends ConsumerWidget {
-    final Map<String, dynamic>? extra;
+import 'package:go_router/go_router.dart';
+class ProfileDetail extends ConsumerStatefulWidget {
+  final Map<String, dynamic>? extra;
   const ProfileDetail({super.key, this.extra});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    print('ProfileDetailScreen extra: $extra'); // ✅ 데이터 확인
+  ConsumerState<ProfileDetail> createState() => _ProfileDetailState();
+}
+
+class _ProfileDetailState extends ConsumerState<ProfileDetail> {
+  int selectedTab = 0; // 0: 북마크, 1: 내가 쓴 글
+
+  @override
+  Widget build(BuildContext context) {
+    // ✅ 여기에서는 ref를 직접 받지 않고,
+    // ConsumerState 내부의 `ref` 프로퍼티를 사용합니다.
+    final uid = widget.extra?['uid'] as String?;
+    print('ProfileDetailScreen extra: ${widget.extra}');
+
     return Scaffold(
-      appBar: AppBar(title:  Text('Profile Screen'),        
-      actions: [
+      appBar: AppBar(
+        title: const Text(
+          '프로필',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: false,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // 설정 화면으로 이동
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
+              context.go('/settings', extra: widget.extra);
             },
           ),
-        ],),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ProfileHeaderIndicator(),
-             ProfileTap(),
-            ProfileCardList()
-          ],
-        ),
+        ],
+      ),
+      body: Column(
+        children: [
+          ProfileHeaderIndicator(extra: widget.extra),
+          ProfileTap(
+            onTabChanged: (index) {
+              setState(() => selectedTab = index);
+            },
+          ),
+          Expanded(
+            child: selectedTab == 0
+                ? ProfileCardList(uid: uid, filterType: 'bookmark')
+                : ProfileCardList(uid: uid, filterType: 'community'),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNav(
-    mode: BottomNavMode.tab,
-    userData: extra ?? {},
-  ),
+        mode: BottomNavMode.tab,
+        userData: widget.extra ?? {},
+      ),
     );
   }
 }

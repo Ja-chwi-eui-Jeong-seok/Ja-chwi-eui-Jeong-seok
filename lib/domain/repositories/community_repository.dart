@@ -16,8 +16,8 @@ abstract interface class CommunityRepository {
   Future<Community?> getById(String id);
   //조회 페이징
   Future<PagedCommunity> fetch({
-    required int categoryCode,
-    required int categoryDetailCode,
+    int? categoryCode,        // nullable로 변경
+    int? categoryDetailCode,  // nullable로 변경
     required String location,
     int limit,
     DocumentSnapshot? startAfter,

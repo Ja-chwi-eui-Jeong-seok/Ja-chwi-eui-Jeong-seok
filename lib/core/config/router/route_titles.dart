@@ -11,7 +11,7 @@ class RouteTitles {
     '/home': '메인',
     '/mission': '미션',
     '/mission-create': '미션 작성',
-    '/mission-saved-list': '자취의 정석',
+    '/mission-saved-list': '완료된 미션',
     '/mission-edit': '미션 수정',
     '/mission-achievers': '미션 달성자목록',
     '/community': '커뮤니티',

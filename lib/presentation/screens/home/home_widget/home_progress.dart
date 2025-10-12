@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ja_chwi/core/utils/level_calculator.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
@@ -13,9 +14,10 @@ class HomeProgress extends ConsumerWidget {
     return userProfileAsync.when(
       data: (userProfile) {
         final missionCount = userProfile.missionCount;
+        final levelString = calculateLevel(missionCount); // 'Lv.X'
         // 현재 레벨 (숫자만 추출)
         final currentLevel =
-            int.tryParse(userProfile.level.replaceAll('Lv.', '')) ?? 1;
+            int.tryParse(levelString.replaceAll('Lv.', '')) ?? 1;
 
         // 다음 레벨까지 필요한 총 미션 수
         final missionsForNextLevel = currentLevel * 7;
@@ -47,7 +49,7 @@ class HomeProgress extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        userProfile.level, // 'Lv.X'
+                        levelString, // 'Lv.X'
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
