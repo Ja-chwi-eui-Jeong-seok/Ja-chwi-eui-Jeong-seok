@@ -300,6 +300,33 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
     state = state.copyWith(likedIds: next, comments: updated);
   }
 
+  // 댓글 삭제
+  Future<void> deleteComment(WidgetRef ref, String commentId) async {
+    try {
+      // 댓글 삭제 실행
+      await ref.read(softDeleteCommentProvider).call(commentId);
+      
+      // 로컬 상태에서 해당 댓글 제거
+      final updatedComments = state.comments.where((comment) => comment.id != commentId).toList();
+      
+      // likedIds에서도 해당 댓글 ID 제거
+      final updatedLikedIds = Set<String>.from(state.likedIds)..remove(commentId);
+      
+      state = state.copyWith(
+        comments: updatedComments,
+        likedIds: updatedLikedIds,
+      );
+
+          ref.read(communityChangedTickProvider.notifier).state++;
+
+      
+      debugPrint('댓글 삭제 완료: $commentId');
+    } catch (e) {
+      debugPrint('댓글 삭제 오류: $e');
+      rethrow; // 에러를 다시 던져서 UI에서 처리할 수 있도록 함
+    }
+  }
+
   Future<String?> softDelete(WidgetRef ref) async {
     final post = await ref.read(getCommunityByIdProvider).call(communityId);
     if (post == null) return '게시글 정보가 없습니다.';
