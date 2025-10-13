@@ -26,6 +26,8 @@ import 'package:ja_chwi/presentation/screens/profile/profile_detail.dart';
 import 'package:ja_chwi/presentation/screens/report/my_reports.dart';
 import 'package:ja_chwi/presentation/screens/report/reports.dart';
 import 'package:ja_chwi/presentation/screens/report/report_user.dart';
+import 'package:ja_chwi/presentation/screens/report/report_screen.dart';
+import 'package:ja_chwi/presentation/screens/report/report_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/setting/setting.dart';
 import 'package:ja_chwi/presentation/screens/splash/splash_screen.dart';
 import 'package:ja_chwi/presentation/widgets/location_auto.dart';
@@ -126,6 +128,14 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const CommunityCreateScreen(),
     ),
     GoRoute(
+      path: '/community-edit',
+      name: '커뮤니티 수정',
+      builder: (context, state) {
+        final id = state.extra as String;
+        return CommunityCreateScreen(id: id);
+      },
+    ),
+    GoRoute(
       path: '/profile-flow',
       builder: (context, state) {
         final data = state.extra as Map<String, dynamic>?; // extra 전체 받기
@@ -201,6 +211,33 @@ final GoRouter router = GoRouter(
         myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
         targetUid: 'MoDmwRSaBANwKlVLvyhEXgiD5Sn2',
       ),
+    ),
+    GoRoute(
+      path: '/report',
+      name: '신고하기',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+        return ReportScreen(
+          targetUserId: data['targetUserId'] as String,
+          targetUserName: data['targetUserName'] as String?,
+          targetContent: data['targetContent'] as String?,
+          targetCreatedAt: data['targetCreatedAt'] as DateTime?,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/report-detail',
+      name: '신고 세부사유',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+        return ReportDetailScreen(
+          targetUserId: data['targetUserId'] as String,
+          targetUserName: data['targetUserName'] as String?,
+          targetContent: data['targetContent'] as String?,
+          targetCreatedAt: data['targetCreatedAt'] as DateTime?,
+          selectedReason: data['selectedReason'] as String,
+        );
+      },
     ),
     //관리자가 uid 불러와 차단하는경우
     GoRoute(

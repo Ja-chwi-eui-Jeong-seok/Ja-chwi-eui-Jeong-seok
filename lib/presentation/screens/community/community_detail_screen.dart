@@ -1,17 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart.dart';
+import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
+import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialog.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_write.dart';
-import 'package:timezone/timezone.dart' as tz;
 
 //타임존
-final tz.Location _seoul = tz.getLocation('Asia/Seoul');
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
@@ -45,7 +46,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   }
 
   //댓글입력
-  void submit() async {
+  Future<void> submit() async {
     if (!mounted) return;
     final text = commentController.text.trim();
     // 빈값 가드
@@ -102,6 +103,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         onToggleLike: (i) =>
             ref.read(provider.notifier).toggleLike(ref, st.comments[i].id),
         createdAtOf: (i) => st.comments[i].createAt,
+        comments: st.comments,
+        detailVmProvider: provider,
       ),
     );
   }
@@ -111,6 +114,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final st = ref.watch(provider);
     //현재유저의 uid 정보
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    //작성자가 유저와 일치하는지
+    final isOwner =
+        st.post != null &&
+        currentUid != null &&
+        st.post!.createUser == currentUid;
 
     // 화면 헤더 데이터 구성
     //게시글과 게시글 작성자 정보
@@ -134,108 +142,176 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final created = st.post == null
         ? '09.17 17:47'
         : DateFormat('MM.dd HH:mm').format(
-            tz.TZDateTime.from(st.post!.communityCreateDate.toUtc(), _seoul),
+            st.post!.communityCreateDate.toLocal(),
           );
     final body = st.post?.communityDetail ?? '게시글내용';
 
-    return DefaultTabController(
-      // TabBar/TabBarView 연결
-      length: 2,
-      child: Scaffold(
-        appBar: CommonAppBar(),
-        body: Stack(
-          children: [
-            NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                //SliverToBoxAdapter제목,헤더,게시글 시작
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 15, 24, 50),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        //제목
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: DefaultTabController(
+        // TabBar/TabBarView 연결
+        length: 2,
+        child: Scaffold(
+          appBar: CommonAppBar(
+            actions: [
+              IconButton(
+                icon: st.loadingBookmark
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        st.isBookmarked
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: st.isBookmarked ? Colors.orange : null,
+                      ),
+                onPressed: st.loadingBookmark
+                    ? null
+                    : () {
+                        ref.read(provider.notifier).toggleBookmark(ref);
+                        ref.read(communityChangedTickProvider.notifier).state++;
+                      },
+              ),
+              if (isOwner) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    context.push('/community-edit', extra: st.post!.id);
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    softdelete() async {
+                      final err = await ref
+                          .read(provider.notifier)
+                          .softDelete(ref);
+                      if (!context.mounted) return;
+                      if (err != null) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(err)));
+                      } else {
+                        if (!context.mounted) return;
+                        context.pushReplacement(
+                          '/community',
+                          extra: {'deleted': true},
+                        ); // 삭제 후 목록으로 이동 , 스낵바용true전달
+                      }
+                    }
+
+                    await showAppConfirmDialog(
+                      context,
+                      title: '삭제하시겠어요?',
+                      message: '삭제하면 되돌릴 수 없어요.',
+                      primaryText: '삭제',
+                      secondaryText: '취소',
+                      destructive: true,
+                      onPrimary: softdelete,
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
+          body: Stack(
+            children: [
+              NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  //SliverToBoxAdapter제목,헤더,게시글 시작
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 15, 24, 50),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          //제목
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
-                        //작성자정보 날짜정보
-                        _HeaderRow(
-                          author: author,
-                          createdAt: created,
-                          authorImg: authorImg == ""
-                              ? 'assets/images/m_profile/m_black.png'
-                              : authorImg,
-                        ),
-                        const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
-                        _PostBody(
-                          body: body,
-                        ),
+                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          //작성자정보 날짜정보
+                          _HeaderRow(
+                            author: author,
+                            createdAt: created,
+                            authorImg: authorImg == ""
+                                ? 'assets/images/m_profile/m_black.png'
+                                : authorImg,
+                          ),
+                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          _PostBody(
+                            body: body,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  //SliverToBoxAdapter 제목,헤더,게시글 끝
+                  const SliverToBoxAdapter(
+                    child: Divider(thickness: 10, color: Color(0xFFEBEBEB)),
+                  ),
+                  //
+                  //SliverPersistentHeader 댓글해더 시작
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _PlainHeaderDelegate(
+                      height: 48,
+                      child: Builder(
+                        builder: (context) {
+                          return _SortTabs(
+                            onTap: (i) {
+                              // 탭 전환 시 TabBarView도 함께 전환
+                              final ctrl = DefaultTabController.of(context);
+                              ctrl.animateTo(i);
+
+                              // 정렬 스위치
+                              final ord = i == 0
+                                  ? CommentOrder.latest
+                                  : CommentOrder.popular;
+                              ref
+                                  .read(provider.notifier)
+                                  .refreshComments(ref, ord);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ), //SliverPersistentHeader 댓글해더 끝
+                ],
+                body:
+                    //댓글리스트
+                    TabBarView(
+                      children: [
+                        //최신순
+                        _pagedList(ref, st),
+                        //추천순
+                        _pagedList(ref, st),
                       ],
                     ),
-                  ),
-                ),
-
-                //SliverToBoxAdapter 제목,헤더,게시글 끝
-                const SliverToBoxAdapter(
-                  child: Divider(thickness: 10, color: Color(0xFFEBEBEB)),
-                ),
-                //
-                //SliverPersistentHeader 댓글해더 시작
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _PlainHeaderDelegate(
-                    height: 48,
-                    child: Builder(
-                      builder: (context) {
-                        return _SortTabs(
-                          onTap: (i) {
-                            // 탭 전환 시 TabBarView도 함께 전환
-                            final ctrl = DefaultTabController.of(context);
-                            ctrl.animateTo(i);
-
-                            // 정렬 스위치
-                            final ord = i == 0
-                                ? CommentOrder.latest
-                                : CommentOrder.popular;
-                            ref
-                                .read(provider.notifier)
-                                .refreshComments(ref, ord);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ), //SliverPersistentHeader 댓글해더 끝
-              ],
-              body:
-                  //댓글리스트
-                  TabBarView(
-                    children: [
-                      //최신순
-                      _pagedList(ref, st),
-                      //추천순
-                      _pagedList(ref, st),
-                    ],
-                  ),
-            ),
-
-            //댓글 입력창
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: CommentWrite(
-                commentController: commentController,
-                submit: submit,
-                currentUid: currentUid!,
               ),
-            ),
-          ],
+
+              //댓글 입력창(비로그인시 입력창 안보이게)
+              if (currentUid != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: CommentWrite(
+                    commentController: commentController,
+                    submit: submit,
+                    currentUid: currentUid,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -267,7 +343,24 @@ class _HeaderRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text(author),
           const Spacer(),
-          Text(createdAt),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.access_time,
+                size: 14,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                createdAt,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

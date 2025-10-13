@@ -19,6 +19,7 @@ class _BlockUserPageState extends State<BlockUserPage> {
   );
 
   late final String myUid; // 🔹 extra에서 가져올 UID 저장 변수
+  late final String tarUid;
   bool _isLoading = false;
 
   @override
@@ -26,6 +27,8 @@ class _BlockUserPageState extends State<BlockUserPage> {
     super.initState();
     // 🔹 extra에서 uid 추출
     myUid = widget.extra?['uid'] ?? 'unknown';
+    tarUid = widget.extra?['targetUid'];
+    _userIdController.text = tarUid;
   }
 
   Future<void> _blockUser() async {
@@ -72,6 +75,7 @@ class _BlockUserPageState extends State<BlockUserPage> {
 
   @override
   Widget build(BuildContext context) {
+    //print('$myUid : $tarUid');
     return Scaffold(
       appBar: AppBar(title: const Text('사용자 차단')),
       body: Padding(
