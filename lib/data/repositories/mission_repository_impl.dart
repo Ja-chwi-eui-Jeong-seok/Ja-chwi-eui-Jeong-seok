@@ -61,4 +61,15 @@ class MissionRepositoryImpl implements MissionRepository {
   ) {
     return dataSource.fetchWeeklyMissionRankers(dateForWeek);
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchUserMissionsForWeek({
+    required String userId,
+    required DateTime dateForWeek,
+  }) {
+    return dataSource.fetchUserMissionsForWeek(
+      userId: userId,
+      dateForWeek: dateForWeek,
+    );
+  }
 }
