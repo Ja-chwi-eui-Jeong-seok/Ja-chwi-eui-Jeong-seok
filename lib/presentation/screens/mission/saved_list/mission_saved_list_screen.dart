@@ -9,10 +9,10 @@ import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-/// `focusedDay` 상태를 관리하는 Provider. 캘린더에서 현재 보여지는 월을 추적합니다.
+/// `focusedDay` 상태를 관리하는 Provider. 캘린더에서 현재 보여지는 월을 추적
 final focusedDayProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
-/// `selectedDay` 상태를 관리하는 Provider. 사용자가 캘린더에서 선택한 날짜를 추적합니다.
+/// `selectedDay` 상태를 관리하는 Provider. 사용자가 캘린더에서 선택한 날짜를 추적
 final selectedDayProvider = StateProvider<DateTime?>((ref) => DateTime.now());
 
 class MissionSavedListScreen extends ConsumerWidget {
