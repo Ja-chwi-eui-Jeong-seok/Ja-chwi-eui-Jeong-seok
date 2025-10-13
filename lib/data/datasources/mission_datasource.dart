@@ -37,4 +37,10 @@ abstract class MissionDataSource {
   Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
     DateTime dateForWeek,
   );
+
+  /// 특정 사용자의 주간 미션 목록을 가져옵니다.
+  Future<List<Map<String, dynamic>>> fetchUserMissionsForWeek({
+    required String userId,
+    required DateTime dateForWeek,
+  });
 }

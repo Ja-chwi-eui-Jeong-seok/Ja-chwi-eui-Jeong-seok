@@ -50,6 +50,14 @@ class ProfileSection extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  // const SizedBox(height: 4),
+                  // Text(
+                  //   '총 ${userProfile.missionCount}회 달성',
+                  //   style: const TextStyle(
+                  //     fontSize: 14,
+                  //     color: Colors.black54,
+                  //   ),
+                  // ),
                 ],
               ),
             ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:intl/intl.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
+import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
+import 'package:intl/intl.dart';
 
 class MissionAchieversScreen extends ConsumerStatefulWidget {
   const MissionAchieversScreen({super.key});
@@ -18,6 +18,19 @@ class MissionAchieversScreen extends ConsumerStatefulWidget {
 class MissionAchieversScreenState
     extends ConsumerState<MissionAchieversScreen> {
   bool _showAllAchievers = false;
+
+  void navigateToUserMissions(MissionAchiever achiever) {
+    if (achiever.name != '미정') {
+      final selectedWeek = ref.read(selectedWeekProvider);
+      context.push(
+        '/mission-achievers/user-missions',
+        extra: {
+          'achiever': achiever,
+          'weekDate': selectedWeek,
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +109,7 @@ class MissionAchieversScreenState
                             // index는 0부터 시작하므로, 4위(achievers[3])부터 가져옵니다.
                             final rank = index + 4;
                             final achiever = achievers[rank - 1];
-                            // AchieverCard 대신 ListTile과 유사한 UI를 직접 구성합니다.
+
                             return Padding(
                               padding: const EdgeInsets.symmetric(
                                 vertical: 8.0,
@@ -162,11 +175,7 @@ class MissionAchieversScreenState
                                   const SizedBox(width: 8),
                                   TextButton(
                                     onPressed: () {
-                                      // achiever.userId를 사용하여 uid를 가져옵니다.
-                                      context.push(
-                                        '/profile-detail',
-                                        extra: {'userId': achiever.userId},
-                                      );
+                                      navigateToUserMissions(achiever);
                                     },
                                     child: const Row(
                                       children: [
@@ -282,10 +291,15 @@ class MissionAchieversScreenState
         final MissionAchiever achiever = ranker['data'] as MissionAchiever;
         return Flexible(
           flex: isFirst ? 3 : 2,
-          child: _buildRanker(
-            ranker['rank'] as int,
-            achiever,
-            ranker['size'] as double,
+          child: GestureDetector(
+            onTap: () {
+              navigateToUserMissions(achiever);
+            },
+            child: _buildRanker(
+              ranker['rank'] as int,
+              achiever,
+              ranker['size'] as double,
+            ),
           ),
         );
       }).toList(),

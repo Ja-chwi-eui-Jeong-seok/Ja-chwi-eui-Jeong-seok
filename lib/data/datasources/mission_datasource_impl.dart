@@ -304,4 +304,41 @@ class MissionDataSourceImpl implements MissionDataSource {
 
     return rankers;
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchUserMissionsForWeek({
+    required String userId,
+    required DateTime dateForWeek,
+  }) async {
+    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산합니다.
+    final startOfWeek = dateForWeek.subtract(
+      Duration(days: dateForWeek.weekday - 1),
+    );
+    final startOfMonday = DateTime.utc(
+      startOfWeek.year,
+      startOfWeek.month,
+      startOfWeek.day,
+    );
+    final endOfWeek = startOfMonday.add(
+      const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
+    );
+
+    // 2. 해당 주에 특정 사용자가 생성한 모든 미션을 가져옵니다.
+    final missionSnapshot = await _firestore
+        .collection('user_missions')
+        .where('userId', isEqualTo: userId)
+        .where('missioncreatedate', isGreaterThanOrEqualTo: startOfMonday)
+        .where('missioncreatedate', isLessThanOrEqualTo: endOfWeek)
+        .orderBy('missioncreatedate', descending: true) // 최신순으로 정렬
+        .get();
+
+    if (missionSnapshot.docs.isEmpty) {
+      return [];
+    }
+
+    // 3. 문서 ID를 포함하여 데이터 목록을 반환합니다.
+    return missionSnapshot.docs
+        .map((doc) => doc.data()..['id'] = doc.id)
+        .toList();
+  }
 }
