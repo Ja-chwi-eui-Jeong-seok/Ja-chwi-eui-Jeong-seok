@@ -139,7 +139,7 @@ class MissionDataSourceImpl implements MissionDataSource {
     DateTime dateForWeek,
     String dongName,
   ) async {
-    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산합니다.
+    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산
     final startOfWeek = dateForWeek.subtract(
       Duration(days: dateForWeek.weekday - 1),
     );
@@ -153,7 +153,7 @@ class MissionDataSourceImpl implements MissionDataSource {
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
 
-    // 2. 같은 dongName을 가진 사용자들의 ID를 가져옵니다.
+    // 2. 같은 dongName을 가진 사용자들의 ID를 가져옴
     final profileSnapshot = await _firestore
         .collection('profiles')
         .where('dongName', isEqualTo: dongName)
@@ -164,8 +164,7 @@ class MissionDataSourceImpl implements MissionDataSource {
     }
     final dongUserIds = profileSnapshot.docs.map((doc) => doc.id).toList();
 
-    // 3. 해당 주에, 같은 동네 사용자들이 생성한 모든 미션을 가져옵니다.
-    // dongUserIds가 30개를 초과할 수 있으므로, 30개씩 나누어 쿼리합니다.
+    // 3. 해당 주에, 같은 동네 사용자들이 생성한 모든 미션을 가져옴
     final List<QueryDocumentSnapshot<Map<String, dynamic>>> allMissionDocs = [];
     const chunkSize = 30;
 
@@ -189,7 +188,7 @@ class MissionDataSourceImpl implements MissionDataSource {
       return [];
     }
 
-    // 3. 사용자별로 미션 개수와 마지막 미션 완료 시간을 집계합니다.
+    // 3. 사용자별로 미션 개수와 마지막 미션 완료 시간을 집계함
     final Map<String, Map<String, dynamic>> userStats = {};
     for (final doc in allMissionDocs) {
       final data = doc.data();
@@ -212,13 +211,13 @@ class MissionDataSourceImpl implements MissionDataSource {
       );
     }
 
-    // 4. 사용자 프로필 정보를 가져와 Map으로 변환합니다. (이미 dongUserIds로 가져왔으므로 재사용 가능)
+    // 4. 사용자 프로필 정보를 가져와 Map으로 변환
     final userIds = userStats.keys.toList();
     if (userIds.isEmpty) return [];
 
     final profiles = await _fetchProfilesInChunks(userIds);
 
-    // 5. userStats를 기준으로 rankers 목록을 생성하고 프로필 정보를 결합합니다.
+    // 5. userStats를 기준으로 rankers 목록을 생성하고 프로필 정보를 결합
     final List<Map<String, dynamic>> rankers = [];
     for (final userId in userIds) {
       final profileData = profiles[userId] ?? {}; // 프로필이 없으면 빈 맵
@@ -251,7 +250,7 @@ class MissionDataSourceImpl implements MissionDataSource {
     required String userId,
     required DateTime dateForWeek,
   }) async {
-    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산합니다.
+    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산
     final startOfWeek = dateForWeek.subtract(
       Duration(days: dateForWeek.weekday - 1),
     );
@@ -264,7 +263,7 @@ class MissionDataSourceImpl implements MissionDataSource {
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
 
-    // 2. 해당 주에 특정 사용자가 생성한 모든 미션을 가져옵니다.
+    // 2. 해당 주에 특정 사용자가 생성한 모든 미션을 가져옴
     final missionSnapshot = await _firestore
         .collection('user_missions')
         .where('userId', isEqualTo: userId)
@@ -277,7 +276,7 @@ class MissionDataSourceImpl implements MissionDataSource {
       return [];
     }
 
-    // 3. 문서 ID를 포함하여 데이터 목록을 반환합니다.
+    // 3. 문서 ID를 포함하여 데이터 목록을 반환
     return missionSnapshot.docs
         .map((doc) => doc.data()..['id'] = doc.id)
         .toList();

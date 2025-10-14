@@ -51,7 +51,7 @@ class _UserWeeklyMissionsScreenState
   void didUpdateWidget(covariant UserWeeklyMissionsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     // 부모 위젯(MissionAchieversScreen)에서 주차가 변경되어 weekDate가 바뀌면
-    // focusedDay와 selectedDay를 새로운 주차의 날짜로 업데이트합니다.
+    // focusedDay와 selectedDay를 새로운 주차의 날짜로 업데이트합
     if (widget.weekDate != oldWidget.weekDate) {
       setState(() {
         _focusedDay = widget.weekDate;
@@ -139,7 +139,7 @@ class _UserWeeklyMissionsScreenState
     final missionsAsync = ref.watch(
       userWeeklyMissionsProvider((
         userId: widget.achiever.userId,
-        weekDate: widget.weekDate,
+        weekDate: _focusedDay,
       )),
     );
 
@@ -167,10 +167,10 @@ class _UserWeeklyMissionsScreenState
                   final completedMissions = _mapMissionsToCalendarEvents(
                     missions,
                   );
-                  final startOfWeek = widget.weekDate.subtract(
-                    Duration(days: widget.weekDate.weekday - 1),
-                  );
-                  final endOfWeek = startOfWeek.add(const Duration(days: 6));
+                  // final startOfWeek = widget.weekDate.subtract(
+                  // Duration(days: widget.weekDate.weekday - 1),
+                  // );
+                  // final endOfWeek = startOfWeek.add(const Duration(days: 6));
 
                   final selectedMission = _selectedDay != null
                       ? completedMissions[DateTime.utc(
@@ -192,14 +192,20 @@ class _UserWeeklyMissionsScreenState
                         daysOfWeekVisible: false,
                         calendarFormat: CalendarFormat.week,
                         focusedDay: _focusedDay,
-                        firstDay: startOfWeek,
-                        lastDay: endOfWeek,
+                        firstDay: DateTime.utc(2020, 1, 1),
+                        lastDay: DateTime.utc(2030, 12, 31),
                         selectedDayPredicate: (day) =>
                             isSameDay(_selectedDay, day),
                         onDaySelected: (selectedDay, focusedDay) {
                           setState(() {
                             _selectedDay = selectedDay;
                             _focusedDay = focusedDay;
+                          });
+                        },
+                        onPageChanged: (focusedDay) {
+                          setState(() {
+                            _focusedDay = focusedDay;
+                            _selectedDay = focusedDay; // 페이지 변경 시 해당 주의 첫 날을 선택
                           });
                         },
                         eventLoader: (day) {

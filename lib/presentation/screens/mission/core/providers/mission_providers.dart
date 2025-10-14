@@ -21,7 +21,6 @@ import 'package:image_picker/image_picker.dart';
 final selectedWeekProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
 /// 특정 주의 미션 랭커 목록을 비동기적으로 가져오는 FutureProvider.
-/// `family`를 사용하여 날짜를 파라미터로 받습니다.
 final weeklyAchieversProvider =
     FutureProvider.family<List<MissionAchiever>, DateTime>((ref, date) async {
       // 1. 현재 사용자의 프로필을 가져와 dongName을 확보합니다.
@@ -42,7 +41,6 @@ final weeklyAchieversProvider =
     });
 
 /// 홈 화면의 주간 랭커 목록을 가져오는 FutureProvider (항상 이번 주)
-/// `weeklyAchieversProvider`를 재사용하여 코드를 간결하게 유지합니다.
 final currentWeekAchieversProvider = FutureProvider<List<MissionAchiever>>(
   (ref) => ref.watch(weeklyAchieversProvider(DateTime.now()).future),
 );
@@ -72,10 +70,8 @@ final missionRepositoryProvider = Provider<MissionRepository>((ref) {
 });
 
 /// UserRepository를 제공하는 Provider
-/// 참고: 이 Provider는 사용자 관련 기능이므로 나중에 `user_provider.dart` 같은 공용 파일로 옮기는 것이 좋습니다.
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final firestore = FirebaseFirestore.instance;
-  // UserDataSourceImpl은 Firestore 인스턴스만 필요합니다.
   final dataSource = UserDataSourceImpl(firestore);
   return UserRepositoryImpl(dataSource);
 });
@@ -99,8 +95,6 @@ final fetchUserProfileUseCaseProvider = Provider<FetchUserProfileUseCase>((
 final todayMissionProvider = FutureProvider<Mission>((ref) {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) {
-    // 로그인한 사용자가 없으면 미션을 가져올 수 없으므로 예외를 발생시킵니다.
-    // UI에서는 이 예외를 처리하여 로그인 화면으로 유도하거나 에러 메시지를 보여줄 수 있습니다.
     throw Exception('로그인한 사용자가 없습니다.');
   }
   final repository = ref.watch(missionRepositoryProvider);
