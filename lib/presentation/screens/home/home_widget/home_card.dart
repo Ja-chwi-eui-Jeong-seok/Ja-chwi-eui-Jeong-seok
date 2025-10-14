@@ -84,7 +84,7 @@ class HomeCard extends ConsumerWidget {
                   ),
                   onPressed: () {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      router.go('/mission-create');
+                      router.push('/mission-create');
                     });
                   },
 
