@@ -27,6 +27,28 @@ class CompletedMissionCard extends StatelessWidget {
     final List<dynamic> photos = missionData['photos'] ?? [];
     final List<dynamic> tags = missionData['tags'] ?? [];
     final Timestamp? completedAt = missionData['missioncreatedate'];
+    final bool isPublic = missionData['isPublic'] ?? false;
+
+    // 비공개 처리
+    if (isReadOnly && !isPublic) {
+      return Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        color: const Color(0xFFF5F5F5),
+        child: const SizedBox(
+          height: 100,
+          child: Center(
+            child: Text(
+              '사용자가 비공개한 미션입니다.',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ),
+        ),
+      );
+    }
 
     return GestureDetector(
       onTap: () {
