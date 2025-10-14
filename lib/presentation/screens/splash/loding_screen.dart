@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/wave_text.dart';
 import 'package:lottie/lottie.dart';
 
@@ -22,7 +23,9 @@ class _SplashPageState extends State<LodingScreen>
     // 애니메이션이 끝났을 때 화면 이동
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        GoRouter.of(context).go('/home');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          router.go('/home');
+        });
       }
     });
   }

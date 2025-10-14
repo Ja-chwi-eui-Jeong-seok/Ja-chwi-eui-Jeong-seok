@@ -28,7 +28,6 @@ Future<void> main() async {
 
 class OpenAI {}
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
