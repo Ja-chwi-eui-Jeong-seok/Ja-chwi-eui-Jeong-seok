@@ -13,12 +13,21 @@ class AiChat extends ConsumerStatefulWidget {
 }
 
 class _AiChatState extends ConsumerState<AiChat> {
+  final ScrollController _scrollController = ScrollController();
   @override
   void initState() {
     super.initState();
     // 메시지 로딩
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(chatMessagesProvider.notifier).loadMessages();
+      _scrollToBottom();
+    });
+
+    // 메시지 목록 변동 시 자동 스크롤
+    ref.listen(chatMessagesProvider, (prev, next) {
+      if (prev == null || next.length != prev.length) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+      }
     });
   }
 
@@ -26,10 +35,23 @@ class _AiChatState extends ConsumerState<AiChat> {
   Future<void> _sendToGemini(String userMessage) async {
     try {
       await ref.read(chatMessagesProvider.notifier).sendMessage(userMessage);
+      _scrollToBottom();
     } catch (e) {
       // 에러는 이미 ChatMessagesNotifier에서 처리됨
       print('메시지 전송 실패: $e');
     }
+  }
+
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   /// 시간 포맷팅
@@ -51,8 +73,10 @@ class _AiChatState extends ConsumerState<AiChat> {
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(chatMessagesProvider);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -65,14 +89,17 @@ class _AiChatState extends ConsumerState<AiChat> {
           // 채팅 리스트
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+              controller: _scrollController,
+              reverse: true,
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final msg = messages[index];
+                final isUser = msg.role.trim().toLowerCase() == 'user';
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: ChatBubble(
-                    isUser: msg.role == 'user',
+                    isUser: isUser,
                     message: msg.content,
                     time: _formatTime(msg.timestamp),
                   ),
@@ -81,8 +108,16 @@ class _AiChatState extends ConsumerState<AiChat> {
             ),
           ),
 
-          // 입력창
-          ChatInputField(onSend: _sendToGemini),
+          // 입력창 + 레시피 호출 연결
+          ChatInputField(
+            onSend: _sendToGemini,
+            onGenerateRecipe: (ingredients) async {
+              await ref
+                  .read(chatMessagesProvider.notifier)
+                  .generateRecipe(ingredients);
+              _scrollToBottom();
+            },
+          ),
         ],
       ),
     );
