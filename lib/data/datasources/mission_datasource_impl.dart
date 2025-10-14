@@ -291,13 +291,13 @@ class MissionDataSourceImpl implements MissionDataSource {
       });
     }
 
-    // 6. 정렬: 1. 주간 미션 개수(내림차순), 2. 마지막 완료일(내림차순)
+    // 6. 정렬: 1. 주간 미션 개수(내림차순), 2. 마지막 완료일(오름차순 - 먼저 한 사람이 위로)
     rankers.sort((a, b) {
       final countCompare = (b['weekCount'] as int).compareTo(
         a['weekCount'] as int,
       );
       if (countCompare != 0) return countCompare;
-      return (b['lastCompleted'] as DateTime).compareTo(
+      return (a['lastCompleted'] as DateTime).compareTo(
         a['lastCompleted'] as DateTime,
       );
     });
