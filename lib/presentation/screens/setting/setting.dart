@@ -1,11 +1,13 @@
 // settings.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/domain/usecases/auth_usecase.dart';
 import 'package:ja_chwi/data/repositories/auth_repository_impl.dart';
 import 'package:ja_chwi/data/datasources/auth_datasource.dart';
+import 'dart:io';
 
 // 다크모드 상태 관리
 final darkModeProvider = StateProvider<bool>((ref) => false);
@@ -265,19 +267,19 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Future<void> _deactivateAccount(BuildContext context, String uid) async {
+    // 다이얼로그 닫기
+    Navigator.pop(context);
+
+    // 로딩 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
     try {
-      // 다이얼로그 닫기
-      Navigator.pop(context);
-
-      // 로딩 표시
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
       // 계정 비활성화 실행 (soft delete)
       final authDataSource = AuthRemoteDataSourceImpl();
       final authRepository = AuthRepositoryImpl(
@@ -287,41 +289,53 @@ class SettingsPage extends ConsumerWidget {
 
       await deleteUseCase.execute(uid, reason: '사용자 요청');
 
-      // 로딩 다이얼로그 닫기
-      Navigator.pop(context);
+      // 로딩 다이얼로그 닫기 (mounted 체크)
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
 
-      // 성공 메시지
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('계정이 비활성화되었습니다.')),
-      );
+      // 성공 메시지 (mounted 체크)
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('계정이 비활성화되었습니다.')),
+        );
+      }
 
-      // 로그인 화면으로 이동
-      context.go('/login');
+      // 로그인 화면으로 이동 (mounted 체크)
+      if (context.mounted) {
+        context.go('/login');
+      }
     } catch (e) {
-      // 로딩 다이얼로그 닫기
-      Navigator.pop(context);
+      // 로딩 다이얼로그 닫기 (mounted 체크)
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
 
-      // 에러 메시지
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('계정 비활성화 실패: $e')),
-      );
+      // 에러 메시지 (mounted 체크)
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('계정 비활성화 실패: $e')),
+        );
+      }
     }
   }
 
   Future<void> _deleteAccount(BuildContext context, String uid) async {
+    print('🔴 계정 삭제 시작: $uid');
+
+    // 다이얼로그 닫기
+    Navigator.pop(context);
+
+    // 로딩 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
     try {
-      // 다이얼로그 닫기
-      Navigator.pop(context);
-
-      // 로딩 표시
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
       // 계정 삭제 실행
       final authDataSource = AuthRemoteDataSourceImpl();
       final authRepository = AuthRepositoryImpl(
@@ -329,26 +343,60 @@ class SettingsPage extends ConsumerWidget {
       );
       final deleteUseCase = DeleteUserAccountUseCase(authRepository);
 
+      // 계정 삭제 실행
       await deleteUseCase.execute(uid, reason: '사용자 요청');
 
-      // 로딩 다이얼로그 닫기
-      Navigator.pop(context);
+      // 계정 삭제 완료 후 로딩 다이얼로그 닫기
+      try {
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      } catch (e) {}
 
-      // 성공 메시지
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('계정이 성공적으로 삭제되었습니다.')),
-      );
+      // 성공 메시지 표시 (현재 화면에서)
+      try {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('계정이 성공적으로 삭제되었습니다.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } catch (e) {}
 
-      // 로그인 화면으로 이동
-      context.go('/login');
+      // 3초 후 로그인 화면으로 이동 (사용자가 메시지를 읽을 시간 제공)
+      Future.delayed(const Duration(seconds: 3), () {
+        try {
+          if (context.mounted) {
+            context.go('/login');
+          } else {
+            // 위젯이 비활성화된 경우 앱 재시작
+            try {
+              SystemNavigator.pop();
+              exit(0);
+            } catch (e) {}
+          }
+        } catch (e) {
+          // 이동 실패 시 앱 재시작
+          try {
+            SystemNavigator.pop();
+            exit(0);
+          } catch (e2) {}
+        }
+      });
     } catch (e) {
-      // 로딩 다이얼로그 닫기
-      Navigator.pop(context);
+      // 로딩 다이얼로그 닫기 (mounted 체크)
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
 
-      // 에러 메시지
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('계정 삭제 실패: $e')),
-      );
+      // 에러 메시지 (mounted 체크)
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('계정 삭제 실패: $e')),
+        );
+      }
     }
   }
 }

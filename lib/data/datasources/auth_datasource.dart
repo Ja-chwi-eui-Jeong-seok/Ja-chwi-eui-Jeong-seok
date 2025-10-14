@@ -230,18 +230,18 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
     });
   }
 
+  @override
   Future<void> deleteUserAccount(String uid, {String? reason}) async {
     try {
-      // 1. 사용자 관련 모든 데이터 삭제
+      // 1. 먼저 Firestore 데이터 삭제 (인증된 상태에서)
       final batch = _firestore.batch();
 
-      // 사용자 프로필 삭제
+      // 사용자 프로필: 삭제 대신 삭제일 기록 + 이메일 비식별화
       final userDocRef = _firestore.collection(kAuthCollection).doc(uid);
-      batch.delete(userDocRef);
-
-      // 사용자 채팅 데이터 삭제
-      final chatDocRef = _firestore.collection('chatbot').doc(uid);
-      batch.delete(chatDocRef);
+      batch.set(userDocRef, {
+        'user_delete_date': FieldValue.serverTimestamp(),
+        'account_email': '',
+      }, SetOptions(merge: true));
 
       // 사용자 메시지 컬렉션 삭제
       final messagesCollection = _firestore
@@ -252,10 +252,20 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
       for (final doc in messagesSnapshot.docs) {
         batch.delete(doc.reference);
       }
+      // 사용자 채팅 데이터 삭제
+      final chatDocRef = _firestore.collection('chatbot').doc(uid);
+      batch.delete(chatDocRef);
+
+      // 추가: profiles 컬렉션 처리 (익명화)
+      final profilesDocRef = _firestore.collection('profiles').doc(uid);
+      // 문서가 없어도 안전하게 적용되도록 merge 옵션을 사용
+      batch.set(profilesDocRef, {
+        'nickname': '탈퇴한 유저',
+      }, SetOptions(merge: true));
 
       await batch.commit();
 
-      // 2. Firebase Auth에서 사용자 삭제
+      // 2. Firebase Auth에서 사용자 삭제 (이것이 로그아웃을 유발함)
       final user = _auth.currentUser;
       if (user != null && user.uid == uid) {
         await user.delete();
@@ -263,8 +273,22 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
 
       // 3. Google Sign-In에서도 로그아웃
       await _googleSignIn.signOut();
+
+      // 4. 잠시 대기하여 모든 리스너가 정리되도록 함
+      await Future.delayed(const Duration(milliseconds: 500));
     } catch (e) {
-      throw Exception('계정 삭제 실패: $e');
+      // Firestore 삭제 실패 시에도 Auth 삭제는 시도
+      print('계정 삭제 중 일부 오류 발생: $e');
+      try {
+        final user = _auth.currentUser;
+        if (user != null && user.uid == uid) {
+          await user.delete();
+        }
+        await _googleSignIn.signOut();
+      } catch (authError) {
+        print('Auth 삭제 실패: $authError');
+        rethrow; // Auth 삭제 실패는 중요한 오류이므로 다시 던짐
+      }
     }
   }
 }

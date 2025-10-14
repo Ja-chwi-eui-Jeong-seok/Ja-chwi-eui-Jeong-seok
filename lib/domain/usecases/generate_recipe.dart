@@ -1,7 +1,7 @@
+import 'package:ja_chwi/data/datasources/gemini_datasource.dart';
 import 'package:ja_chwi/domain/entities/chat_message.dart';
+import 'package:ja_chwi/domain/repositories/chat_repository.dart';
 
-import '../repositories/chat_repository.dart';
-import '../../data/datasources/gemini_datasource.dart';
 
 /// 냉장고 재료를 기반으로 레시피를 생성하는 UseCase
 ///

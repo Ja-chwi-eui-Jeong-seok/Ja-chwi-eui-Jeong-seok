@@ -20,8 +20,10 @@ class ChatMessage {
 
   //(Firebase 불러오기용)
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    final rawRole = (json['role'] as String?) ?? '';
+    final normalizedRole = rawRole.trim().toLowerCase();
     return ChatMessage(
-      role: json['role'] as String,
+      role: normalizedRole,
       content: json['content'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
     );
