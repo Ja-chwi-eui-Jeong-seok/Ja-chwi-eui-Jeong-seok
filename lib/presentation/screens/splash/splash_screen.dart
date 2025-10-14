@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,32 +20,27 @@ class _SplashPageState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(vsync: this);
 
-    _controller.addStatusListener((status) async {
+    // ✅ Lottie 끝난 후 비동기적으로 화면 전환
+    _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        await _checkUserAndNavigate();
+        Future.microtask(() async {
+          await _checkUserAndNavigate();
+        });
       }
     });
   }
 
   Future<void> _checkUserAndNavigate() async {
-    // 🔹 0. Firebase 캐시 초기화
     final firestore = FirebaseFirestore.instance;
 
-    // Firestore 로컬 캐시 초기화
-    await firestore.clearPersistence().catchError((e) {
-      print('Firestore cache clear error: $e');
-    });
-
-    // FirebaseAuth 상태 강제 갱신
+    // FirebaseAuth 상태 갱신
     await FirebaseAuth.instance.currentUser?.reload();
-
     final user = FirebaseAuth.instance.currentUser;
 
     // 🔹 1. 로그인 여부 확인
     if (user == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        router.go('/login');
-      });
+      if (!mounted) return;
+      router.go('/login');
       return;
     }
 
@@ -58,13 +52,12 @@ class _SplashPageState extends State<SplashScreen>
           .get(const GetOptions(source: Source.server));
 
       if (!userProfileDoc.exists) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          router.go('/login');
-        });
+        if (!mounted) return;
+        router.go('/login');
         return;
       }
 
-      // 🔹 3. users 문서 확인
+      // 🔹 3. users 문서 확인 (개인정보 동의 여부)
       final usersDoc = await firestore
           .collection('users')
           .doc(user.uid)
@@ -74,13 +67,12 @@ class _SplashPageState extends State<SplashScreen>
       final privacyConsent = (usersData?['privacy_consent'] ?? false) == true;
 
       if (!privacyConsent) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          router.go('/privacy-policy');
-        });
+        if (!mounted) return;
+        router.go('/privacy-policy');
         return;
       }
 
-      // 🔹 4. profiles 문서 확인
+      // 🔹 4. profiles 문서 확인 (닉네임 존재 여부)
       final profilesDoc = await firestore
           .collection('profiles')
           .doc(user.uid)
@@ -90,9 +82,8 @@ class _SplashPageState extends State<SplashScreen>
       final nickname = profilesData?['nickname'] ?? '';
 
       if (nickname.isEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          router.go('/profile-flow');
-        });
+        if (!mounted) return;
+        router.go('/profile-flow');
         return;
       }
 
@@ -108,14 +99,12 @@ class _SplashPageState extends State<SplashScreen>
         'privacyConsent': privacyConsent,
       };
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        router.go('/home', extra: extraData);
-      });
+      if (!mounted) return;
+      router.go('/home', extra: extraData);
     } catch (e) {
       print('🔥 Splash navigation error: $e');
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        router.go('/login');
-      });
+      if (!mounted) return;
+      router.go('/login');
     }
   }
 
