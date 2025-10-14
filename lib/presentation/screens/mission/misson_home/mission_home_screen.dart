@@ -17,19 +17,15 @@ class MissionHomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentWeekAchievers = ref.watch(currentWeekAchieversProvider);
+    final currentWeekAchieversAsync = ref.watch(currentWeekAchieversProvider);
 
     final todayMissionAsync = ref.watch(todayMissionProvider);
     return Scaffold(
       appBar: CommonAppBar(
         actions: [
           RefreshIconButton(
-            onPressed: () async {
-              // Repository 자체를 새로고침하여 데이터 소스를 새로 만듭니다.
-              ref.invalidate(missionRepositoryProvider);
-              // 잠시 기다려 StateProvider가 업데이트되도록 합니다.
-              await Future.delayed(const Duration(milliseconds: 50));
-              // 의존하는 다른 Provider들을 새로고침합니다.
+            onPressed: () {
+              ref.invalidate(userProfileProvider); // dongName을 다시 가져오기 위해 추가
               ref.invalidate(todayMissionProvider);
               ref.invalidate(currentWeekAchieversProvider);
             },
@@ -53,26 +49,11 @@ class MissionHomeScreen extends ConsumerWidget {
               const SizedBox(height: 32),
               _buildTodayMissionSection(context, todayMissionAsync),
               const SizedBox(height: 40),
-              _buildMissionAchieversSection(context, ref, currentWeekAchievers),
-              const SizedBox(height: 20), // 40
-              /// 임시 로그아웃
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    if (context.mounted) {
-                      context.go('/login');
-                    }
-                  },
-                  child: const Text(
-                    '로그아웃',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
+              _buildMissionAchieversSection(
+                context,
+                ref,
+                currentWeekAchieversAsync,
               ),
-              const SizedBox(height: 20),
-              //요기까지
             ],
           ),
         ),

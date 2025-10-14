@@ -135,78 +135,11 @@ class MissionDataSourceImpl implements MissionDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers() async {
-    final now = DateTime.now();
-    final startOfToday = DateTime(now.year, now.month, now.day);
-    final endOfToday = startOfToday.add(const Duration(days: 1));
-
-    // 1. 오늘 생성된 미션 문서
-    final missionSnapshot = await _firestore
-        .collection('user_missions')
-        .where('missioncreatedate', isGreaterThanOrEqualTo: startOfToday)
-        .where('missioncreatedate', isLessThan: endOfToday)
-        .orderBy('missioncreatedate', descending: false) // 먼저 완료한 순서
-        .get();
-
-    if (missionSnapshot.docs.isEmpty) {
-      return [];
-    }
-
-    // 2. 미션 문서에서 userId와 완료 시간을 Map 형태로 추출 (Key: userId, Value: completedAt)
-    final Map<String, DateTime> achieverCompletionTimes = {
-      for (var doc in missionSnapshot.docs)
-        doc.data()['userId'] as String:
-            (doc.data()['missioncreatedate'] as Timestamp).toDate(),
-    };
-
-    final userIds = achieverCompletionTimes.keys.toList();
-
-    // 3. userId 목록을 30개씩 나누어 profiles 정보를 한 번에 가져옵니다. (whereIn 쿼리 제한 때문)
-    final List<Map<String, dynamic>> result = [];
-    const chunkSize = 30;
-
-    for (var i = 0; i < userIds.length; i += chunkSize) {
-      final chunk = userIds.sublist(
-        i,
-        i + chunkSize > userIds.length ? userIds.length : i + chunkSize,
-      );
-
-      if (chunk.isEmpty) continue;
-
-      final profileSnapshot = await _firestore
-          .collection('profiles')
-          .where(FieldPath.documentId, whereIn: chunk)
-          .get();
-
-      for (final profileDoc in profileSnapshot.docs) {
-        final userId = profileDoc.id;
-        final profileData = profileDoc.data();
-        final completedAt = achieverCompletionTimes[userId];
-
-        result.add({
-          ...profileData,
-          'userId': userId,
-          'completedAt': completedAt,
-        });
-      }
-    }
-
-    // 4. 완료 시간(missioncreatedate) 기준으로 다시 정렬합니다.
-    result.sort((a, b) {
-      // 'a'와 'b'는 result 리스트의 요소(Map)이며, 'completedAt' 키를 가지고 있습니다.
-      return (a['completedAt'] as DateTime).compareTo(
-        b['completedAt'] as DateTime,
-      );
-    });
-
-    return result;
-  }
-
-  @override
   Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
     DateTime dateForWeek,
+    String dongName,
   ) async {
-    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산합니다.
+    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산
     final startOfWeek = dateForWeek.subtract(
       Duration(days: dateForWeek.weekday - 1),
     );
@@ -220,20 +153,44 @@ class MissionDataSourceImpl implements MissionDataSource {
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
 
-    // 2. 해당 주에 생성된 모든 미션을 가져옵니다.
-    final missionSnapshot = await _firestore
-        .collection('user_missions')
-        .where('missioncreatedate', isGreaterThanOrEqualTo: startOfMonday)
-        .where('missioncreatedate', isLessThanOrEqualTo: endOfWeek)
+    // 2. 같은 dongName을 가진 사용자들의 ID를 가져옴
+    final profileSnapshot = await _firestore
+        .collection('profiles')
+        .where('dongName', isEqualTo: dongName)
         .get();
 
-    if (missionSnapshot.docs.isEmpty) {
+    if (profileSnapshot.docs.isEmpty) {
+      return []; // 같은 동네 사용자가 없으면 빈 목록 반환
+    }
+    final dongUserIds = profileSnapshot.docs.map((doc) => doc.id).toList();
+
+    // 3. 해당 주에, 같은 동네 사용자들이 생성한 모든 미션을 가져옴
+    final List<QueryDocumentSnapshot<Map<String, dynamic>>> allMissionDocs = [];
+    const chunkSize = 30;
+
+    for (var i = 0; i < dongUserIds.length; i += chunkSize) {
+      final chunk = dongUserIds.sublist(
+        i,
+        i + chunkSize > dongUserIds.length ? dongUserIds.length : i + chunkSize,
+      );
+      if (chunk.isEmpty) continue;
+
+      final missionSnapshot = await _firestore
+          .collection('user_missions')
+          .where('userId', whereIn: chunk)
+          .where('missioncreatedate', isGreaterThanOrEqualTo: startOfMonday)
+          .where('missioncreatedate', isLessThanOrEqualTo: endOfWeek)
+          .get();
+      allMissionDocs.addAll(missionSnapshot.docs);
+    }
+
+    if (allMissionDocs.isEmpty) {
       return [];
     }
 
-    // 3. 사용자별로 미션 개수와 마지막 미션 완료 시간을 집계합니다.
+    // 3. 사용자별로 미션 개수와 마지막 미션 완료 시간을 집계함
     final Map<String, Map<String, dynamic>> userStats = {};
-    for (final doc in missionSnapshot.docs) {
+    for (final doc in allMissionDocs) {
       final data = doc.data();
       final userId = data['userId'] as String;
       final completedAt = (data['missioncreatedate'] as Timestamp).toDate();
@@ -254,30 +211,13 @@ class MissionDataSourceImpl implements MissionDataSource {
       );
     }
 
-    // 4. 사용자 프로필 정보를 가져와 Map으로 변환합니다.
+    // 4. 사용자 프로필 정보를 가져와 Map으로 변환
     final userIds = userStats.keys.toList();
     if (userIds.isEmpty) return [];
 
-    final Map<String, Map<String, dynamic>> profiles = {};
-    const chunkSize = 30;
-    for (var i = 0; i < userIds.length; i += chunkSize) {
-      final chunk = userIds.sublist(
-        i,
-        i + chunkSize > userIds.length ? userIds.length : i + chunkSize,
-      );
-      if (chunk.isEmpty) continue;
+    final profiles = await _fetchProfilesInChunks(userIds);
 
-      final profileSnapshot = await _firestore
-          .collection('profiles')
-          .where(FieldPath.documentId, whereIn: chunk)
-          .get();
-
-      for (final profileDoc in profileSnapshot.docs) {
-        profiles[profileDoc.id] = profileDoc.data();
-      }
-    }
-
-    // 5. userStats를 기준으로 rankers 목록을 생성하고 프로필 정보를 결합합니다.
+    // 5. userStats를 기준으로 rankers 목록을 생성하고 프로필 정보를 결합
     final List<Map<String, dynamic>> rankers = [];
     for (final userId in userIds) {
       final profileData = profiles[userId] ?? {}; // 프로필이 없으면 빈 맵
@@ -291,17 +231,81 @@ class MissionDataSourceImpl implements MissionDataSource {
       });
     }
 
-    // 6. 정렬: 1. 주간 미션 개수(내림차순), 2. 마지막 완료일(내림차순)
+    // 6. 정렬: 1. 주간 미션 개수(내림차순), 2. 마지막 완료일(오름차순 - 먼저 한 사람이 위로)
     rankers.sort((a, b) {
       final countCompare = (b['weekCount'] as int).compareTo(
         a['weekCount'] as int,
       );
       if (countCompare != 0) return countCompare;
-      return (b['lastCompleted'] as DateTime).compareTo(
+      return (a['lastCompleted'] as DateTime).compareTo(
         a['lastCompleted'] as DateTime,
       );
     });
 
     return rankers;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchUserMissionsForWeek({
+    required String userId,
+    required DateTime dateForWeek,
+  }) async {
+    // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산
+    final startOfWeek = dateForWeek.subtract(
+      Duration(days: dateForWeek.weekday - 1),
+    );
+    final startOfMonday = DateTime.utc(
+      startOfWeek.year,
+      startOfWeek.month,
+      startOfWeek.day,
+    );
+    final endOfWeek = startOfMonday.add(
+      const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
+    );
+
+    // 2. 해당 주에 특정 사용자가 생성한 모든 미션을 가져옴
+    final missionSnapshot = await _firestore
+        .collection('user_missions')
+        .where('userId', isEqualTo: userId)
+        .where('missioncreatedate', isGreaterThanOrEqualTo: startOfMonday)
+        .where('missioncreatedate', isLessThanOrEqualTo: endOfWeek)
+        .orderBy('missioncreatedate', descending: true) // 최신순으로 정렬
+        .get();
+
+    if (missionSnapshot.docs.isEmpty) {
+      return [];
+    }
+
+    // 3. 문서 ID를 포함하여 데이터 목록을 반환
+    return missionSnapshot.docs
+        .map((doc) => doc.data()..['id'] = doc.id)
+        .toList();
+  }
+
+  /// 사용자 ID 목록을 받아 프로필 정보를 Map 형태로 반환하는 내부 헬퍼 함수
+  Future<Map<String, Map<String, dynamic>>> _fetchProfilesInChunks(
+    List<String> userIds,
+  ) async {
+    if (userIds.isEmpty) return {};
+
+    final Map<String, Map<String, dynamic>> profiles = {};
+    const chunkSize = 30; // Firestore 'whereIn' 쿼리의 최대 개수는 30
+
+    for (var i = 0; i < userIds.length; i += chunkSize) {
+      final chunk = userIds.sublist(
+        i,
+        i + chunkSize > userIds.length ? userIds.length : i + chunkSize,
+      );
+      if (chunk.isEmpty) continue;
+
+      final profileSnapshot = await _firestore
+          .collection('profiles')
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      for (final profileDoc in profileSnapshot.docs) {
+        profiles[profileDoc.id] = profileDoc.data();
+      }
+    }
+    return profiles;
   }
 }
