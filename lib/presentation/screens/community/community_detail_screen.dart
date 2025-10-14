@@ -181,7 +181,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               ],
               if (isOwner) ...[
                 IconButton(
-                  icon: const Icon(Icons.delete_forever_outlined),
+                  icon: Icon(
+                    AppIcons.delete,
+                    size: 24,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                   onPressed: () async {
                     softdelete() async {
                       final err = await ref
@@ -212,11 +216,15 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     );
                   },
                 ),
+
                 IconButton(
                   icon: const Icon(Icons.mode_edit_outline_outlined),
                   onPressed: () {
                     context.push('/community-edit', extra: st.post!.id);
                   },
+                ),
+                SizedBox(
+                  width: 5,
                 ),
               ],
             ],
@@ -466,4 +474,10 @@ class _SortTabs extends StatelessWidget {
       },
     );
   }
+}
+
+class AppIcons {
+  AppIcons._();
+  static const String _kFontFam = 'AppIcons';
+  static const IconData delete = IconData(0xe900, fontFamily: _kFontFam);
 }
