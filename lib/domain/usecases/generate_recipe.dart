@@ -2,7 +2,6 @@ import 'package:ja_chwi/data/datasources/gemini_datasource.dart';
 import 'package:ja_chwi/domain/entities/chat_message.dart';
 import 'package:ja_chwi/domain/repositories/chat_repository.dart';
 
-
 /// 냉장고 재료를 기반으로 레시피를 생성하는 UseCase
 ///
 /// 사용자가 가진 재료를 입력하면 AI가 맞춤 레시피를 생성합니다.
