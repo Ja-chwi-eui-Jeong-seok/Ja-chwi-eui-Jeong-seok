@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/triple_arrow_icon.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 
+//
 class HomeCard extends ConsumerWidget {
   const HomeCard({super.key});
 
@@ -82,8 +84,11 @@ class HomeCard extends ConsumerWidget {
                     padding: EdgeInsets.zero,
                   ),
                   onPressed: () {
-                    GoRouter.of(context).push('/mission-create');
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      router.push('/mission-create');
+                    });
                   },
+
                   child: Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: Column(

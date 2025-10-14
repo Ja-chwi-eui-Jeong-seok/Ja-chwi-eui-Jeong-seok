@@ -1,9 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/providers/auth_provider.dart';
-import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_mock_viewmodel.dart';
-// import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_view_model.dart'
-//     hide AuthStatus;
+import 'package:ja_chwi/presentation/screens/auth/viewmodel/auth_view_model.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AppleLoginButton extends ConsumerWidget {
@@ -12,46 +11,119 @@ class AppleLoginButton extends ConsumerWidget {
   const AppleLoginButton({super.key, this.onLoginSuccess});
 
   Future<void> _handleAppleLogin(BuildContext context, WidgetRef ref) async {
-    final authNotifier = ref.read(authNotifierProvider.notifier);
-    await authNotifier.signInWithApple();
-
-    if (!context.mounted) return;
-
-    final latestState = ref.read(authNotifierProvider);
-    // ignore: unrelated_type_equality_checks
-    if (latestState.status == AuthStatus.success) {
-      if (onLoginSuccess != null) {
-        await onLoginSuccess!();
+    try {
+      if (kDebugMode) {
+        print('🍎 Apple 로그인 시작');
+        print('🍎 현재 상태: ${ref.read(authNotifierProvider).status}');
       }
-      // ignore: unrelated_type_equality_checks
-    } else if (latestState.status == AuthStatus.error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(latestState.errorMessage)),
-      );
+
+      final authNotifier = ref.read(authNotifierProvider.notifier);
+      if (kDebugMode) {
+        print('🍎 AuthNotifier 가져옴');
+      }
+
+      await authNotifier.signInWithApple();
+      if (kDebugMode) {
+        print('🍎 signInWithApple() 완료');
+      }
+
+      if (!context.mounted) {
+        if (kDebugMode) {
+          print('🍎 Context가 mounted되지 않음');
+        }
+        return;
+      }
+
+      final latestState = ref.read(authNotifierProvider);
+
+      if (kDebugMode) {
+        print('🍎 Apple 로그인 상태: ${latestState.status}');
+        print('🍎 사용자 정보: ${latestState.user?.uid}');
+      }
+
+      if (latestState.status == AuthStatus.success) {
+        if (kDebugMode) {
+          print('🍎 Apple 로그인 성공');
+        }
+        if (onLoginSuccess != null) {
+          if (kDebugMode) {
+            print('🍎 onLoginSuccess 콜백 실행');
+          }
+          await onLoginSuccess!();
+        } else {
+          if (kDebugMode) {
+            print('🍎 onLoginSuccess 콜백이 null');
+          }
+        }
+      } else if (latestState.status == AuthStatus.error) {
+        if (kDebugMode) {
+          print('🍎 Apple 로그인 에러: ${latestState.errorMessage}');
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Apple 로그인 실패: ${latestState.errorMessage}')),
+        );
+      } else {
+        if (kDebugMode) {
+          print('🍎 예상치 못한 상태: ${latestState.status}');
+        }
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('🍎 Apple 로그인 예외: $e');
+        print('🍎 Stack trace: $stackTrace');
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Apple 로그인 중 오류가 발생했습니다: $e')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState.status == AuthStatus.loading;
 
-    return SizedBox(
-      height: 48,
+    // iOS에서만 Apple 로그인 버튼 표시
+    //TODO : 안드로이드에서도 보여줄지 정하기
+    // if (!Platform.isIOS) {
+    //   return SizedBox.shrink(); // Android에서는 버튼 숨김
+    // }
+
+    return Container(
+      height: 56, // iPad에서 더 쉽게 터치할 수 있도록 높이 증가
       width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey, width: 1),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-
-          child: SignInWithAppleButton(
-            style: SignInWithAppleButtonStyle.white,
-            // ignore: unrelated_type_equality_checks
-            onPressed: authState.status == AuthStatus.loading
-                ? () {} // 비활성화 대신 빈 함수
-                : () => _handleAppleLogin(context, ref),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.grey, width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(28),
+          onTap: isLoading
+              ? null
+              : () {
+                  if (kDebugMode) {
+                    print('🍎 Apple 로그인 버튼 클릭됨');
+                  }
+                  _handleAppleLogin(context, ref);
+                },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: SignInWithAppleButton(
+              style: SignInWithAppleButtonStyle.black,
+              onPressed: () {
+                if (!isLoading) {
+                  if (kDebugMode) {
+                    print('🍎 Apple 로그인 버튼 클릭됨 (SignInWithAppleButton)');
+                  }
+                  _handleAppleLogin(context, ref);
+                }
+              },
+            ),
           ),
         ),
       ),
