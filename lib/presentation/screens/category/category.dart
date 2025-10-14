@@ -197,7 +197,7 @@ class _AddOrEditDialogState extends State<AddOrEditDialog> {
       parentCode: widget.parentCategoryCode,
       excludeDocId: widget.docId,
     );
-
+    if (!mounted) return;
     if (isDup) {
       ScaffoldMessenger.of(
         context,
@@ -341,8 +341,9 @@ class CategoryPage extends StatelessWidget {
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: service.getCategories(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
+          }
           final categories = snapshot.data!;
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),

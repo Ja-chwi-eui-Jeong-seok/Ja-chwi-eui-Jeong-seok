@@ -79,8 +79,8 @@ class CommentList extends ConsumerWidget {
         final me = FirebaseAuth.instance.currentUser?.uid;
         final targetUid = uidOf(i); // 이 댓글 작성자 uid
 
-        late final nickname;
-        late final thumbUrl;
+        late final String nickname;
+        late final String thumbUrl;
 
         // 차단된 유저인지 확인
         final isBlocked = blockedUsersAsync.when(
@@ -190,7 +190,6 @@ class CommentList extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        //TODO: 삭제하기
                       ],
                     ],
                   );
@@ -205,7 +204,7 @@ class CommentList extends ConsumerWidget {
                         );
                         break;
                       }
-
+                      if (!context.mounted) return;
                       // 신고하기 페이지로 이동
                       context.push(
                         '/report',

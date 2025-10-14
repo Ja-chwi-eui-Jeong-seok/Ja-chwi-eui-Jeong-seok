@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/auth/login_widget/google_login_button.dart';
@@ -139,7 +140,9 @@ class LoginScreen extends StatelessWidget {
           child: Center(
             child: GoogleLoginButton(
               onLoginSuccess: () async {
-                print('login test file check2');
+                if (kDebugMode) {
+                  print('login test file check2');
+                }
                 final accepted = await context.push<bool>('/privacy-policy');
                 if (!context.mounted) return;
 
@@ -182,6 +185,8 @@ Future<Map<String, dynamic>> fetchUserData(String uid) async {
     'managerType': userProfileDoc.data()?['manager_type'] ?? '',
   };
 
-  print('fetchUserData 결과: $userData');
+  if (kDebugMode) {
+    print('fetchUserData 결과: $userData');
+  }
   return userData;
 }
