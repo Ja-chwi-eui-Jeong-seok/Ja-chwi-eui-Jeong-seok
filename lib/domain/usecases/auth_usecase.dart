@@ -18,3 +18,17 @@ class UpdateUserUseCase {
   UpdateUserUseCase(this.repository);
   Future<void> execute(AuthEntity entity) => repository.updateUser(entity);
 }
+
+class DeleteUserUseCase {
+  final AuthRepository repository;
+  DeleteUserUseCase(this.repository);
+  Future<void> execute(String uid, {String? reason}) =>
+      repository.deleteUser(uid, reason: reason);
+}
+
+class DeleteUserAccountUseCase {
+  final AuthRepository repository;
+  DeleteUserAccountUseCase(this.repository);
+  Future<void> execute(String uid, {String? reason}) =>
+      repository.deleteUserAccount(uid, reason: reason);
+}
