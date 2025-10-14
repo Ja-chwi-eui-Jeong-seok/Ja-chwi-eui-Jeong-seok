@@ -41,7 +41,10 @@ class ProfileSection extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(userProfile.level, style: const TextStyle(fontSize: 16)),
+                  Text(
+                    userProfile.level, // UserProfile 모델에 이미 계산된 level이 있음
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   Text(
                     userProfile.nickname,
                     style: const TextStyle(

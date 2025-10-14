@@ -33,6 +33,7 @@ abstract class MissionRepository {
   /// 주간 미션 랭커 목록을 가져옵니다.
   Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
     DateTime dateForWeek,
+    String dongName,
   );
 
   /// 특정 사용자의 주간 미션 목록을 가져옵니다.

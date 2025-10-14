@@ -17,7 +17,7 @@ class MissionHomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentWeekAchievers = ref.watch(currentWeekAchieversProvider);
+    final currentWeekAchieversAsync = ref.watch(currentWeekAchieversProvider);
 
     final todayMissionAsync = ref.watch(todayMissionProvider);
     return Scaffold(
@@ -25,7 +25,7 @@ class MissionHomeScreen extends ConsumerWidget {
         actions: [
           RefreshIconButton(
             onPressed: () {
-              // 의존하는 Provider들을 직접 새로고침합니다.
+              ref.invalidate(userProfileProvider); // dongName을 다시 가져오기 위해 추가
               ref.invalidate(todayMissionProvider);
               ref.invalidate(currentWeekAchieversProvider);
             },
@@ -49,7 +49,11 @@ class MissionHomeScreen extends ConsumerWidget {
               const SizedBox(height: 32),
               _buildTodayMissionSection(context, todayMissionAsync),
               const SizedBox(height: 40),
-              _buildMissionAchieversSection(context, ref, currentWeekAchievers),
+              _buildMissionAchieversSection(
+                context,
+                ref,
+                currentWeekAchieversAsync,
+              ),
               const SizedBox(height: 20), // 40
               /// 임시 로그아웃
               Align(

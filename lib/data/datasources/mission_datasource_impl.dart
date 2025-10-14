@@ -137,6 +137,7 @@ class MissionDataSourceImpl implements MissionDataSource {
   @override
   Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
     DateTime dateForWeek,
+    String dongName,
   ) async {
     // 1. 주어진 날짜가 속한 주의 시작(월요일)과 끝(일요일)을 계산합니다.
     final startOfWeek = dateForWeek.subtract(
@@ -152,20 +153,45 @@ class MissionDataSourceImpl implements MissionDataSource {
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
 
-    // 2. 해당 주에 생성된 모든 미션을 가져옵니다.
-    final missionSnapshot = await _firestore
-        .collection('user_missions')
-        .where('missioncreatedate', isGreaterThanOrEqualTo: startOfMonday)
-        .where('missioncreatedate', isLessThanOrEqualTo: endOfWeek)
+    // 2. 같은 dongName을 가진 사용자들의 ID를 가져옵니다.
+    final profileSnapshot = await _firestore
+        .collection('profiles')
+        .where('dongName', isEqualTo: dongName)
         .get();
 
-    if (missionSnapshot.docs.isEmpty) {
+    if (profileSnapshot.docs.isEmpty) {
+      return []; // 같은 동네 사용자가 없으면 빈 목록 반환
+    }
+    final dongUserIds = profileSnapshot.docs.map((doc) => doc.id).toList();
+
+    // 3. 해당 주에, 같은 동네 사용자들이 생성한 모든 미션을 가져옵니다.
+    // dongUserIds가 30개를 초과할 수 있으므로, 30개씩 나누어 쿼리합니다.
+    final List<QueryDocumentSnapshot<Map<String, dynamic>>> allMissionDocs = [];
+    const chunkSize = 30;
+
+    for (var i = 0; i < dongUserIds.length; i += chunkSize) {
+      final chunk = dongUserIds.sublist(
+        i,
+        i + chunkSize > dongUserIds.length ? dongUserIds.length : i + chunkSize,
+      );
+      if (chunk.isEmpty) continue;
+
+      final missionSnapshot = await _firestore
+          .collection('user_missions')
+          .where('userId', whereIn: chunk)
+          .where('missioncreatedate', isGreaterThanOrEqualTo: startOfMonday)
+          .where('missioncreatedate', isLessThanOrEqualTo: endOfWeek)
+          .get();
+      allMissionDocs.addAll(missionSnapshot.docs);
+    }
+
+    if (allMissionDocs.isEmpty) {
       return [];
     }
 
     // 3. 사용자별로 미션 개수와 마지막 미션 완료 시간을 집계합니다.
     final Map<String, Map<String, dynamic>> userStats = {};
-    for (final doc in missionSnapshot.docs) {
+    for (final doc in allMissionDocs) {
       final data = doc.data();
       final userId = data['userId'] as String;
       final completedAt = (data['missioncreatedate'] as Timestamp).toDate();
@@ -186,7 +212,7 @@ class MissionDataSourceImpl implements MissionDataSource {
       );
     }
 
-    // 4. 사용자 프로필 정보를 가져와 Map으로 변환합니다.
+    // 4. 사용자 프로필 정보를 가져와 Map으로 변환합니다. (이미 dongUserIds로 가져왔으므로 재사용 가능)
     final userIds = userStats.keys.toList();
     if (userIds.isEmpty) return [];
 
