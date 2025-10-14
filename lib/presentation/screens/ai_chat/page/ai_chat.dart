@@ -1,80 +1,57 @@
-import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/widget/chat_bubble.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/widget/chat_input_field.dart';
+import 'package:ja_chwi/presentation/providers/chat_provider.dart';
 
-class AiChat extends StatefulWidget {
+class AiChat extends ConsumerStatefulWidget {
   const AiChat({super.key});
 
   @override
-  State<AiChat> createState() => _AiChatState();
+  ConsumerState<AiChat> createState() => _AiChatState();
 }
 
-class _AiChatState extends State<AiChat> {
-  final List<Map<String, dynamic>> _messages = [];
-
+class _AiChatState extends ConsumerState<AiChat> {
   @override
   void initState() {
     super.initState();
+    // 메시지 로딩
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(chatMessagesProvider.notifier).loadMessages();
+    });
   }
 
-  /// GPT 호출
-  Future<void> _sendToGPT(String userMessage) async {
-    final now = TimeOfDay.now().format(context);
-
-    // 사용자 메시지 추가
-    setState(() {
-      _messages.add({"role": "user", "content": userMessage, "time": now});
-    });
-
+  /// Gemini AI 호출
+  Future<void> _sendToGemini(String userMessage) async {
     try {
-      final response = await OpenAI.instance.chat.create(
-        model: "gpt-4.1-mini",
-        messages: _messages.map((m) {
-          return OpenAIChatCompletionChoiceMessageModel(
-            role: m['role'] == 'user'
-                ? OpenAIChatMessageRole.user
-                : OpenAIChatMessageRole.assistant,
-            content: [
-              OpenAIChatCompletionChoiceMessageContentItemModel.text(
-                m['contemt'],
-              ),
-            ],
-          );
-        }).toList(),
-      );
-
-      // 답변 꺼내기 (null-safe)
-      final reply =
-          response.choices.first.message.content
-              ?.map((c) => c.text)
-              .join(" ")
-              .trim() ??
-          "응답 없음";
-
-      final replyTime = TimeOfDay.now().format(context);
-
-      setState(() {
-        _messages.add({
-          "role": "assistant",
-          "content": reply,
-          "time": replyTime,
-        });
-      });
+      await ref.read(chatMessagesProvider.notifier).sendMessage(userMessage);
     } catch (e) {
-      setState(() {
-        _messages.add({
-          "role": "assistant",
-          "content": "⚠️ 오류 발생: $e",
-          "time": now,
-        });
-      });
+      // 에러는 이미 ChatMessagesNotifier에서 처리됨
+      print('메시지 전송 실패: $e');
+    }
+  }
+
+  /// 시간 포맷팅
+  String _formatTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inDays > 0) {
+      return '${timestamp.month}/${timestamp.day}';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}시간 전';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}분 전';
+    } else {
+      return '방금 전';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final messages = ref.watch(chatMessagesProvider);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -89,15 +66,15 @@ class _AiChatState extends State<AiChat> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: _messages.length,
+              itemCount: messages.length,
               itemBuilder: (context, index) {
-                final msg = _messages[index];
+                final msg = messages[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: ChatBubble(
-                    isUser: msg['role'] == 'user',
-                    message: msg['content'],
-                    time: msg['time'],
+                    isUser: msg.role == 'user',
+                    message: msg.content,
+                    time: _formatTime(msg.timestamp),
                   ),
                 );
               },
@@ -105,7 +82,7 @@ class _AiChatState extends State<AiChat> {
           ),
 
           // 입력창
-          ChatInputField(onSend: _sendToGPT),
+          ChatInputField(onSend: _sendToGemini),
         ],
       ),
     );

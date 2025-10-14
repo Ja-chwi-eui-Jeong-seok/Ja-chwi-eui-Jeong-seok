@@ -1,7 +1,7 @@
-import '../../domain/entities/auth_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_datasource.dart';
-import '../models/auth_model.dart';
+import 'package:ja_chwi/data/datasources/auth_datasource.dart';
+import 'package:ja_chwi/data/models/auth_model.dart';
+import 'package:ja_chwi/domain/entities/auth_entity.dart';
+import 'package:ja_chwi/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthDataSource remoteDataSource;
@@ -25,4 +25,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> deleteUser(String userId, {String? reason}) async =>
       remoteDataSource.softDeleteUser(userId, reason: reason);
+
+  @override
+  Future<void> deleteUserAccount(String uid, {String? reason}) async =>
+      remoteDataSource.deleteUserAccount(uid, reason: reason);
 }
