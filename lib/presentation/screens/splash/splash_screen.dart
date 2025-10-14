@@ -15,7 +15,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashPageState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  bool _navigationDone = false; // ✅ 추가
 
   @override
   void initState() {
@@ -30,20 +29,20 @@ class _SplashPageState extends State<SplashScreen>
   }
 
   Future<void> _checkUserAndNavigate() async {
-    if (_navigationDone) return; // ✅ 중복 실행 방지
-    _navigationDone = true;
-
+    // 🔹 0. Firebase 캐시 초기화
     final firestore = FirebaseFirestore.instance;
 
-    // 🔹 Firebase 캐시 초기화
+    // Firestore 로컬 캐시 초기화
     await firestore.clearPersistence().catchError((e) {
       print('Firestore cache clear error: $e');
     });
 
-    // 🔹 Auth 상태 강제 갱신
+    // FirebaseAuth 상태 강제 갱신
     await FirebaseAuth.instance.currentUser?.reload();
+
     final user = FirebaseAuth.instance.currentUser;
 
+    // 🔹 1. 로그인 여부 확인
     if (user == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         router.go('/login');
@@ -52,6 +51,7 @@ class _SplashPageState extends State<SplashScreen>
     }
 
     try {
+      // 🔹 2. user_profile 문서 확인
       final userProfileDoc = await firestore
           .collection('user_profile')
           .doc(user.uid)
@@ -64,6 +64,7 @@ class _SplashPageState extends State<SplashScreen>
         return;
       }
 
+      // 🔹 3. users 문서 확인
       final usersDoc = await firestore
           .collection('users')
           .doc(user.uid)
@@ -79,6 +80,7 @@ class _SplashPageState extends State<SplashScreen>
         return;
       }
 
+      // 🔹 4. profiles 문서 확인
       final profilesDoc = await firestore
           .collection('profiles')
           .doc(user.uid)
@@ -94,6 +96,7 @@ class _SplashPageState extends State<SplashScreen>
         return;
       }
 
+      // 🔹 5. 모든 조건 통과 시 홈으로 이동
       final extraData = {
         'uid': user.uid,
         'nickname': nickname,

@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 radius: circleRadius,
                 onTap: () {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    router.go('/ai-chat', extra: userData);
+                    router.push('/ai-chat', extra: userData);
                   });
                 },
               ),
