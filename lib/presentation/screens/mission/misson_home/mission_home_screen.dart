@@ -54,25 +54,6 @@ class MissionHomeScreen extends ConsumerWidget {
                 ref,
                 currentWeekAchieversAsync,
               ),
-              const SizedBox(height: 20), // 40
-              /// 임시 로그아웃
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    if (context.mounted) {
-                      context.go('/login');
-                    }
-                  },
-                  child: const Text(
-                    '로그아웃',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              //요기까지
             ],
           ),
         ),

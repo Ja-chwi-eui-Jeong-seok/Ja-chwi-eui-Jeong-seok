@@ -5,7 +5,6 @@ abstract class MissionRepository {
   Future<bool> hasCompletedMissionToday(String userId);
 
   /// 사진 목록을 스토리지에 업로드하고 URL 목록을 반환합니다.
-  /// [photos]는 URL(String)과 로컬 파일(XFile)이 섞인 목록일 수 있습니다.
   Future<List<String>> uploadPhotos(String userId, List<dynamic> photos);
 
   /// 새로운 미션을 생성합니다.
