@@ -5,18 +5,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../models/auth_model.dart';
-import '../../domain/entities/auth_entity.dart';
 import 'dart:convert'; // utf8
 import 'dart:math'; // Random
 import 'package:crypto/crypto.dart'; // sha256
 
 abstract class AuthDataSource {
-  Future<AuthEntity?> signInWithGoogle();
-  Future<AuthEntity?> signInWithApple();
-  Future<AuthEntity?> fetchCurrentUser();
+  Future<AuthModel?> signInWithGoogle();
+  Future<AuthModel?> signInWithApple();
+  Future<AuthModel?> fetchCurrentUser();
   Future<void> signOut();
   Future<void> updateUser(AuthModel user);
   Future<void> softDeleteUser(String uid, {String? reason});
+  Future<void> deleteUserAccount(String uid, {String? reason});
 }
 
 class AuthRemoteDataSourceImpl implements AuthDataSource {
@@ -214,8 +214,57 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
   Future<void> softDeleteUser(String uid, {String? reason}) async {
     final docRef = _firestore.collection(kAuthCollection).doc(uid);
     await docRef.update({
-      'user_delete_date': DateTime.now(),
+      'user_delete_date': FieldValue.serverTimestamp(),
       'user_delete_note': reason ?? '사용자 요청',
+      'deletion_scheduled': true, // 60일 후 삭제 예약 플래그
     });
+  }
+
+  @override
+  Future<void> restoreUser(String uid) async {
+    final docRef = _firestore.collection(kAuthCollection).doc(uid);
+    await docRef.update({
+      'user_delete_date': null,
+      'user_delete_note': '',
+      'deletion_scheduled': false,
+    });
+  }
+
+  Future<void> deleteUserAccount(String uid, {String? reason}) async {
+    try {
+      // 1. 사용자 관련 모든 데이터 삭제
+      final batch = _firestore.batch();
+
+      // 사용자 프로필 삭제
+      final userDocRef = _firestore.collection(kAuthCollection).doc(uid);
+      batch.delete(userDocRef);
+
+      // 사용자 채팅 데이터 삭제
+      final chatDocRef = _firestore.collection('chatbot').doc(uid);
+      batch.delete(chatDocRef);
+
+      // 사용자 메시지 컬렉션 삭제
+      final messagesCollection = _firestore
+          .collection('chatbot')
+          .doc(uid)
+          .collection('messages');
+      final messagesSnapshot = await messagesCollection.get();
+      for (final doc in messagesSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+
+      // 2. Firebase Auth에서 사용자 삭제
+      final user = _auth.currentUser;
+      if (user != null && user.uid == uid) {
+        await user.delete();
+      }
+
+      // 3. Google Sign-In에서도 로그아웃
+      await _googleSignIn.signOut();
+    } catch (e) {
+      throw Exception('계정 삭제 실패: $e');
+    }
   }
 }
