@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,7 +18,9 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
   @override
   void initState() {
     super.initState();
-    print("MyBlocksPage extra: ${widget.extra}");
+    if (kDebugMode) {
+      print("MyBlocksPage extra: ${widget.extra}");
+    }
     final myUid = widget.extra?['uid'] as String?;
     _myBlocks = myUid != null ? fetchMyBlocks(myUid) : Future.value([]);
   }
@@ -42,7 +45,9 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
   }
 
   /// uid → {nickname, thumbUrl} 매핑
-  Future<Map<String, Map<String, String>>> fetchProfiles(Set<String> uids) async {
+  Future<Map<String, Map<String, String>>> fetchProfiles(
+    Set<String> uids,
+  ) async {
     final Map<String, Map<String, String>> map = {};
     for (var uid in uids) {
       final doc = await firestore.collection('profiles').doc(uid).get();
@@ -66,6 +71,7 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
       setState(() {
         _myBlocks = fetchMyBlocks(widget.extra?['uid']);
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('차단이 해제되었습니다.')),
       );
@@ -118,7 +124,9 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
               }
 
               if (profileSnapshot.hasError) {
-                return Center(child: Text("프로필 로딩 오류: ${profileSnapshot.error}"));
+                return Center(
+                  child: Text("프로필 로딩 오류: ${profileSnapshot.error}"),
+                );
               }
 
               final profileMap = profileSnapshot.data ?? {};
@@ -136,10 +144,16 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
 
                   return Card(
                     color: Colors.white, // 배경색
-                    elevation: 0,        // 그림자 깊이 (0이면 그림자 없음)
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    elevation: 0, // 그림자 깊이 (0이면 그림자 없음)
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -148,7 +162,12 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
                               ? CircleAvatar(
                                   radius: 20,
                                   backgroundImage: AssetImage(thumbUrl),
-                                  backgroundColor: const Color.fromARGB(0, 29, 13, 13), // 배경 투명
+                                  backgroundColor: const Color.fromARGB(
+                                    0,
+                                    29,
+                                    13,
+                                    13,
+                                  ), // 배경 투명
                                 )
                               : const CircleAvatar(
                                   radius: 20,
@@ -170,7 +189,8 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
                                 ),
                                 if (reason.isNotEmpty || createdAt != null)
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       if (reason.isNotEmpty)
                                         Text(
@@ -188,12 +208,12 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
                                             color: Colors.black54,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 12),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           // 차단 해제 버튼
                           OutlinedButton(
                             onPressed: () async {
@@ -212,7 +232,7 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
                                     textAlign: TextAlign.center,
                                   ),
                                   content: Text(
-                                    "차단 해제 시, ${nickname} 님의 모든 활동이 다시 보이게 됩니다.",
+                                    "차단 해제 시, $nickname 님의 모든 활동이 다시 보이게 됩니다.",
                                     style: const TextStyle(
                                       fontSize: 10,
                                       color: Colors.grey,
@@ -221,24 +241,38 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
                                     textAlign: TextAlign.center,
                                   ),
                                   actionsAlignment: MainAxisAlignment.center,
-                                  actionsPadding: const EdgeInsets.only(bottom: 12),
+                                  actionsPadding: const EdgeInsets.only(
+                                    bottom: 12,
+                                  ),
                                   actions: [
                                     OutlinedButton(
-                                      onPressed: () => Navigator.pop(context, false),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
                                       style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(color: Colors.grey),
+                                        side: const BorderSide(
+                                          color: Colors.grey,
+                                        ),
                                         foregroundColor: Colors.grey,
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 8,
+                                        ),
                                       ),
                                       child: const Text("취소"),
                                     ),
                                     const SizedBox(width: 12),
                                     OutlinedButton(
-                                      onPressed: () => Navigator.pop(context, true),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
                                       style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(color: Colors.redAccent),
+                                        side: const BorderSide(
+                                          color: Colors.redAccent,
+                                        ),
                                         foregroundColor: Colors.redAccent,
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 8,
+                                        ),
                                       ),
                                       child: const Text("해제"),
                                     ),
@@ -253,7 +287,10 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Colors.black),
                               foregroundColor: Colors.black,
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               minimumSize: const Size(60, 32),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),

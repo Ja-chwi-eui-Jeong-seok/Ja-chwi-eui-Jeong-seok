@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/core/config/router/router.dart';
@@ -32,7 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     userData = widget.extra;
-    print('HomeScreen 데이터: $userData');
+    if (kDebugMode) {
+      print('HomeScreen 데이터: $userData');
+    }
   }
 
   @override
@@ -57,7 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.notifications),
               onPressed: () {
-                print('알림 창');
+                if (kDebugMode) {
+                  print('알림 창');
+                }
               },
             ),
           ],
