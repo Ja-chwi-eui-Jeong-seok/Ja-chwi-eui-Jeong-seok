@@ -94,7 +94,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 indicatorSize: TabBarIndicatorSize.tab,
                 tabs: [
                   const Tab(text: '전체'), // "전체" 탭 추가
-                  ...parents.map((p) => Tab(text: p.categoryName)).toList(),
+                  ...parents.map((p) => Tab(text: p.categoryName)),
                 ],
               ),
             ),
@@ -113,7 +113,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                           location: location,
                         )
                       : const NoLocationView();
-                }).toList(),
+                }),
               ],
             ),
             floatingActionButton: FloatingActionButton.small(
@@ -356,13 +356,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                     ),
                   ),
                   const Spacer(),
-                  //TODO: 정렬기능
-                  // const Text(
-                  //   '최신순',
-                  //   style: TextStyle(fontWeight: FontWeight.w600),
-                  // ),
-                  // const Text('  |  ', style: TextStyle(color: Colors.grey)),
-                  // const Text('인기순', style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -588,8 +581,8 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
     if (loc == null || loc.isEmpty) return;
 
     provider = communityListVmProvider(
-      categoryCode: null,    // 모든 카테고리
-      detailCode: null,      // 모든 하위 카테고리
+      categoryCode: null, // 모든 카테고리
+      detailCode: null, // 모든 하위 카테고리
       location: loc,
     );
     _ready = true;
@@ -605,7 +598,7 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
     if (!_ready) return const NoLocationView();
 
     final st = ref.watch(provider);
-    
+
     if (st.items.isEmpty) {
       return Scaffold(
         body: Column(
@@ -678,7 +671,8 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                   right: 24,
                   bottom: 100,
                 ),
-                itemCount: st.items.length + ((st.isLoading && st.hasMore) ? 1 : 0),
+                itemCount:
+                    st.items.length + ((st.isLoading && st.hasMore) ? 1 : 0),
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, i) {
                   if (i >= st.items.length) {
@@ -728,7 +722,10 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                                 Row(
                                   children: [
                                     Text(
-                                      StringUtils.truncateWithEllipsis(15, x.communityName),
+                                      StringUtils.truncateWithEllipsis(
+                                        15,
+                                        x.communityName,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -779,7 +776,7 @@ class _BookmarkIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarkStatusAsync = ref.watch(isBookmarkedProvider(postId));
-    
+
     return bookmarkStatusAsync.when(
       data: (isBookmarked) => Icon(
         isBookmarked ? Icons.bookmark : Icons.bookmark_border,

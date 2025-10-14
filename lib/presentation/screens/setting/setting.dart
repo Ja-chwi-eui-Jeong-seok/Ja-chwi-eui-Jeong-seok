@@ -1,5 +1,6 @@
 // settings.dart
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,16 +122,16 @@ class SettingsPage extends ConsumerWidget {
           ),
 
           // 계정 비활성화
-          ListTile(
-            leading: const Icon(Icons.pause_circle, color: Colors.orange),
-            title: const Text(
-              "계정 비활성화",
-              style: TextStyle(color: Colors.orange),
-            ),
-            onTap: () {
-              _showDeactivateAccountDialog(context, uid);
-            },
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.pause_circle, color: Colors.orange),
+          //   title: const Text(
+          //     "계정 비활성화",
+          //     style: TextStyle(color: Colors.orange),
+          //   ),
+          //   onTap: () {
+          //     _showDeactivateAccountDialog(context, uid);
+          //   },
+          // ),
 
           // 계정 완전 삭제
           ListTile(
@@ -321,7 +322,9 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Future<void> _deleteAccount(BuildContext context, String uid) async {
-    print('🔴 계정 삭제 시작: $uid');
+    if (kDebugMode) {
+      print('🔴 계정 삭제 시작: $uid');
+    }
 
     // 다이얼로그 닫기
     Navigator.pop(context);

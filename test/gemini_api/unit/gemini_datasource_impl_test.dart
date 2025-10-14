@@ -8,7 +8,7 @@ void main() {
   setUpAll(() async {
     await dotenv.load(fileName: "assets/config/env/setting.env");
     final apiKey = dotenv.env['GEMINI_API_KEY'];
-    assert(apiKey != null && apiKey!.isNotEmpty, 'GEMINI_API_KEY missing');
+    assert(apiKey != null && apiKey.isNotEmpty, 'GEMINI_API_KEY missing');
     dataSource = GeminiDataSourceImpl(apiKey!);
   });
 

@@ -108,7 +108,7 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
       String toYmd(DateTime d) =>
           '${d.toLocal().year.toString().padLeft(4, '0')}-${d.toLocal().month.toString().padLeft(2, '0')}-${d.toLocal().day.toString().padLeft(2, '0')}';
       final todayYmd = toYmd(DateTime.now());
-      final lastYmd = lastGreetedAt != null ? toYmd(lastGreetedAt!) : null;
+      final lastYmd = lastGreetedAt != null ? toYmd(lastGreetedAt) : null;
 
       final isFirstEnterToday = lastYmd != todayYmd;
       if (isFirstEnterToday) {

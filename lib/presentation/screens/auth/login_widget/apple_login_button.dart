@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/providers/auth_provider.dart';
@@ -11,43 +12,67 @@ class AppleLoginButton extends ConsumerWidget {
 
   Future<void> _handleAppleLogin(BuildContext context, WidgetRef ref) async {
     try {
-      print('🍎 Apple 로그인 시작');
-      print('🍎 현재 상태: ${ref.read(authNotifierProvider).status}');
+      if (kDebugMode) {
+        print('🍎 Apple 로그인 시작');
+        print('🍎 현재 상태: ${ref.read(authNotifierProvider).status}');
+      }
 
       final authNotifier = ref.read(authNotifierProvider.notifier);
-      print('🍎 AuthNotifier 가져옴');
+      if (kDebugMode) {
+        print('🍎 AuthNotifier 가져옴');
+      }
 
       await authNotifier.signInWithApple();
-      print('🍎 signInWithApple() 완료');
+      if (kDebugMode) {
+        print('🍎 signInWithApple() 완료');
+      }
 
       if (!context.mounted) {
-        print('🍎 Context가 mounted되지 않음');
+        if (kDebugMode) {
+          print('🍎 Context가 mounted되지 않음');
+        }
         return;
       }
 
       final latestState = ref.read(authNotifierProvider);
-      print('🍎 Apple 로그인 상태: ${latestState.status}');
-      print('🍎 사용자 정보: ${latestState.user?.uid}');
+
+      if (kDebugMode) {
+        print('🍎 Apple 로그인 상태: ${latestState.status}');
+        print('🍎 사용자 정보: ${latestState.user?.uid}');
+      }
 
       if (latestState.status == AuthStatus.success) {
-        print('🍎 Apple 로그인 성공');
+        if (kDebugMode) {
+          print('🍎 Apple 로그인 성공');
+        }
         if (onLoginSuccess != null) {
-          print('🍎 onLoginSuccess 콜백 실행');
+          if (kDebugMode) {
+            print('🍎 onLoginSuccess 콜백 실행');
+          }
           await onLoginSuccess!();
         } else {
-          print('🍎 onLoginSuccess 콜백이 null');
+          if (kDebugMode) {
+            print('🍎 onLoginSuccess 콜백이 null');
+          }
         }
       } else if (latestState.status == AuthStatus.error) {
-        print('🍎 Apple 로그인 에러: ${latestState.errorMessage}');
+        if (kDebugMode) {
+          print('🍎 Apple 로그인 에러: ${latestState.errorMessage}');
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Apple 로그인 실패: ${latestState.errorMessage}')),
         );
       } else {
-        print('🍎 예상치 못한 상태: ${latestState.status}');
+        if (kDebugMode) {
+          print('🍎 예상치 못한 상태: ${latestState.status}');
+        }
       }
     } catch (e, stackTrace) {
-      print('🍎 Apple 로그인 예외: $e');
-      print('🍎 Stack trace: $stackTrace');
+      if (kDebugMode) {
+        print('🍎 Apple 로그인 예외: $e');
+        print('🍎 Stack trace: $stackTrace');
+      }
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Apple 로그인 중 오류가 발생했습니다: $e')),
@@ -81,7 +106,9 @@ class AppleLoginButton extends ConsumerWidget {
           onTap: isLoading
               ? null
               : () {
-                  print('🍎 Apple 로그인 버튼 클릭됨');
+                  if (kDebugMode) {
+                    print('🍎 Apple 로그인 버튼 클릭됨');
+                  }
                   _handleAppleLogin(context, ref);
                 },
           child: ClipRRect(
@@ -90,7 +117,9 @@ class AppleLoginButton extends ConsumerWidget {
               style: SignInWithAppleButtonStyle.black,
               onPressed: () {
                 if (!isLoading) {
-                  print('🍎 Apple 로그인 버튼 클릭됨 (SignInWithAppleButton)');
+                  if (kDebugMode) {
+                    print('🍎 Apple 로그인 버튼 클릭됨 (SignInWithAppleButton)');
+                  }
                   _handleAppleLogin(context, ref);
                 }
               },
