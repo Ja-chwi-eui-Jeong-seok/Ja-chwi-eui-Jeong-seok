@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/mission/achievers/user_weekly_missions_screen.dart';
 import 'package:ja_chwi/presentation/screens/add_mission/add_mission_list.dart';
 import 'package:ja_chwi/presentation/screens/ai_chat/page/ai_chat.dart';
 import 'package:ja_chwi/presentation/screens/auth/page/login_screen.dart';
@@ -16,7 +17,9 @@ import 'package:ja_chwi/presentation/screens/help/help_admin.dart';
 import 'package:ja_chwi/presentation/screens/help/help_page.dart';
 import 'package:ja_chwi/presentation/screens/home/page/home_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/achievers/mission_achievers_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/mission_create_screen.dart';
+import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_detail_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/mission_saved_list_screen.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/mission_home_screen.dart';
 import 'package:ja_chwi/presentation/screens/profile/profile_flow.dart';
@@ -95,14 +98,46 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const MissionCreateScreen(),
     ),
     GoRoute(
+      path: '/mission-detail',
+      name: '미션 상세',
+      builder: (context, state) {
+        final missionData = state.extra as Map<String, dynamic>?;
+        if (missionData == null) {
+          return const Scaffold(
+            body: Center(child: Text('미션 정보를 불러올 수 없습니다.')),
+          );
+        }
+        return MissionDetailScreen(missionData: missionData);
+      },
+    ),
+    GoRoute(
       path: '/mission-saved-list',
       name: '미션 저장목록',
       builder: (context, state) => const MissionSavedListScreen(),
     ),
     GoRoute(
       path: '/mission-achievers',
-      name: '미션 달성자목록',
+      name: '주간 미션 랭킹',
       builder: (context, state) => const MissionAchieversScreen(),
+      routes: [
+        GoRoute(
+          path: 'user-missions',
+          name: 'user-weekly-missions',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final achiever = extra?['achiever'] as MissionAchiever?;
+            final weekDate = extra?['weekDate'] as DateTime?;
+
+            if (achiever == null || weekDate == null) {
+              return const Scaffold(body: Center(child: Text('잘못된 접근입니다.')));
+            }
+            return UserWeeklyMissionsScreen(
+              achiever: achiever,
+              weekDate: weekDate,
+            );
+          },
+        ),
+      ],
     ),
     GoRoute(
       path: '/community',

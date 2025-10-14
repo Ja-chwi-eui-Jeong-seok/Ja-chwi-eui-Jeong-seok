@@ -13,7 +13,7 @@ class RouteTitles {
     '/mission-create': '미션 작성',
     '/mission-saved-list': '완료된 미션',
     '/mission-edit': '미션 수정',
-    '/mission-achievers': '미션 달성자목록',
+    '/mission-achievers': '주간 미션 랭킹',
     '/community': '커뮤니티',
     '/community-detail': '커뮤니티 상세',
     '/community-create': '커뮤니티 작성',
