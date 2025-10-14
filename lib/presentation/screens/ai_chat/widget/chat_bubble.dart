@@ -49,6 +49,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           if (!widget.isUser) const SizedBox(width: 8),
 
           Flexible(
+            fit: FlexFit.loose,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -83,27 +84,44 @@ class _ChatBubbleState extends State<ChatBubble> {
     );
   }
 
-  Widget _buildAiBubble() => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-    decoration: BoxDecoration(
-      color: Colors.grey.shade200,
-      borderRadius: BorderRadius.circular(20),
+  Widget _buildAiBubble() => ConstrainedBox(
+    constraints: BoxConstraints(
+      maxWidth: MediaQuery.of(context).size.width * 0.55,
     ),
-    child: Text(
-      widget.message,
-      style: TextStyle(fontSize: 14),
-      softWrap: true,
-      overflow: TextOverflow.visible,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        widget.message,
+        style: const TextStyle(fontSize: 14),
+        softWrap: true,
+        maxLines: null,
+        overflow: TextOverflow.clip,
+      ),
     ),
   );
 
-  Widget _buildUserBubble() => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-    decoration: BoxDecoration(
-      color: Colors.black,
-      borderRadius: BorderRadius.circular(20),
+  Widget _buildUserBubble() => ConstrainedBox(
+    constraints: BoxConstraints(
+      maxWidth: MediaQuery.of(context).size.width * 0.55,
     ),
-    child: Text(widget.message, style: const TextStyle(color: Colors.white)),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        widget.message,
+        style: const TextStyle(color: Colors.white),
+        softWrap: true,
+        maxLines: null,
+        overflow: TextOverflow.clip,
+      ),
+    ),
   );
 
   Widget _buildTime() => Text(

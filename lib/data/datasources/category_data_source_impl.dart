@@ -10,7 +10,10 @@ class CategoryDataSourceImpl implements CategoryDataSource {
   //카테고리 코드 불러오기
   @override
   Future<List<CategoryCodeDto>> fetchCategoryCodes() async {
-    final snapshot = await firestore.collection('categorycode').get();
+    final snapshot = await firestore
+        .collection('categorycode')
+        .where('category_delete_yn', isEqualTo: false)
+        .get();
 
     return snapshot.docs
         .map((doc) => CategoryCodeDto.fromFirebase(doc.data()))
@@ -23,6 +26,7 @@ class CategoryDataSourceImpl implements CategoryDataSource {
     final snapshot = await firestore
         .collection('categorydetail')
         .where('category_code', isEqualTo: categoryCode)
+        .where('category_delete_yn', isEqualTo: false)
         .get();
 
     return snapshot.docs

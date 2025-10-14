@@ -9,10 +9,10 @@ import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-/// `focusedDay` 상태를 관리하는 Provider. 캘린더에서 현재 보여지는 월을 추적합니다.
+/// `focusedDay` 상태를 관리하는 Provider. 캘린더에서 현재 보여지는 월을 추적
 final focusedDayProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
-/// `selectedDay` 상태를 관리하는 Provider. 사용자가 캘린더에서 선택한 날짜를 추적합니다.
+/// `selectedDay` 상태를 관리하는 Provider. 사용자가 캘린더에서 선택한 날짜를 추적
 final selectedDayProvider = StateProvider<DateTime?>((ref) => DateTime.now());
 
 class MissionSavedListScreen extends ConsumerWidget {
@@ -78,9 +78,6 @@ class MissionSavedListScreen extends ConsumerWidget {
           selectedDay: selectedDay,
           totalCompletedMissions: totalCompletedMissionsForMonth,
           daysInMonth: daysInMonth,
-          consecutiveSuccessDays: _calculateConsecutiveDays(
-            completedMissions.keys,
-          ),
           onDaySelected: (selected, focused) {
             ref.read(selectedDayProvider.notifier).state = selected;
             ref.read(focusedDayProvider.notifier).state = focused;
@@ -175,34 +172,5 @@ class MissionSavedListScreen extends ConsumerWidget {
       return completedAt.year == focusedDay.year &&
           completedAt.month == focusedDay.month;
     }).length;
-  }
-
-  int _calculateConsecutiveDays(Iterable<DateTime> dates) {
-    if (dates.isEmpty) {
-      return 0;
-    }
-
-    final completedDatesSet = dates.toSet();
-    final today = DateTime.now();
-    final todayUtc = DateTime.utc(today.year, today.month, today.day);
-
-    // 시작 날짜를 정합니다. 오늘 미션을 완료했으면 오늘부터, 아니면 어제부터 확인
-    DateTime currentDate = completedDatesSet.contains(todayUtc)
-        ? todayUtc
-        : todayUtc.subtract(const Duration(days: 1));
-
-    // 시작 날짜의 미션이 완료되지 않았다면 연속일은 0
-    if (!completedDatesSet.contains(currentDate)) {
-      return 0;
-    }
-
-    int consecutiveDays = 0;
-    // currentDate부터 과거로 하루씩 이동하며 연속된 날짜인지 확인
-    while (completedDatesSet.contains(currentDate)) {
-      consecutiveDays++;
-      currentDate = currentDate.subtract(const Duration(days: 1));
-    }
-
-    return consecutiveDays;
   }
 }

@@ -5,24 +5,28 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../models/auth_model.dart';
-import '../../domain/entities/auth_entity.dart';
 import 'dart:convert'; // utf8
 import 'dart:math'; // Random
 import 'package:crypto/crypto.dart'; // sha256
 
 abstract class AuthDataSource {
-  Future<AuthEntity?> signInWithGoogle();
-  Future<AuthEntity?> signInWithApple();
-  Future<AuthEntity?> fetchCurrentUser();
+  Future<AuthModel?> signInWithGoogle();
+  Future<AuthModel?> signInWithApple();
+  Future<AuthModel?> fetchCurrentUser();
   Future<void> signOut();
   Future<void> updateUser(AuthModel user);
   Future<void> softDeleteUser(String uid, {String? reason});
+  Future<void> deleteUserAccount(String uid, {String? reason});
 }
 
 class AuthRemoteDataSourceImpl implements AuthDataSource {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: Platform.isIOS
+        ? '932235207263-ls86slhic1mfi5big5h46hv35r83egtb.apps.googleusercontent.com'
+        : null,
+  );
   // final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
 
   static const String kAuthCollection = 'user_profile';
@@ -35,110 +39,131 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
 
   @override
   Future<AuthModel?> signInWithGoogle() async {
-    // 항상 계정 선택창을 표시하기 위해 기존 로그인을 해제합니다.
-    // 이전에 로그인한 사용자가 있으면 silent sign-in이 되어 계정 선택창이 뜨지 않는 것을 방지합니다.
-    await _googleSignIn.signOut();
+    try {
+      // 항상 계정 선택창을 표시하기 위해 기존 로그인을 해제합니다.
+      // 이전에 로그인한 사용자가 있으면 silent sign-in이 되어 계정 선택창이 뜨지 않는 것을 방지합니다.
+      await _googleSignIn.signOut();
 
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) return null;
-    final googleAuth = await googleUser.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    final userCred = await _auth.signInWithCredential(credential);
-
-    final user = userCred.user;
-
-    if (user == null) return null;
-    final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
-
-    final snapshot = await docRef.get();
-
-    final deviceName = await _getDeviceName();
-
-    if (!snapshot.exists) {
-      final newUser = AuthModel(
-        uid: user.uid,
-        accountData: user.displayName ?? '',
-        accountEmail: user.email ?? '',
-        accountType: 'google',
-        createDevice: deviceName,
-        privacyConsent: true,
-        agreeToTermsOfService: true,
-        userCreateDate: DateTime.now(),
-        userUpdateDate: DateTime.now(),
-        userDeleteDate: null,
-        userDeleteNote: '',
-        managerType: false,
-      );
-
-      print('로그인 성공: ${user.email}');
-      print('신규 유저 Firestore 저장: ${newUser.toMap()}'); // 신규 유저 정보 출력
-      try {
-        await docRef.set(newUser.toMap());
-        print("✅ Firestore 저장 성공 (uid: ${user.uid})");
-      } catch (e) {
-        print("❌ Firestore 저장 실패: $e");
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return null;
       }
-      return newUser;
-    } else {
-      // 기존 유저인 경우 Firestore에서 데이터를 불러옴
-      return AuthModel.fromMap(snapshot.data()!, snapshot.id);
+
+      final googleAuth = await googleUser.authentication;
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        throw Exception('Google authentication failed: missing tokens');
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final userCred = await _auth.signInWithCredential(credential);
+
+      final user = userCred.user;
+
+      if (user == null) {
+        return null;
+      }
+
+      final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
+      final snapshot = await docRef.get();
+      final deviceName = await _getDeviceName();
+
+      if (!snapshot.exists) {
+        final newUser = AuthModel(
+          uid: user.uid,
+          accountData: user.displayName ?? '',
+          accountEmail: user.email ?? '',
+          accountType: 'google',
+          createDevice: deviceName,
+          privacyConsent: true,
+          agreeToTermsOfService: true,
+          userCreateDate: DateTime.now(),
+          userUpdateDate: DateTime.now(),
+          userDeleteDate: null,
+          userDeleteNote: '',
+          managerType: false,
+        );
+
+        // 신규 유저 정보 출력
+        try {
+          await docRef.set(newUser.toMap());
+        } catch (e) {}
+        return newUser;
+      } else {
+        // 기존 유저인 경우 Firestore에서 데이터를 불러옴
+        return AuthModel.fromMap(snapshot.data()!, snapshot.id);
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
   @override
   Future<AuthModel?> signInWithApple() async {
-    // 1. rawNonce & hashedNonce 생성
-    final rawNonce = _generateNonce();
-    final hashedNonce = _sha256ofString(rawNonce);
+    try {
+      // iOS에서만 Apple 로그인 허용
 
-    // 2. Apple 로그인 요청 (hashedNonce 전달)
-    final appleCredential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
-      ],
-      nonce: hashedNonce,
-    );
+      if (!Platform.isIOS) {
+        throw Exception('Apple 로그인은 iOS에서만 지원됩니다.');
+      }
 
-    // 3. Firebase OAuthCredential 생성 (idToken + rawNonce)
-    final oauthCredential = OAuthProvider("apple.com").credential(
-      idToken: appleCredential.identityToken,
-      rawNonce: rawNonce,
-    );
+      // 1. rawNonce & hashedNonce 생성
+      final rawNonce = _generateNonce();
+      final hashedNonce = _sha256ofString(rawNonce);
 
-    // 4. Firebase Auth 로그인
-    final userCred = await _auth.signInWithCredential(oauthCredential);
-    final user = userCred.user;
-    if (user == null) return null;
-
-    // 5. Firestore 사용자 문서 처리
-    final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
-    final snapshot = await docRef.get();
-    final deviceName = await _getDeviceName();
-
-    if (!snapshot.exists) {
-      final newUser = AuthModel(
-        uid: user.uid,
-        accountData: user.displayName ?? '',
-        accountEmail: user.email ?? '',
-        accountType: 'apple',
-        createDevice: deviceName,
-        privacyConsent: true,
-        agreeToTermsOfService: true,
-        userCreateDate: DateTime.now(),
-        userUpdateDate: DateTime.now(),
-        userDeleteDate: null,
-        userDeleteNote: '',
-        managerType: false,
+      // 2. Apple 로그인 요청 (hashedNonce 전달)
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
       );
-      print('Firestore 저장 데이터: ${newUser.toMap()}');
-      await docRef.set(newUser.toMap());
-      return newUser;
-    } else {
-      return AuthModel.fromMap(snapshot.data()!, snapshot.id);
+
+      // 3. Firebase OAuthCredential 생성 (idToken + rawNonce + accessToken)
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      // 4. Firebase Auth 로그인
+      final userCred = await _auth.signInWithCredential(oauthCredential);
+      final user = userCred.user;
+      if (user == null) {
+        return null;
+      }
+
+      // 5. Firestore 사용자 문서 처리
+      final docRef = _firestore.collection(kAuthCollection).doc(user.uid);
+      final snapshot = await docRef.get();
+      final deviceName = await _getDeviceName();
+
+      if (!snapshot.exists) {
+        final newUser = AuthModel(
+          uid: user.uid,
+          accountData: user.displayName ?? '',
+          accountEmail: user.email ?? '',
+          accountType: 'apple',
+          createDevice: deviceName,
+          privacyConsent: true,
+          agreeToTermsOfService: true,
+          userCreateDate: DateTime.now(),
+          userUpdateDate: DateTime.now(),
+          userDeleteDate: null,
+          userDeleteNote: '',
+          managerType: false,
+        );
+        await docRef.set(newUser.toMap());
+        return newUser;
+      } else {
+        final existingUser = AuthModel.fromMap(snapshot.data()!, snapshot.id);
+        return existingUser;
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -189,8 +214,81 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
   Future<void> softDeleteUser(String uid, {String? reason}) async {
     final docRef = _firestore.collection(kAuthCollection).doc(uid);
     await docRef.update({
-      'user_delete_date': DateTime.now(),
+      'user_delete_date': FieldValue.serverTimestamp(),
       'user_delete_note': reason ?? '사용자 요청',
+      'deletion_scheduled': true, // 60일 후 삭제 예약 플래그
     });
+  }
+
+  @override
+  Future<void> restoreUser(String uid) async {
+    final docRef = _firestore.collection(kAuthCollection).doc(uid);
+    await docRef.update({
+      'user_delete_date': null,
+      'user_delete_note': '',
+      'deletion_scheduled': false,
+    });
+  }
+
+  @override
+  Future<void> deleteUserAccount(String uid, {String? reason}) async {
+    try {
+      // 1. 먼저 Firestore 데이터 삭제 (인증된 상태에서)
+      final batch = _firestore.batch();
+
+      // 사용자 프로필: 삭제 대신 삭제일 기록 + 이메일 비식별화
+      final userDocRef = _firestore.collection(kAuthCollection).doc(uid);
+      batch.set(userDocRef, {
+        'user_delete_date': FieldValue.serverTimestamp(),
+        'account_email': '',
+      }, SetOptions(merge: true));
+
+      // 사용자 메시지 컬렉션 삭제
+      final messagesCollection = _firestore
+          .collection('chatbot')
+          .doc(uid)
+          .collection('messages');
+      final messagesSnapshot = await messagesCollection.get();
+      for (final doc in messagesSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      // 사용자 채팅 데이터 삭제
+      final chatDocRef = _firestore.collection('chatbot').doc(uid);
+      batch.delete(chatDocRef);
+
+      // 추가: profiles 컬렉션 처리 (익명화)
+      final profilesDocRef = _firestore.collection('profiles').doc(uid);
+      // 문서가 없어도 안전하게 적용되도록 merge 옵션을 사용
+      batch.set(profilesDocRef, {
+        'nickname': '탈퇴한 유저',
+      }, SetOptions(merge: true));
+
+      await batch.commit();
+
+      // 2. Firebase Auth에서 사용자 삭제 (이것이 로그아웃을 유발함)
+      final user = _auth.currentUser;
+      if (user != null && user.uid == uid) {
+        await user.delete();
+      }
+
+      // 3. Google Sign-In에서도 로그아웃
+      await _googleSignIn.signOut();
+
+      // 4. 잠시 대기하여 모든 리스너가 정리되도록 함
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (e) {
+      // Firestore 삭제 실패 시에도 Auth 삭제는 시도
+      print('계정 삭제 중 일부 오류 발생: $e');
+      try {
+        final user = _auth.currentUser;
+        if (user != null && user.uid == uid) {
+          await user.delete();
+        }
+        await _googleSignIn.signOut();
+      } catch (authError) {
+        print('Auth 삭제 실패: $authError');
+        rethrow; // Auth 삭제 실패는 중요한 오류이므로 다시 던짐
+      }
+    }
   }
 }

@@ -13,10 +13,16 @@ class GoogleLoginButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authNotifier = ref.read(authNotifierProvider.notifier);
     final authState = ref.watch(authNotifierProvider);
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      padding: EdgeInsets.symmetric(
+        horizontal: isLandscape ? 16 : 24,
+        vertical: isLandscape ? 20 : 40,
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           /// Google 로그인 버튼
           SizedBox(
@@ -62,9 +68,11 @@ class GoogleLoginButton extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: isLandscape ? 8 : 12),
 
-          AppleLoginButton(),
+          AppleLoginButton(
+            onLoginSuccess: onLoginSuccess,
+          ),
         ],
       ),
     );
