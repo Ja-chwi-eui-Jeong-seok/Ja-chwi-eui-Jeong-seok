@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/ai_chat_circle.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/home_background.dart';
@@ -88,7 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 center: circleCenter,
                 radius: circleRadius,
                 onTap: () {
-                  GoRouter.of(context).push('/ai-chat', extra: userData);
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    router.go('/ai-chat', extra: userData);
+                  });
                 },
               ),
               Padding(
