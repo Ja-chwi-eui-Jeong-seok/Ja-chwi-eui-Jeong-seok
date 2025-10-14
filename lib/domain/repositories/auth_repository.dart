@@ -7,4 +7,5 @@ abstract class AuthRepository {
   Future<void> signOut();
   Future<void> updateUser(AuthEntity entity);
   Future<void> deleteUser(String accountData, {String? reason});
+  Future<void> deleteUserAccount(String uid, {String? reason});
 }

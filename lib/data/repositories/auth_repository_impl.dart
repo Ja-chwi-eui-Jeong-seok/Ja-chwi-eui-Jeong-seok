@@ -11,26 +11,22 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthEntity?> signInWithGoogle() async {
     final model = await remoteDataSource.signInWithGoogle();
-    if (model is AuthModel) {
-      return model.toDomain();
-    }
-    return model;
+    if (model == null) return null;
+    return model.toDomain();
   }
 
   @override
   Future<AuthEntity?> signInWithApple() async {
     final model = await remoteDataSource.signInWithApple();
     if (model == null) return null;
-    if (model is AuthModel) return model.toDomain();
-    return model;
+    return model.toDomain();
   }
 
   @override
   Future<AuthEntity?> getCurrentUser() async {
     final model = await remoteDataSource.fetchCurrentUser();
     if (model == null) return null;
-    if (model is AuthModel) return model.toDomain();
-    return model;
+    return model.toDomain();
   }
 
   @override
@@ -45,7 +41,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> deleteUser(String userId, {String? reason}) async {
-    await remoteDataSource.softDeleteUser(userId, reason: reason);
+  Future<void> deleteUser(String accountData, {String? reason}) async {
+    await remoteDataSource.softDeleteUser(accountData, reason: reason);
+  }
+
+  @override
+  Future<void> deleteUserAccount(String uid, {String? reason}) async {
+    await remoteDataSource.deleteUserAccount(uid, reason: reason);
   }
 }
