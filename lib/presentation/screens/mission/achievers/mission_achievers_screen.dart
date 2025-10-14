@@ -34,7 +34,10 @@ class MissionAchieversScreenState
 
   @override
   Widget build(BuildContext context) {
-    final achieversAsync = ref.watch(weeklyAchieversProvider);
+    // 1. 현재 선택된 주(week)의 날짜를 가져옵니다.
+    final selectedWeek = ref.watch(selectedWeekProvider);
+    // 2. 가져온 날짜를 weeklyAchieversProvider에 파라미터로 전달합니다.
+    final achieversAsync = ref.watch(weeklyAchieversProvider(selectedWeek));
 
     return Scaffold(
       appBar: CommonAppBar(
@@ -50,7 +53,6 @@ class MissionAchieversScreenState
       ),
       body: achieversAsync.when(
         data: (achievers) {
-          final selectedWeek = ref.watch(selectedWeekProvider);
           final startOfWeek = selectedWeek.subtract(
             Duration(days: selectedWeek.weekday - 1),
           );

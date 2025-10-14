@@ -11,7 +11,6 @@ import 'package:ja_chwi/domain/repositories/mission_repository.dart';
 import 'package:ja_chwi/domain/repositories/user_repository.dart';
 import 'package:ja_chwi/domain/repositories/user_repository_impl.dart';
 import 'package:ja_chwi/domain/usecases/fetch_user_profile_usecase.dart';
-import 'package:ja_chwi/domain/usecases/fetch_today_mission_achievers_usecase.dart';
 import 'package:ja_chwi/domain/usecases/pick_images_usecase.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/user_profile.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
@@ -21,30 +20,22 @@ import 'package:image_picker/image_picker.dart';
 /// 현재 선택된 주(week)를 관리하는 StateProvider. 기본값은 이번 주.
 final selectedWeekProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
-/// 주간 미션 랭커 목록을 비동기적으로 가져오는 FutureProvider
-final weeklyAchieversProvider = FutureProvider<List<MissionAchiever>>((
-  ref,
-) async {
-  final repository = ref.watch(missionRepositoryProvider);
-  final selectedWeek = ref.watch(selectedWeekProvider);
-
-  final achieversData = await repository.fetchWeeklyMissionRankers(
-    selectedWeek,
-  );
-  return achieversData.map((data) => MissionAchiever.fromMap(data)).toList();
-});
+/// 특정 주의 미션 랭커 목록을 비동기적으로 가져오는 FutureProvider.
+/// `family`를 사용하여 날짜를 파라미터로 받습니다.
+final weeklyAchieversProvider =
+    FutureProvider.family<List<MissionAchiever>, DateTime>((ref, date) async {
+      final repository = ref.watch(missionRepositoryProvider);
+      final achieversData = await repository.fetchWeeklyMissionRankers(date);
+      return achieversData
+          .map((data) => MissionAchiever.fromMap(data))
+          .toList();
+    });
 
 /// 홈 화면의 주간 랭커 목록을 가져오는 FutureProvider (항상 이번 주)
-final currentWeekAchieversProvider = FutureProvider<List<MissionAchiever>>((
-  ref,
-) async {
-  final repository = ref.watch(missionRepositoryProvider);
-  // 항상 현재 시간을 기준으로 데이터를 가져옵니다.
-  final achieversData = await repository.fetchWeeklyMissionRankers(
-    DateTime.now(),
-  );
-  return achieversData.map((data) => MissionAchiever.fromMap(data)).toList();
-});
+/// `weeklyAchieversProvider`를 재사용하여 코드를 간결하게 유지합니다.
+final currentWeekAchieversProvider = FutureProvider<List<MissionAchiever>>(
+  (ref) => ref.watch(weeklyAchieversProvider(DateTime.now()).future),
+);
 
 /// 현재 사용자의 프로필 정보를 비동기적으로 가져오는 FutureProvider
 final userProfileProvider = StreamProvider<UserProfile>((ref) {
@@ -63,7 +54,7 @@ final userProfileProvider = StreamProvider<UserProfile>((ref) {
 });
 
 /// MissionRepository를 제공하는 Provider
-final missionRepositoryProvider = StateProvider<MissionRepository>((ref) {
+final missionRepositoryProvider = Provider<MissionRepository>((ref) {
   final firestore = FirebaseFirestore.instance;
   final storage = FirebaseStorage.instance;
   final dataSource = MissionDataSourceImpl(firestore, storage);
@@ -86,14 +77,6 @@ final pickImagesUseCaseProvider = Provider<PickImagesUseCase>((ref) {
   final repository = ImagePickerRepositoryImpl(dataSource);
   return PickImagesUseCase(repository);
 });
-
-/// FetchTodayMissionAchieversUseCase를 제공하는 Provider
-final fetchTodayMissionAchieversUseCaseProvider =
-    Provider<FetchTodayMissionAchieversUseCase>((ref) {
-      return FetchTodayMissionAchieversUseCase(
-        ref.watch(missionRepositoryProvider),
-      );
-    });
 
 /// FetchUserProfileUseCase를 제공하는 Provider
 final fetchUserProfileUseCaseProvider = Provider<FetchUserProfileUseCase>((

@@ -52,10 +52,6 @@ class MissionRepositoryImpl implements MissionRepository {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> fetchTodayMissionAchievers() =>
-      dataSource.fetchTodayMissionAchievers();
-
-  @override
   Future<List<Map<String, dynamic>>> fetchWeeklyMissionRankers(
     DateTime dateForWeek,
   ) {

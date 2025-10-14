@@ -24,12 +24,8 @@ class MissionHomeScreen extends ConsumerWidget {
       appBar: CommonAppBar(
         actions: [
           RefreshIconButton(
-            onPressed: () async {
-              // Repository 자체를 새로고침하여 데이터 소스를 새로 만듭니다.
-              ref.invalidate(missionRepositoryProvider);
-              // 잠시 기다려 StateProvider가 업데이트되도록 합니다.
-              await Future.delayed(const Duration(milliseconds: 50));
-              // 의존하는 다른 Provider들을 새로고침합니다.
+            onPressed: () {
+              // 의존하는 Provider들을 직접 새로고침합니다.
               ref.invalidate(todayMissionProvider);
               ref.invalidate(currentWeekAchieversProvider);
             },
