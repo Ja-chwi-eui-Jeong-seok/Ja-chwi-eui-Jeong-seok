@@ -41,7 +41,10 @@ class ProfileSection extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(userProfile.level, style: const TextStyle(fontSize: 16)),
+                  Text(
+                    userProfile.level, // UserProfile 모델에 이미 계산된 level이 있음
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   Text(
                     userProfile.nickname,
                     style: const TextStyle(
@@ -50,6 +53,14 @@ class ProfileSection extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  // const SizedBox(height: 4),
+                  // Text(
+                  //   '총 ${userProfile.missionCount}회 달성',
+                  //   style: const TextStyle(
+                  //     fontSize: 14,
+                  //     color: Colors.black54,
+                  //   ),
+                  // ),
                 ],
               ),
             ),
