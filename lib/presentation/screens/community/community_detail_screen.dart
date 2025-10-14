@@ -155,35 +155,33 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         child: Scaffold(
           appBar: CommonAppBar(
             actions: [
-              IconButton(
-                icon: st.loadingBookmark
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        st.isBookmarked
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
-                        color: st.isBookmarked ? Colors.orange : null,
-                      ),
-                onPressed: st.loadingBookmark
-                    ? null
-                    : () {
-                        ref.read(provider.notifier).toggleBookmark(ref);
-                        ref.read(communityChangedTickProvider.notifier).state++;
-                      },
-              ),
+              if (!isOwner) ...[
+                IconButton(
+                  icon: st.loadingBookmark
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          st.isBookmarked
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          color: st.isBookmarked ? Colors.orange : null,
+                        ),
+                  onPressed: st.loadingBookmark
+                      ? null
+                      : () {
+                          ref.read(provider.notifier).toggleBookmark(ref);
+                          ref
+                              .read(communityChangedTickProvider.notifier)
+                              .state++;
+                        },
+                ),
+              ],
               if (isOwner) ...[
                 IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    context.push('/community-edit', extra: st.post!.id);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
+                  icon: const Icon(Icons.delete_forever_outlined),
                   onPressed: () async {
                     softdelete() async {
                       final err = await ref
@@ -212,6 +210,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                       destructive: true,
                       onPrimary: softdelete,
                     );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.mode_edit_outline_outlined),
+                  onPressed: () {
+                    context.push('/community-edit', extra: st.post!.id);
                   },
                 ),
               ],
