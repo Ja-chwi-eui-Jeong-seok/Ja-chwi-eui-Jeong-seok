@@ -24,8 +24,18 @@ final selectedWeekProvider = StateProvider<DateTime>((ref) => DateTime.now());
 /// `family`를 사용하여 날짜를 파라미터로 받습니다.
 final weeklyAchieversProvider =
     FutureProvider.family<List<MissionAchiever>, DateTime>((ref, date) async {
+      // 1. 현재 사용자의 프로필을 가져와 dongName을 확보합니다.
+      final userProfile = await ref.watch(userProfileProvider.future);
+      final dongName = userProfile.dongName;
+      if (dongName.isEmpty) {
+        // 동네 정보가 없는 경우 빈 목록을 반환하거나 에러 처리를 할 수 있습니다.
+        return [];
+      }
       final repository = ref.watch(missionRepositoryProvider);
-      final achieversData = await repository.fetchWeeklyMissionRankers(date);
+      final achieversData = await repository.fetchWeeklyMissionRankers(
+        date,
+        dongName,
+      );
       return achieversData
           .map((data) => MissionAchiever.fromMap(data))
           .toList();

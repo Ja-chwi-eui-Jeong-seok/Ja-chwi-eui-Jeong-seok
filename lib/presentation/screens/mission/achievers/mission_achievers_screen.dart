@@ -38,6 +38,8 @@ class MissionAchieversScreenState
     final selectedWeek = ref.watch(selectedWeekProvider);
     // 2. 가져온 날짜를 weeklyAchieversProvider에 파라미터로 전달합니다.
     final achieversAsync = ref.watch(weeklyAchieversProvider(selectedWeek));
+    // 3. 현재 사용자의 프로필 정보를 가져와 앱바 제목에 사용합니다.
+    final userProfileAsync = ref.watch(userProfileProvider);
 
     return Scaffold(
       appBar: CommonAppBar(
@@ -66,6 +68,17 @@ class MissionAchieversScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                userProfileAsync.when(
+                  data: (profile) => Text(
+                    '위치 : ${profile.dongName}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  loading: () => const SizedBox(), // 로딩 중에는 아무것도 표시하지 않음
+                  error: (_, __) => const SizedBox(), // 에러 시에도 아무것도 표시하지 않음
+                ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
