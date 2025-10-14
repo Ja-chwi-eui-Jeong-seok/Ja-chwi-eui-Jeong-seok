@@ -22,13 +22,6 @@ class _AiChatState extends ConsumerState<AiChat> {
       ref.read(chatMessagesProvider.notifier).loadMessages();
       _scrollToBottom();
     });
-
-    // 메시지 목록 변동 시 자동 스크롤
-    ref.listen(chatMessagesProvider, (prev, next) {
-      if (prev == null || next.length != prev.length) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-      }
-    });
   }
 
   /// Gemini AI 호출
@@ -75,6 +68,13 @@ class _AiChatState extends ConsumerState<AiChat> {
     final messages = ref.watch(chatMessagesProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
+    // 메시지 목록 변동 시 자동 스크롤 (build 내부에서 등록 필요)
+    ref.listen<List<dynamic>>(chatMessagesProvider, (prev, next) {
+      if (prev == null || next.length != prev.length) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+      }
+    });
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -84,41 +84,46 @@ class _AiChatState extends ConsumerState<AiChat> {
         ),
         title: const Text('채팅'),
       ),
-      body: Column(
-        children: [
-          // 채팅 리스트
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
-              controller: _scrollController,
-              reverse: true,
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final msg = messages[index];
-                final isUser = msg.role.trim().toLowerCase() == 'user';
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ChatBubble(
-                    isUser: isUser,
-                    message: msg.content,
-                    time: _formatTime(msg.timestamp),
-                  ),
-                );
+      body: AnimatedPadding(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: Column(
+          children: [
+            // 채팅 리스트
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                controller: _scrollController,
+                reverse: true,
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final msg = messages[index];
+                  final isUser = msg.role.trim().toLowerCase() == 'user';
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: ChatBubble(
+                      isUser: isUser,
+                      message: msg.content,
+                      time: _formatTime(msg.timestamp),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // 입력창 + 레시피 호출 연결
+            ChatInputField(
+              onSend: _sendToGemini,
+              onGenerateRecipe: (ingredients) async {
+                await ref
+                    .read(chatMessagesProvider.notifier)
+                    .generateRecipe(ingredients);
+                _scrollToBottom();
               },
             ),
-          ),
-
-          // 입력창 + 레시피 호출 연결
-          ChatInputField(
-            onSend: _sendToGemini,
-            onGenerateRecipe: (ingredients) async {
-              await ref
-                  .read(chatMessagesProvider.notifier)
-                  .generateRecipe(ingredients);
-              _scrollToBottom();
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
