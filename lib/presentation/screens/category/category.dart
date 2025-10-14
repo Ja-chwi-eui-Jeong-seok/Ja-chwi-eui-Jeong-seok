@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 
-/// ✅ Firestore 로직 전담 서비스
+///Firestore 로직 전담 서비스
 class CategoryService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -13,14 +13,16 @@ class CategoryService {
         .where('category_delete_yn', isEqualTo: false)
         .orderBy('category_code')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              final data = doc.data();
-              return {
-                'docId': doc.id,
-                'categoryCode': data['category_code'] ?? 0,
-                'categoryName': data['category_name'] ?? '',
-              };
-            }).toList());
+        .map(
+          (snapshot) => snapshot.docs.map((doc) {
+            final data = doc.data();
+            return {
+              'docId': doc.id,
+              'categoryCode': data['category_code'] ?? 0,
+              'categoryName': data['category_name'] ?? '',
+            };
+          }).toList(),
+        );
   }
 
   /// 상세 코드 스트림
@@ -31,17 +33,19 @@ class CategoryService {
         .where('category_delete_yn', isEqualTo: false)
         .orderBy('category_detail_code')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              final data = doc.data();
-              return {
-                'docId': doc.id,
-                'detailCode': data['category_detail_code'] ?? 0,
-                'detailName': data['category_detail_name'] ?? '',
-              };
-            }).toList());
+        .map(
+          (snapshot) => snapshot.docs.map((doc) {
+            final data = doc.data();
+            return {
+              'docId': doc.id,
+              'detailCode': data['category_detail_code'] ?? 0,
+              'detailName': data['category_detail_name'] ?? '',
+            };
+          }).toList(),
+        );
   }
 
-  /// ✅ 중복 코드 검사
+  ///중복 코드 검사
   Future<bool> isDuplicate({
     required bool isCategory,
     required num code,
@@ -66,7 +70,7 @@ class CategoryService {
     return snapshot.docs.first.id != excludeDocId;
   }
 
-  /// ✅ 신규 추가 / 수정
+  ///신규 추가 / 수정
   Future<void> saveCategory({
     required bool isCategory,
     required num code,
@@ -82,10 +86,7 @@ class CategoryService {
         'category_code': parentCategoryCode,
         'category_detail_code': code,
       },
-      if (isCategory)
-        'category_name': name
-      else
-        'category_detail_name': name,
+      if (isCategory) 'category_name': name else 'category_detail_name': name,
     };
 
     if (docId == null) {
@@ -105,8 +106,11 @@ class CategoryService {
     }
   }
 
-  /// ✅ 논리 삭제
-  Future<void> deleteCategory(String collection, String docId, String note) async {
+  Future<void> deleteCategory(
+    String collection,
+    String docId,
+    String note,
+  ) async {
     await firestore.collection(collection).doc(docId).update({
       'category_delete_yn': true,
       'category_delete_note': note.trim(),
@@ -115,7 +119,7 @@ class CategoryService {
   }
 }
 
-/// ✅ 추가/수정 다이얼로그 위젯 (키보드 안정화 완료)
+/// 추가/수정 다이얼로그 위젯
 class AddOrEditDialog extends StatefulWidget {
   final bool isCategory;
   final num? parentCategoryCode;
@@ -147,7 +151,9 @@ class _AddOrEditDialogState extends State<AddOrEditDialog> {
   @override
   void initState() {
     super.initState();
-    codeController = TextEditingController(text: widget.currentCode?.toString() ?? '');
+    codeController = TextEditingController(
+      text: widget.currentCode?.toString() ?? '',
+    );
     nameController = TextEditingController(text: widget.currentName ?? '');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -165,21 +171,23 @@ class _AddOrEditDialogState extends State<AddOrEditDialog> {
   }
 
   Future<void> _handleSave() async {
-    FocusScope.of(context).unfocus(); // ✅ 키보드 이벤트 정리
+    FocusScope.of(context).unfocus(); // 키보드 이벤트 정리
 
     final codeText = codeController.text.trim();
     final nameText = nameController.text.trim();
 
     if (codeText.isEmpty || nameText.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('코드와 이름을 모두 입력해주세요.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('코드와 이름을 모두 입력해주세요.')));
       return;
     }
 
     final codeNum = num.tryParse(codeText);
     if (codeNum == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('코드는 숫자만 입력 가능합니다.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('코드는 숫자만 입력 가능합니다.')));
       return;
     }
 
@@ -191,8 +199,9 @@ class _AddOrEditDialogState extends State<AddOrEditDialog> {
     );
 
     if (isDup) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('이미 존재하는 코드입니다.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('이미 존재하는 코드입니다.')));
       return;
     }
 
@@ -220,7 +229,8 @@ class _AddOrEditDialogState extends State<AddOrEditDialog> {
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(labelText: '코드'),
-            onEditingComplete: () => FocusScope.of(context).requestFocus(nameFocus),
+            onEditingComplete: () =>
+                FocusScope.of(context).requestFocus(nameFocus),
           ),
           TextField(
             controller: nameController,
@@ -235,7 +245,7 @@ class _AddOrEditDialogState extends State<AddOrEditDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            FocusScope.of(context).unfocus(); // ✅ 키보드 해제
+            FocusScope.of(context).unfocus(); //키보드 해제
             Navigator.pop(context);
           },
           child: const Text('취소'),
@@ -249,7 +259,7 @@ class _AddOrEditDialogState extends State<AddOrEditDialog> {
   }
 }
 
-/// ✅ 메인 페이지 (UI 중심, 로직은 얇게)
+///메인 페이지 (UI 중심, 로직은 얇게)
 class CategoryPage extends StatelessWidget {
   final Map<String, dynamic> extra;
   final CategoryService service = CategoryService();
@@ -277,7 +287,11 @@ class CategoryPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, String docId, String collection) {
+  void _showDeleteDialog(
+    BuildContext context,
+    String docId,
+    String collection,
+  ) {
     final noteController = TextEditingController();
     showDialog(
       context: context,
@@ -290,15 +304,19 @@ class CategoryPage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              FocusScope.of(context).unfocus(); // ✅ 키보드 정리
+              FocusScope.of(context).unfocus(); //키보드 정리
               Navigator.pop(context);
             },
             child: const Text('취소'),
           ),
           TextButton(
             onPressed: () async {
-              FocusScope.of(context).unfocus(); // ✅ 키보드 정리
-              await service.deleteCategory(collection, docId, noteController.text);
+              FocusScope.of(context).unfocus(); // 키보드 정리
+              await service.deleteCategory(
+                collection,
+                docId,
+                noteController.text,
+              );
               if (context.mounted) Navigator.pop(context);
             },
             child: const Text('삭제', style: TextStyle(color: Colors.red)),
@@ -314,16 +332,17 @@ class CategoryPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('카테고리 관리'),
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              context.go('/admin', extra: extra);
-            },
-          ),
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            context.go('/admin', extra: extra);
+          },
         ),
+      ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: service.getCategories(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
           final categories = snapshot.data!;
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -349,8 +368,11 @@ class CategoryPage extends StatelessWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () =>
-                            _showDeleteDialog(context, c['docId'], 'categorycode'),
+                        onPressed: () => _showDeleteDialog(
+                          context,
+                          c['docId'],
+                          'categorycode',
+                        ),
                       ),
                     ],
                   ),
@@ -361,32 +383,39 @@ class CategoryPage extends StatelessWidget {
                         final details = detailSnapshot.data ?? [];
                         return Column(
                           children: [
-                            ...details.map((d) => ListTile(
-                                  title: Text('${d['detailName']} (${d['detailCode']})'),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit),
-                                        onPressed: () => _showAddOrEditDialog(
-                                          context,
-                                          parentCategoryCode: c['categoryCode'],
-                                          currentCode: d['detailCode'],
-                                          currentName: d['detailName'],
-                                          docId: d['docId'],
-                                        ),
+                            ...details.map(
+                              (d) => ListTile(
+                                title: Text(
+                                  '${d['detailName']} (${d['detailCode']})',
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () => _showAddOrEditDialog(
+                                        context,
+                                        parentCategoryCode: c['categoryCode'],
+                                        currentCode: d['detailCode'],
+                                        currentName: d['detailName'],
+                                        docId: d['docId'],
                                       ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.red),
-                                        onPressed: () => _showDeleteDialog(
-                                          context,
-                                          d['docId'],
-                                          'categorydetail',
-                                        ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
                                       ),
-                                    ],
-                                  ),
-                                )),
+                                      onPressed: () => _showDeleteDialog(
+                                        context,
+                                        d['docId'],
+                                        'categorydetail',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                             ListTile(
                               leading: const Icon(Icons.add),
                               title: const Text('상세 코드 추가'),
