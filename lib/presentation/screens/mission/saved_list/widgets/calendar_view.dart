@@ -12,7 +12,6 @@ class CalendarView extends StatelessWidget {
 
   final int totalCompletedMissions;
   final int daysInMonth;
-  final int consecutiveSuccessDays;
 
   const CalendarView({
     super.key,
@@ -24,11 +23,36 @@ class CalendarView extends StatelessWidget {
     this.builders = const CalendarBuilders(),
     required this.totalCompletedMissions,
     required this.daysInMonth,
-    required this.consecutiveSuccessDays,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 현재 보고 있는 달의 최대 연속 성공일 계산
+    int calculateMaxConsecutiveDays() {
+      if (eventLoader == null) return 0;
+
+      int maxStreak = 0;
+      int currentStreak = 0;
+      final daysInFocusedMonth = DateUtils.getDaysInMonth(
+        focusedDay.year,
+        focusedDay.month,
+      );
+
+      for (int i = 1; i <= daysInFocusedMonth; i++) {
+        final day = DateTime.utc(focusedDay.year, focusedDay.month, i);
+        if (eventLoader!(day).isNotEmpty) {
+          currentStreak++;
+        } else {
+          maxStreak = currentStreak > maxStreak ? currentStreak : maxStreak;
+          currentStreak = 0;
+        }
+      }
+      maxStreak = currentStreak > maxStreak
+          ? currentStreak
+          : maxStreak; // 마지막 streak 확인
+      return maxStreak;
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -151,7 +175,7 @@ class CalendarView extends StatelessWidget {
                       text: TextSpan(
                         children: <TextSpan>[
                           TextSpan(
-                            text: '$consecutiveSuccessDays',
+                            text: '${calculateMaxConsecutiveDays()}',
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
