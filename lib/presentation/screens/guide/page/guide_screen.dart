@@ -59,11 +59,14 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   void _nextStep() {
-    setState(() {
-      if (current < 4) {
+    if (current < 4) {
+      setState(() {
         current++;
-      } else {
-        GoRouter.of(context).go(
+      });
+    } else {
+      // 빌드 중 호출되지 않도록 예약
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.go(
           '/home',
           extra: {
             'uid': uid,
@@ -73,8 +76,8 @@ class _GuideScreenState extends State<GuideScreen> {
             'color': color,
           },
         );
-      }
-    });
+      });
+    }
   }
 
   @override

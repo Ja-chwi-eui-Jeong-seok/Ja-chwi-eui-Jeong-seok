@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -14,6 +15,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashPageState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  bool _navigationDone = false; // ✅ 추가
 
   @override
   void initState() {
@@ -28,63 +30,70 @@ class _SplashPageState extends State<SplashScreen>
   }
 
   Future<void> _checkUserAndNavigate() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    // 🔹 1. 로그인 여부 확인
-    if (user == null) {
-      GoRouter.of(context).go('/login');
-      return;
-    }
+    if (_navigationDone) return; // ✅ 중복 실행 방지
+    _navigationDone = true;
 
     final firestore = FirebaseFirestore.instance;
 
+    // 🔹 Firebase 캐시 초기화
+    await firestore.clearPersistence().catchError((e) {
+      print('Firestore cache clear error: $e');
+    });
+
+    // 🔹 Auth 상태 강제 갱신
+    await FirebaseAuth.instance.currentUser?.reload();
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        router.go('/login');
+      });
+      return;
+    }
+
     try {
-      // 🔹 2. user_profile 문서 확인
       final userProfileDoc = await firestore
           .collection('user_profile')
           .doc(user.uid)
-          .get();
+          .get(const GetOptions(source: Source.server));
 
       if (!userProfileDoc.exists) {
-        GoRouter.of(context).go('/login');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          router.go('/login');
+        });
         return;
       }
 
-      // 🔹 3. users 문서 확인
       final usersDoc = await firestore
           .collection('users')
           .doc(user.uid)
           .get(const GetOptions(source: Source.server));
 
       final usersData = usersDoc.data();
-      print('🔥 usersDoc data: $usersData'); // 디버깅용 로그
-
-      // privacy_consent 값 안전하게 읽기
       final privacyConsent = (usersData?['privacy_consent'] ?? false) == true;
-      print('🔥 privacyConsent: $privacyConsent');
 
       if (!privacyConsent) {
-        GoRouter.of(context).go('/privacy-policy');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          router.go('/privacy-policy');
+        });
         return;
       }
 
-      // 🔹 4. profiles 문서 확인
       final profilesDoc = await firestore
           .collection('profiles')
           .doc(user.uid)
           .get(const GetOptions(source: Source.server));
 
       final profilesData = profilesDoc.data();
-      print('🔥 profilesDoc data: $profilesData');
-
       final nickname = profilesData?['nickname'] ?? '';
 
       if (nickname.isEmpty) {
-        GoRouter.of(context).go('/profile-flow');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          router.go('/profile-flow');
+        });
         return;
       }
 
-      // 🔹 5. 모든 조건 통과 시 홈으로 이동
       final extraData = {
         'uid': user.uid,
         'nickname': nickname,
@@ -96,10 +105,14 @@ class _SplashPageState extends State<SplashScreen>
         'privacyConsent': privacyConsent,
       };
 
-      GoRouter.of(context).go('/home', extra: extraData);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        router.go('/home', extra: extraData);
+      });
     } catch (e) {
       print('🔥 Splash navigation error: $e');
-      GoRouter.of(context).go('/login'); // 예외 발생 시 로그인으로
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        router.go('/login');
+      });
     }
   }
 
