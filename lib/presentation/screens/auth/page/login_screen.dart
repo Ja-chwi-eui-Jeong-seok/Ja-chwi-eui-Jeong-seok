@@ -11,6 +11,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("빌드");
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600; // iPad 감지
     final isLandscape = screenSize.width > screenSize.height; // 가로모드 감지
