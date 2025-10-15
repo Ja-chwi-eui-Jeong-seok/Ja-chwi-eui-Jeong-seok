@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
-import 'package:ja_chwi/presentation/providers/profile_providers.dart';
 
 class NicknameInput extends ConsumerStatefulWidget {
   final Future<void> Function(String)? onNext;
