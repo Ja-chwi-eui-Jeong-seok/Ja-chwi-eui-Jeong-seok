@@ -172,22 +172,20 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/profile-flow',
-      builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>?; // extra 전체 받기
-        debugPrint("넘어온 데이터: $data");
 
+      redirect: (context, state) {
+        final data = state.extra as Map<String, dynamic>?;
         final uid = data?['uid'] as String?;
-        if (uid == null) {
-          context.go('/login');
-          return const SizedBox.shrink();
-        }
+        return uid == null ? '/login' : null;
+      },
 
-        return ProfileFlowPage(
-          uid: uid,
-          extra: data,
-        );
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+        final uid = data['uid'] as String; // redirect로 null 아님 보장
+        return ProfileFlowPage(uid: uid, extra: data);
       },
     ),
+
     GoRoute(
       path: '/profile',
       name: '프로필',
