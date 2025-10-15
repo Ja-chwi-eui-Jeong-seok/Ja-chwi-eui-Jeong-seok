@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ProfileTap extends StatefulWidget {
-  const ProfileTap({super.key, required Null Function(dynamic index) onTabChanged});
+  final void Function(int index) onTabChanged;
+
+  const ProfileTap({super.key, required this.onTabChanged});
 
   @override
   State<ProfileTap> createState() => _ProfileTapState();
@@ -11,14 +13,14 @@ class _ProfileTapState extends State<ProfileTap> {
   int selectedIndex = 0;
 
   final List<IconData> icons = [
-    Icons.bookmark_outline, // 저장한 글
-    Icons.edit_outlined,    // 내가 작성한 글
+    Icons.bookmark_outline,
+    Icons.edit_outlined,
   ];
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16), // 좌우 끝 패딩
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final tabWidth = constraints.maxWidth / icons.length;
@@ -28,7 +30,6 @@ class _ProfileTapState extends State<ProfileTap> {
             child: Stack(
               alignment: Alignment.bottomLeft,
               children: [
-                // 1️⃣ 전체 하단 선 (연결된 바)
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -38,7 +39,6 @@ class _ProfileTapState extends State<ProfileTap> {
                     color: Colors.grey[300],
                   ),
                 ),
-                // 2️⃣ 아이콘 Row
                 Row(
                   children: List.generate(icons.length, (index) {
                     bool isSelected = index == selectedIndex;
@@ -48,6 +48,7 @@ class _ProfileTapState extends State<ProfileTap> {
                           setState(() {
                             selectedIndex = index;
                           });
+                          widget.onTabChanged(index); // ✅ 여기서 부모에게 전달
                         },
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -65,7 +66,6 @@ class _ProfileTapState extends State<ProfileTap> {
                     );
                   }),
                 ),
-                // 3️⃣ 선택된 탭 강조 바
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeInOut,

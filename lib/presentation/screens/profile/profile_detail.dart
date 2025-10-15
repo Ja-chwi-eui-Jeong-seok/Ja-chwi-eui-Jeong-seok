@@ -53,9 +53,10 @@ class _ProfileDetailState extends ConsumerState<ProfileDetail> {
             },
           ),
           Expanded(
-            child: selectedTab == 0
-                ? ProfileCardList(uid: uid, filterType: 'bookmark')
-                : ProfileCardList(uid: uid, filterType: 'community'),
+             child: ProfileCardList(
+              extra: widget.extra,
+              filterType: selectedTab == 0 ? 'bookmark' : 'communitylist',
+      ),
           ),
         ],
       ),
