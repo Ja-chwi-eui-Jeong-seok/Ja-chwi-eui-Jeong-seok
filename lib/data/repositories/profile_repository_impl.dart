@@ -1,6 +1,7 @@
 import 'package:ja_chwi/domain/entities/profile_entity.dart';
 import 'package:ja_chwi/data/datasources/profile_datasource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class ProfileRepositoryImpl {
   final FirebaseProfileDataSource dataSource;
@@ -26,4 +27,16 @@ class ProfileRepositoryImpl {
 
     return querySnapshot.docs.isNotEmpty;
   }
+  Future<Profile?> getProfileByUid(String uid) async {
+  try {
+    final doc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
+    if (!doc.exists) return null;
+    final data = doc.data()!;
+    return Profile.fromJson(data);
+  } catch (e) {
+    debugPrint("🔥 getProfileByUid error: $e");
+    return null;
+  }
+}
+
 }
