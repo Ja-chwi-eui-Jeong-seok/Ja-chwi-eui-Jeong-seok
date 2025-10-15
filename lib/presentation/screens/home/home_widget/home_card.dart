@@ -83,11 +83,10 @@ class HomeCard extends ConsumerWidget {
                     ),
                     padding: EdgeInsets.zero,
                   ),
-                  onPressed: () {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      router.push('/mission-create');
-                    });
-                  },
+                  onPressed: () => context.push(
+                    '/mission-create',
+                    extra: mission.missiontitle,
+                  ),
 
                   child: Padding(
                     padding: const EdgeInsets.all(4.0),
