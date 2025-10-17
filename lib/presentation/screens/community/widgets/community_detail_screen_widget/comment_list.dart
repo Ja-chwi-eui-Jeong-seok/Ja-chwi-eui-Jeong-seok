@@ -69,7 +69,7 @@ class CommentList extends ConsumerWidget {
 
     // shrinkWrap/physics 건드리지 않기
     return ListView.builder(
-      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
+      padding: const EdgeInsets.only(bottom: 100),
       itemCount: itemCount + (loading ? 1 : 0),
       itemBuilder: (context, i) {
         if (i >= itemCount) {
@@ -300,211 +300,246 @@ class CommentList extends ConsumerWidget {
           child: Column(
             children: [
               // 메인 댓글
-              Container(
-                color: Colors.white,
-                // height: 80,
-                child: Row(
-                  children: [
-                    SizedBox(
-                      height: 45,
-                      width: 45,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(22.5),
-                        child: ColorFiltered(
-                          colorFilter: isBlocked
-                              ? const ColorFilter.mode(
-                                  Colors.grey,
-                                  BlendMode.saturation,
-                                )
-                              : const ColorFilter.mode(
-                                  Colors.transparent,
-                                  BlendMode.multiply,
-                                ),
-                          child: Image.asset(thumbUrl),
+              Consumer(
+                builder: (context, ref, child) {
+                  final replyMode = ref.watch(replyModeProvider);
+                  final replyData = ref.watch(replyModeDataProvider);
+
+                  // 답글 모드이고 현재 댓글이 답글 대상인 경우 회색 배경
+                  final backgroundColor =
+                      (replyMode == ReplyMode.replying &&
+                          replyData != null &&
+                          replyData.parentCommentId == comments[i].id)
+                      ? Colors.grey[100]
+                      : Colors.white;
+
+                  return Container(
+                    color: backgroundColor,
+
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 8,
                         ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              //작성자이름
-                              Text(
-                                nickname,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: isBlocked ? Colors.grey : null,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-
-                              SizedBox(
-                                width: 8,
-                              ),
-
-                              RelativeTimeTextKst(
-                                createdAtUtc: createdAtOf(i).toUtc(),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isBlocked
-                                      ? Colors.grey.shade400
-                                      : Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: isBlocked
-                                      ? () {
-                                          // 차단된 댓글을 클릭하면 표시 상태 토글
-                                          final currentVisibility = ref
-                                              .read(
-                                                blockedCommentVisibilityProvider(
-                                                  uidOf(i),
-                                                ).notifier,
-                                              )
-                                              .state;
-                                          ref
-                                                  .read(
-                                                    blockedCommentVisibilityProvider(
-                                                      uidOf(i),
-                                                    ).notifier,
-                                                  )
-                                                  .state =
-                                              !currentVisibility;
-                                        }
-                                      : null,
-                                  child: MouseRegion(
-                                    cursor: isBlocked
-                                        ? SystemMouseCursors.click
-                                        : SystemMouseCursors.basic,
-                                    child: Text(
-                                      //댓글내용 - 차단된 유저인지 확인
-                                      blockedUsersAsync.when(
-                                        data: (blockedUsers) {
-                                          if (blockedUsers.contains(
-                                            targetUid,
-                                          )) {
-                                            // 차단된 유저인 경우, 표시 상태에 따라 내용 결정
-                                            final isVisible = ref.watch(
-                                              blockedCommentVisibilityProvider(
-                                                uidOf(i),
-                                              ),
-                                            );
-                                            return isVisible
-                                                ? textOf(i)
-                                                : '(차단된 유저입니다)';
-                                          }
-                                          return textOf(i);
-                                        },
-                                        loading: () => textOf(i),
-                                        error: (_, __) => textOf(i),
-                                      ),
-                                      maxLines: 5,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: blockedUsersAsync.when(
-                                        data: (blockedUsers) {
-                                          if (blockedUsers.contains(
-                                            targetUid,
-                                          )) {
-                                            final isVisible = ref.watch(
-                                              blockedCommentVisibilityProvider(
-                                                uidOf(i),
-                                              ),
-                                            );
-                                            return TextStyle(
-                                              color: isVisible
-                                                  ? null
-                                                  : Colors.grey,
-                                              fontStyle: isVisible
-                                                  ? null
-                                                  : FontStyle.italic,
-                                            );
-                                          }
-                                          return null;
-                                        },
-                                        loading: () => null,
-                                        error: (_, __) => null,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (isBlocked) ...[
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.visibility_outlined,
-                                  size: 16,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ],
-                            ],
-                          ),
-
-                          // 답글달기 버튼
-                          if (!isBlocked) ...[
-                            const SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: TextButton(
-                                onPressed: () =>
-                                    _toggleReplyInput(ref, comments[i]),
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  minimumSize: Size.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: Text(
-                                  '답글달기',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 10,
-                                  ),
+                        Row(
+                          children: [
+                            //좌우 패딩용
+                            SizedBox(
+                              width: 25,
+                            ),
+                            SizedBox(
+                              height: 45,
+                              width: 45,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(22.5),
+                                child: ColorFiltered(
+                                  colorFilter: isBlocked
+                                      ? const ColorFilter.mode(
+                                          Colors.grey,
+                                          BlendMode.saturation,
+                                        )
+                                      : const ColorFilter.mode(
+                                          Colors.transparent,
+                                          BlendMode.multiply,
+                                        ),
+                                  child: Image.asset(thumbUrl),
                                 ),
                               ),
                             ),
-                          ],
-                        ],
-                      ),
-                    ),
 
-                    if (isBlocked)
-                      ...[]
-                    else
-                      HeartButton(
-                        liked: isBlocked ? false : isLikedOf(i),
-                        count: isBlocked ? 0 : likeCountOf(i),
-                        onPressed: () => onToggleLike(i),
-                      ),
-                  ],
-                ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      //작성자이름
+                                      Text(
+                                        nickname,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                          color: isBlocked ? Colors.grey : null,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      //댓글작성날짜
+                                      RelativeTimeTextKst(
+                                        createdAtUtc: createdAtOf(i).toUtc(),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: isBlocked
+                                              ? Colors.grey.shade400
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: isBlocked
+                                              ? () {
+                                                  // 차단된 댓글을 클릭하면 표시 상태 토글
+                                                  final currentVisibility = ref
+                                                      .read(
+                                                        blockedCommentVisibilityProvider(
+                                                          uidOf(i),
+                                                        ).notifier,
+                                                      )
+                                                      .state;
+                                                  ref
+                                                          .read(
+                                                            blockedCommentVisibilityProvider(
+                                                              uidOf(i),
+                                                            ).notifier,
+                                                          )
+                                                          .state =
+                                                      !currentVisibility;
+                                                }
+                                              : null,
+                                          child: MouseRegion(
+                                            cursor: isBlocked
+                                                ? SystemMouseCursors.click
+                                                : SystemMouseCursors.basic,
+                                            child: Text(
+                                              //댓글내용 - 차단된 유저인지 확인
+                                              blockedUsersAsync.when(
+                                                data: (blockedUsers) {
+                                                  if (blockedUsers.contains(
+                                                    targetUid,
+                                                  )) {
+                                                    // 차단된 유저인 경우, 표시 상태에 따라 내용 결정
+                                                    final isVisible = ref.watch(
+                                                      blockedCommentVisibilityProvider(
+                                                        uidOf(i),
+                                                      ),
+                                                    );
+                                                    return isVisible
+                                                        ? textOf(i)
+                                                        : '(차단된 유저입니다)';
+                                                  }
+                                                  return textOf(i);
+                                                },
+                                                loading: () => textOf(i),
+                                                error: (_, __) => textOf(i),
+                                              ),
+                                              maxLines: 5,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: blockedUsersAsync.when(
+                                                data: (blockedUsers) {
+                                                  if (blockedUsers.contains(
+                                                    targetUid,
+                                                  )) {
+                                                    final isVisible = ref.watch(
+                                                      blockedCommentVisibilityProvider(
+                                                        uidOf(i),
+                                                      ),
+                                                    );
+                                                    return TextStyle(
+                                                      color: isVisible
+                                                          ? null
+                                                          : Colors.grey,
+                                                      fontStyle: isVisible
+                                                          ? null
+                                                          : FontStyle.italic,
+                                                      fontSize: 12,
+                                                    );
+                                                  }
+                                                  return null;
+                                                },
+                                                loading: () => null,
+                                                error: (_, __) => null,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (isBlocked) ...[
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.visibility_outlined,
+                                          size: 16,
+                                          color: Colors.grey.shade500,
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+
+                                  // 답글달기 버튼
+                                  if (!isBlocked) ...[
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: TextButton(
+                                        onPressed: () =>
+                                            _toggleReplyInput(ref, comments[i]),
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                        child: Text(
+                                          '답글달기',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+
+                            if (isBlocked)
+                              ...[]
+                            else
+                              HeartButton(
+                                liked: isBlocked ? false : isLikedOf(i),
+                                count: isBlocked ? 0 : likeCountOf(i),
+                                onPressed: () => onToggleLike(i),
+                              ),
+                            SizedBox(
+                              width: 25,
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
 
               // 답글 목록 (댓글 box 바깥에 표시)
               if (comments[i].replies.isNotEmpty) ...[
                 Container(
                   margin: const EdgeInsets.only(
-                    left: 57,
-                    bottom: 16,
-                  ), // 프로필 이미지 크기(45) + 간격(12) = 57
+                    left: 80,
+                  ),
                   child: Column(
                     children: comments[i].replies.map((reply) {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: Row(
                           children: [
+                            SizedBox(
+                              height: 8,
+                            ),
                             // 답글 작성자 프로필 이미지 (댓글과 동일한 크기)
                             SizedBox(
                               height: 45,
@@ -604,10 +639,13 @@ class CommentList extends ConsumerWidget {
                                     reply.noteDetail,
                                     maxLines: 5,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ],
                               ),
+                            ),
+                            SizedBox(
+                              height: 8,
                             ),
                           ],
                         ),

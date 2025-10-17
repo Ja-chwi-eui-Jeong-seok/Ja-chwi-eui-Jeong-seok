@@ -67,13 +67,9 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
       final replyMode = ref.read(replyModeProvider);
       final replyData = ref.read(replyModeDataProvider);
 
-      print('댓글 제출 시 답글 모드: $replyMode');
-      print('댓글 제출 시 답글 데이터: $replyData');
-
       if (replyMode == ReplyMode.replying &&
           replyData != null &&
           widget.detailVmProvider != null) {
-        print('답글 작성 모드로 처리');
         // 답글 작성
         await ref
             .read(widget.detailVmProvider!.notifier)
@@ -89,7 +85,6 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
         ref.read(replyModeDataProvider.notifier).state = null;
         widget.commentController.clear(); // 답글 완료 후 컨트롤러 클리어
       } else {
-        print('일반 댓글 작성 모드로 처리');
         // 일반 댓글 작성
         await widget.submit();
       }
@@ -110,9 +105,6 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
     final replyMode = ref.watch(replyModeProvider);
     final replyData = ref.watch(replyModeDataProvider);
 
-    print('CommentWrite build - 답글 모드: $replyMode');
-    print('CommentWrite build - 답글 데이터: $replyData');
-
     //uid 기반 프로필정보 로드(유저정보,위치정보)
     final profileAv = ref.watch(profileByUidProvider(widget.currentUid));
     final profileImg = profileAv.when(
@@ -124,8 +116,9 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
       error: (error, _) => Image.asset('assets/images/m_profile/m_black.png'),
       data: (data) {
         final url = data.thumbUrl;
-        if (url.isEmpty)
+        if (url.isEmpty) {
           return Image.asset('assets/images/m_profile/m_black.png');
+        }
         if (url.startsWith('http')) return Image.network(url);
         return Image.asset(url);
       },
@@ -158,55 +151,55 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
                   ),
                 ),
               ),
-              // 답글 모드 표시
-              if (replyMode == ReplyMode.replying && replyData != null)
-                Container(
-                  width: double.infinity,
-                  // margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[200]!),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.reply,
-                        size: 16,
-                        color: Colors.blue[600],
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${replyData.parentCommentNickname}님에게 답글',
-                        style: TextStyle(
-                          color: Colors.blue[600],
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: () {
-                          // 답글 모드 해제
-                          ref.read(replyModeProvider.notifier).state =
-                              ReplyMode.none;
-                          ref.read(replyModeDataProvider.notifier).state = null;
-                          widget.commentController.clear();
-                        },
-                        child: Icon(
-                          Icons.close,
-                          size: 16,
-                          color: Colors.blue[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
+              // 답글 모드 표시
+              // if (replyMode == ReplyMode.replying && replyData != null)
+              //   Container(
+              //     width: double.infinity,
+              //     // margin: const EdgeInsets.only(bottom: 12),
+              //     padding: const EdgeInsets.symmetric(
+              //       horizontal: 12,
+              //       vertical: 8,
+              //     ),
+              //     decoration: BoxDecoration(
+              //       color: Colors.blue[50],
+              //       borderRadius: BorderRadius.circular(8),
+              //       border: Border.all(color: Colors.blue[200]!),
+              //     ),
+              //     child: Row(
+              //       children: [
+              //         Icon(
+              //           Icons.reply,
+              //           size: 16,
+              //           color: Colors.blue[600],
+              //         ),
+              //         const SizedBox(width: 8),
+              //         Text(
+              //           '${replyData.parentCommentNickname}님에게 답글',
+              //           style: TextStyle(
+              //             color: Colors.blue[600],
+              //             fontWeight: FontWeight.w500,
+              //             fontSize: 14,
+              //           ),
+              //         ),
+              //         const Spacer(),
+              //         GestureDetector(
+              //           onTap: () {
+              //             // 답글 모드 해제
+              //             ref.read(replyModeProvider.notifier).state =
+              //                 ReplyMode.none;
+              //             ref.read(replyModeDataProvider.notifier).state = null;
+              //             widget.commentController.clear();
+              //           },
+              //           child: Icon(
+              //             Icons.close,
+              //             size: 16,
+              //             color: Colors.blue[600],
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
               Container(
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(
