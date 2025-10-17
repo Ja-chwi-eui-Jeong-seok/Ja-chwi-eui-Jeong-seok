@@ -33,3 +33,7 @@ final getCommentCountProvider = Provider<GetCommentCount>(
 final softDeleteCommentProvider = Provider<SoftDeleteComment>(
   (ref) => SoftDeleteComment(ref.read(commentRepoProvider)),
 );
+
+final softDeleteReplyProvider = Provider<SoftDeleteReply>(
+  (ref) => SoftDeleteReply(ref.read(commentRepoProvider)),
+);

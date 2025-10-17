@@ -36,6 +36,12 @@ abstract interface class CommentRepository {
   Future<void> update(String id, Map<String, dynamic> patch);
   Future<void> softDelete(String id);
 
+  /// 답글 소프트 삭제
+  Future<void> softDeleteReply({
+    required String parentCommentId,
+    required String replyId,
+  });
+
   /// 게시글별 댓글 수
   Future<int> getCountByCommunity(
     String communityId, {

@@ -33,6 +33,12 @@ abstract interface class CommentDataSource {
   Future<void> update(String id, Map<String, dynamic> patch);
   Future<void> softDelete(String id);
 
+  // 답글 소프트 삭제
+  Future<void> softDeleteReply({
+    required String parentCommentId,
+    required String replyId,
+  });
+
   //게시글 댓글 카운트용
   Future<int> countByCommunity({
     required String communityId,

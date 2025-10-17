@@ -80,6 +80,17 @@ class CommentRepositoryImpl implements CommentRepository {
   Future<void> softDelete(String id) => ds.softDelete(id);
 
   @override
+  Future<void> softDeleteReply({
+    required String parentCommentId,
+    required String replyId,
+  }) {
+    return ds.softDeleteReply(
+      parentCommentId: parentCommentId,
+      replyId: replyId,
+    );
+  }
+
+  @override
   Future<int> getCountByCommunity(
     String communityId, {
     bool excludeDeleted = true,
