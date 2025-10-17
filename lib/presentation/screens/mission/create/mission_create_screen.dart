@@ -174,6 +174,7 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
             onPressed: () => context.pop(),
           ),
+          titleSpacing: 0.0,
         ),
         body: SingleChildScrollView(
           child: Padding(
