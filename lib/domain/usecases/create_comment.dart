@@ -17,4 +17,19 @@ class CreateComment {
       noteDetail: noteDetail,
     );
   }
+
+  /// 답글 생성
+  Future<Comment> createReply({
+    required String parentCommentId,
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  }) {
+    return repo.createReply(
+      parentCommentId: parentCommentId,
+      communityId: communityId,
+      uid: uid,
+      noteDetail: noteDetail,
+    );
+  }
 }

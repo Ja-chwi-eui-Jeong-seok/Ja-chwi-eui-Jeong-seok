@@ -19,6 +19,7 @@ class CommentRepositoryImpl implements CommentRepository {
     deleteAt: d.deleteAt?.toDate(),
     deleteYn: d.deleteYn,
     commentLog: d.commentLog,
+    replies: d.replies.map(_toEntity).toList(),
   );
 
   @override
@@ -33,6 +34,22 @@ class CommentRepositoryImpl implements CommentRepository {
       noteDetail: noteDetail,
     );
     return _toEntity(dto); //서버시간 반영된 Entity
+  }
+
+  @override
+  Future<Comment> createReply({
+    required String parentCommentId,
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  }) async {
+    final dto = await ds.createReply(
+      parentCommentId: parentCommentId,
+      communityId: communityId,
+      uid: uid,
+      noteDetail: noteDetail,
+    );
+    return _toEntity(dto);
   }
 
   @override
