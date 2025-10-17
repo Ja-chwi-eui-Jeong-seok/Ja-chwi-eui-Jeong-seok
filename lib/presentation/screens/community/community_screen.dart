@@ -382,6 +382,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       ),
                     );
                   }
+
                   final x = st.items[i];
                   final date =
                       DateFormat(
@@ -389,11 +390,15 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       ).format(
                         x.communityCreateDate.toLocal(),
                       );
+                  final pv = x.createUser;
 
                   //댓글수
                   final countAv = ref.watch(commentCountByPostProvider(x.id));
                   Widget commentCount = countAv.when(
-                    data: (c) => Text('$c'),
+                    data: (c) => Text(
+                      '$c',
+                      style: TextStyle(fontSize: 10),
+                    ),
                     loading: () => const SizedBox(
                       width: 14,
                       height: 14,
@@ -455,7 +460,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                     //댓글수 표시
                                     const Icon(
                                       Icons.mode_comment_outlined,
-                                      size: 18,
+                                      size: 14,
                                     ),
                                     const SizedBox(
                                       width: 4,
@@ -693,13 +698,30 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
 
                   final countAv = ref.watch(commentCountByPostProvider(x.id));
                   Widget commentCount = countAv.when(
-                    data: (c) => Text('$c'),
+                    data: (c) => Text(
+                      '$c',
+                      style: TextStyle(fontSize: 10),
+                    ),
                     loading: () => const SizedBox(
-                      width: 14,
-                      height: 14,
+                      width: 10,
+                      height: 10,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    error: (_, __) => const Text('0'),
+                    error: (_, __) => const Text(
+                      '0',
+                      style: TextStyle(fontSize: 10),
+                    ),
+                  );
+                  final pv = ref.watch(profileByUidProvider(x.createUser));
+
+                  final (pvImg, nickName) = pv.when<(String, String)>(
+                    data: (p) => (
+                      p.imageFullUrl,
+                      p.nickname,
+                    ),
+                    loading: () => ('assets/images/profile/black.png', '집먼지'),
+                    error: (_, __) =>
+                        ('assets/images/profile/black.png', '집먼지'),
                   );
 
                   return InkWell(
@@ -715,49 +737,79 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                         border: Border.all(color: Color(0xFFF2F2F2), width: 3),
                       ),
                       padding: const EdgeInsets.all(12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Stack(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      StringUtils.truncateWithEllipsis(
-                                        15,
-                                        x.communityName,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          StringUtils.truncateWithEllipsis(
+                                            15,
+                                            x.communityName,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          date,
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
                                     ),
                                     Spacer(),
-                                    Text(date),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          nickName,
+                                          style: TextStyle(fontSize: 14),
+                                        ),
+                                        Spacer(),
+                                        const Icon(
+                                          Icons.mode_comment_outlined,
+                                          size: 13,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        commentCount,
+                                        const SizedBox(width: 10),
+                                        _BookmarkIcon(
+                                          postId: x.id,
+                                          authorUid: x.createUser,
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
-                                Spacer(),
-                                Row(
-                                  children: [
-                                    NickName(uid: x.createUser),
-                                    Spacer(),
-                                    const Icon(
-                                      Icons.mode_comment_outlined,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    commentCount,
-                                    const SizedBox(width: 10),
-                                    _BookmarkIcon(
-                                      postId: x.id,
-                                      authorUid: x.createUser,
-                                    ),
-                                  ],
+                              ),
+                            ],
+                          ),
+                          Positioned.fill(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: IgnorePointer(
+                              child: Align(
+                                heightFactor: 0.5,
+                                alignment: Alignment.bottomCenter,
+                                child: Opacity(
+                                  opacity: 0.35,
+                                  child:
+                                      //Text('test'),
+                                      Image.asset(
+                                        pvImg,
+                                      ),
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
@@ -794,17 +846,17 @@ class _BookmarkIcon extends ConsumerWidget {
     return bookmarkStatusAsync.when(
       data: (isBookmarked) => Icon(
         isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-        size: 18,
+        size: 16,
         color: isBookmarked ? Colors.orange : Colors.grey,
       ),
       loading: () => const SizedBox(
-        width: 18,
-        height: 18,
+        width: 16,
+        height: 16,
         child: CircularProgressIndicator(strokeWidth: 2),
       ),
       error: (_, __) => const Icon(
         Icons.bookmark_border,
-        size: 18,
+        size: 16,
         color: Colors.grey,
       ),
     );
