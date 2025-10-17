@@ -64,7 +64,6 @@ final userProfileProvider = StreamProvider<UserProfile>((ref) {
 /// MissionRepository를 제공하는 Provider
 final missionRepositoryProvider = Provider<MissionRepository>((ref) {
   final firestore = FirebaseFirestore.instance;
-  // 기본 버킷 대신 새로 생성한 'us-west1' 버킷을 사용하도록 지정합니다.
   final storage = FirebaseStorage.instanceFor(
     bucket: 'gs://ja-chwi-eui-jeong-seok',
   );

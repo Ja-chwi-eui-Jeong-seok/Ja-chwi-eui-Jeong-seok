@@ -464,7 +464,10 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                     commentCount,
                                     const SizedBox(width: 10),
                                     // 북마크 아이콘
-                                    _BookmarkIcon(postId: x.id),
+                                    _BookmarkIcon(
+                                      postId: x.id,
+                                      authorUid: x.createUser,
+                                    ),
                                   ],
                                 ),
                               ],
@@ -748,7 +751,10 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                                     const SizedBox(width: 4),
                                     commentCount,
                                     const SizedBox(width: 10),
-                                    _BookmarkIcon(postId: x.id),
+                                    _BookmarkIcon(
+                                      postId: x.id,
+                                      authorUid: x.createUser,
+                                    ),
                                   ],
                                 ),
                               ],
@@ -770,11 +776,19 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
 
 // 북마크 아이콘 위젯
 class _BookmarkIcon extends ConsumerWidget {
-  const _BookmarkIcon({required this.postId});
+  const _BookmarkIcon({required this.postId, required this.authorUid});
   final String postId;
+  final String authorUid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+
+    // 자신의 글일 경우 북마크 아이콘을 숨김
+    if (currentUserUid == authorUid) {
+      return const SizedBox.shrink();
+    }
+
     final bookmarkStatusAsync = ref.watch(isBookmarkedProvider(postId));
 
     return bookmarkStatusAsync.when(
