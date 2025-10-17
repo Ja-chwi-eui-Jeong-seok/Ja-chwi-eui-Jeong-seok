@@ -17,6 +17,14 @@ abstract interface class CommentRepository {
     required String noteDetail,
   });
 
+  /// 답글 생성 (서브컬렉션에 저장)
+  Future<Comment> createReply({
+    required String parentCommentId,
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  });
+
   Future<PagedComments> fetchByCommunity({
     required String communityId,
     required CommentOrder order,
