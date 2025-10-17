@@ -406,123 +406,140 @@ class CommentList extends ConsumerWidget {
                             child: Container(
                               color: Colors.white,
                               margin: const EdgeInsets.only(bottom: 8),
-                              child: Row(
+                              child: Column(
                                 children: [
                                   SizedBox(
                                     height: 8,
                                   ),
-                                  // 답글 작성자 프로필 이미지 (댓글과 동일한 크기)
-                                  SizedBox(
-                                    height: 45,
-                                    width: 45,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(22.5),
-                                      child: Consumer(
-                                        builder: (context, ref, child) {
-                                          final profileAsync = ref.watch(
-                                            profileByUidProvider(reply.uid),
-                                          );
+                                  Row(
+                                    children: [
+                                      // 답글 작성자 프로필 이미지 (댓글과 동일한 크기)
+                                      SizedBox(
+                                        height: 45,
+                                        width: 45,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            22.5,
+                                          ),
+                                          child: Consumer(
+                                            builder: (context, ref, child) {
+                                              final profileAsync = ref.watch(
+                                                profileByUidProvider(reply.uid),
+                                              );
 
-                                          return profileAsync.when(
-                                            data: (profile) {
-                                              final thumbUrl = profile.thumbUrl;
-                                              if (thumbUrl.isEmpty) {
-                                                return Image.asset(
+                                              return profileAsync.when(
+                                                data: (profile) {
+                                                  final thumbUrl =
+                                                      profile.thumbUrl;
+                                                  if (thumbUrl.isEmpty) {
+                                                    return Image.asset(
+                                                      'assets/images/m_profile/m_black.png',
+                                                    );
+                                                  }
+                                                  if (thumbUrl.startsWith(
+                                                    'http',
+                                                  )) {
+                                                    return Image.network(
+                                                      thumbUrl,
+                                                    );
+                                                  }
+                                                  return Image.asset(thumbUrl);
+                                                },
+                                                loading: () => Image.asset(
                                                   'assets/images/m_profile/m_black.png',
-                                                );
-                                              }
-                                              if (thumbUrl.startsWith('http')) {
-                                                return Image.network(thumbUrl);
-                                              }
-                                              return Image.asset(thumbUrl);
+                                                ),
+                                                error: (_, __) => Image.asset(
+                                                  'assets/images/m_profile/m_black.png',
+                                                ),
+                                              );
                                             },
-                                            loading: () => Image.asset(
-                                              'assets/images/m_profile/m_black.png',
-                                            ),
-                                            error: (_, __) => Image.asset(
-                                              'assets/images/m_profile/m_black.png',
-                                            ),
-                                          );
-                                        },
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
 
-                                  const SizedBox(width: 12),
+                                      const SizedBox(width: 12),
 
-                                  // 답글 내용 (댓글과 동일한 구조)
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
+                                      // 답글 내용 (댓글과 동일한 구조)
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            // 닉네임 (댓글과 동일한 스타일)
-                                            Consumer(
-                                              builder: (context, ref, child) {
-                                                final profileAsync = ref.watch(
-                                                  profileByUidProvider(
-                                                    reply.uid,
-                                                  ),
-                                                );
+                                            Row(
+                                              children: [
+                                                // 닉네임 (댓글과 동일한 스타일)
+                                                Consumer(
+                                                  builder: (context, ref, child) {
+                                                    final profileAsync = ref
+                                                        .watch(
+                                                          profileByUidProvider(
+                                                            reply.uid,
+                                                          ),
+                                                        );
 
-                                                return profileAsync.when(
-                                                  data: (profile) => Text(
-                                                    profile.nickname,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+                                                    return profileAsync.when(
+                                                      data: (profile) => Text(
+                                                        profile.nickname,
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      loading: () => Text(
+                                                        reply.uid,
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      error: (_, __) => Text(
+                                                        'error',
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+
+                                                const SizedBox(width: 8),
+
+                                                // 시간 (댓글과 동일한 스타일)
+                                                Text(
+                                                  _formatTime(reply.createAt),
+                                                  style: const TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.grey,
                                                   ),
-                                                  loading: () => Text(
-                                                    reply.uid,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  error: (_, __) => Text(
-                                                    reply.uid,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                );
-                                              },
+                                                ),
+                                              ],
                                             ),
 
-                                            const SizedBox(width: 8),
+                                            const SizedBox(height: 4),
 
-                                            // 시간 (댓글과 동일한 스타일)
+                                            // 답글 내용 (댓글과 동일한 스타일)
                                             Text(
-                                              _formatTime(reply.createAt),
+                                              reply.noteDetail,
+                                              maxLines: 5,
+                                              overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 fontSize: 12,
-                                                color: Colors.grey,
                                               ),
                                             ),
                                           ],
                                         ),
-
-                                        const SizedBox(height: 4),
-
-                                        // 답글 내용 (댓글과 동일한 스타일)
-                                        Text(
-                                          reply.noteDetail,
-                                          maxLines: 5,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                   SizedBox(
                                     height: 8,
