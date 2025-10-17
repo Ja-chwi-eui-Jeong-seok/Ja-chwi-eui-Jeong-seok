@@ -65,264 +65,306 @@ class MissionAchieversScreenState
           final weekString =
               '${DateFormat('yyyy년 MM월 dd일').format(startOfWeek)} ~ ${DateFormat('MM월 dd일').format(endOfWeek)}';
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                userProfileAsync.when(
-                  data: (profile) => Text(
-                    '위치 : ${profile.dongName}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  loading: () => const SizedBox(), // 로딩 중에는 아무것도 표시하지 않음
-                  error: (_, __) => const SizedBox(), // 에러 시에도 아무것도 표시하지 않음
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 16,
+                    userProfileAsync.when(
+                      data: (profile) => Text(
+                        '위치 : ${profile.dongName}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      onPressed: () {
-                        ref
-                            .read(selectedWeekProvider.notifier)
-                            .state = selectedWeek.subtract(
-                          const Duration(days: 7),
-                        );
-                      },
+                      loading: () => const SizedBox(), // 로딩 중에는 아무것도 표시하지 않음
+                      error: (_, __) => const SizedBox(), // 에러 시에도 아무것도 표시하지 않음
                     ),
-                    const SizedBox(width: 20),
-                    Text(
-                      weekString,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onPressed: () {
-                        ref.read(selectedWeekProvider.notifier).state =
-                            selectedWeek.add(const Duration(days: 7));
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: achievers.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.only(bottom: 140.0),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/images/profile/tung.png',
-                                  width: 150,
-                                  height: 150,
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  '아직 아무도 달성 못했어요...',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  '이웃보다 먼저 순위에 도달해보세요!',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new,
+                            size: 16,
                           ),
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildRankingSection(achievers),
-                            const SizedBox(height: 24),
-                            Expanded(
-                              child: achievers.length <= 3
-                                  ? const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.only(bottom: 150),
-                                        child: Text(
-                                          '미션을 완료하고 랭킹에 참여해보세요!',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 14,
-                                          ),
-                                        ),
+                          onPressed: () {
+                            ref
+                                .read(selectedWeekProvider.notifier)
+                                .state = selectedWeek.subtract(
+                              const Duration(days: 7),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 20),
+                        Text(
+                          weekString,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                          onPressed: () {
+                            ref.read(selectedWeekProvider.notifier).state =
+                                selectedWeek.add(const Duration(days: 7));
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: achievers.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 140.0),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/profile/tung.png',
+                                      width: 150,
+                                      height: 150,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      '아직 아무도 달성 못했어요...',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
                                       ),
-                                    )
-                                  : ListView.separated(
-                                      // 1, 2, 3위는 상단에 표시되므로 4위부터 리스트에 표시
-                                      itemCount:
-                                          _getListItemCount(
-                                            achievers.length,
-                                          ) +
-                                          (achievers.length > 10 &&
-                                                  !_showAllAchievers
-                                              ? 1
-                                              : 0),
-                                      itemBuilder: (context, index) {
-                                        // '더보기' 버튼 렌더링
-                                        if (index ==
-                                                _getListItemCount(
-                                                  achievers.length,
-                                                ) &&
-                                            achievers.length > 10 &&
-                                            !_showAllAchievers) {
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 16.0,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      '이웃보다 먼저 순위에 도달해보세요!',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildRankingSection(achievers),
+                                const SizedBox(height: 24),
+                                Expanded(
+                                  child: achievers.length <= 3
+                                      ? const Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: 150,
                                             ),
-                                            child: TextButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                  _showAllAchievers = true;
-                                                });
-                                              },
-                                              child: const Text(
-                                                '더보기',
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                            child: Text(
+                                              '미션을 완료하고 랭킹에 참여해보세요!',
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 14,
                                               ),
                                             ),
-                                          );
-                                        }
-
-                                        final rank = index + 4;
-                                        final achiever = achievers[rank - 1];
-
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0,
                                           ),
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 30,
-                                                child: Text(
-                                                  '$rank',
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              SizedBox(
-                                                width: 48,
-                                                height: 48,
-                                                child: ClipOval(
-                                                  child: Image(
-                                                    image:
-                                                        (achiever.imageFullUrl
-                                                                    .startsWith(
-                                                                      'http',
-                                                                    )
-                                                                ? NetworkImage(
-                                                                    achiever
-                                                                        .imageFullUrl,
-                                                                  )
-                                                                : AssetImage(
-                                                                    achiever
-                                                                        .imageFullUrl,
-                                                                  ))
-                                                            as ImageProvider,
-                                                    fit: BoxFit.contain,
-                                                    errorBuilder:
-                                                        (
-                                                          context,
-                                                          error,
-                                                          stackTrace,
-                                                        ) => const Icon(
-                                                          Icons.person,
-                                                          size: 30,
-                                                        ),
+                                        )
+                                      : ListView.separated(
+                                          // 1, 2, 3위는 상단에 표시되므로 4위부터 리스트에 표시
+                                          itemCount:
+                                              _getListItemCount(
+                                                achievers.length,
+                                              ) +
+                                              (achievers.length > 10 &&
+                                                      !_showAllAchievers
+                                                  ? 1
+                                                  : 0),
+                                          itemBuilder: (context, index) {
+                                            // '더보기' 버튼 렌더링
+                                            if (index ==
+                                                    _getListItemCount(
+                                                      achievers.length,
+                                                    ) &&
+                                                achievers.length > 10 &&
+                                                !_showAllAchievers) {
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 16.0,
+                                                    ),
+                                                child: TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      _showAllAchievers = true;
+                                                    });
+                                                  },
+                                                  child: const Text(
+                                                    '더보기',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Text(
-                                                achiever.level,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                achiever.name,
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const Spacer(),
-                                              Text(
-                                                '${achiever.weekCount}회',
-                                                style: const TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              TextButton(
-                                                onPressed: () {
-                                                  navigateToUserMissions(
-                                                    achiever,
-                                                  );
-                                                },
-                                                child: const Row(
-                                                  children: [
-                                                    Text(
-                                                      '상세보기',
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 13,
+                                              );
+                                            }
+
+                                            final rank = index + 4;
+                                            final achiever =
+                                                achievers[rank - 1];
+
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 8.0,
+                                                  ),
+                                              child: Row(
+                                                children: [
+                                                  SizedBox(
+                                                    width: 30,
+                                                    child: Text(
+                                                      '$rank',
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
                                                         fontWeight:
                                                             FontWeight.bold,
                                                       ),
+                                                      textAlign:
+                                                          TextAlign.center,
                                                     ),
-                                                    SizedBox(width: 2),
-                                                    Icon(
-                                                      Icons.arrow_forward_ios,
-                                                      color: Colors.black,
-                                                      size: 13,
+                                                  ),
+                                                  const SizedBox(width: 16),
+                                                  SizedBox(
+                                                    width: 48,
+                                                    height: 48,
+                                                    child: ClipOval(
+                                                      child: Image(
+                                                        image:
+                                                            (achiever.imageFullUrl
+                                                                        .startsWith(
+                                                                          'http',
+                                                                        )
+                                                                    ? NetworkImage(
+                                                                        achiever
+                                                                            .imageFullUrl,
+                                                                      )
+                                                                    : AssetImage(
+                                                                        achiever
+                                                                            .imageFullUrl,
+                                                                      ))
+                                                                as ImageProvider,
+                                                        fit: BoxFit.contain,
+                                                        errorBuilder:
+                                                            (
+                                                              context,
+                                                              error,
+                                                              stackTrace,
+                                                            ) => const Icon(
+                                                              Icons.person,
+                                                              size: 30,
+                                                            ),
+                                                      ),
                                                     ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                  const SizedBox(width: 16),
+                                                  Text(
+                                                    achiever.level,
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    achiever.name,
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const Spacer(),
+                                                  Text(
+                                                    '${achiever.weekCount}회',
+                                                    style: const TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      navigateToUserMissions(
+                                                        achiever,
+                                                      );
+                                                    },
+                                                    child: const Row(
+                                                      children: [
+                                                        Text(
+                                                          '상세보기',
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 13,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 2),
+                                                        Icon(
+                                                          Icons
+                                                              .arrow_forward_ios,
+                                                          color: Colors.black,
+                                                          size: 13,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                      separatorBuilder: (context, index) =>
-                                          const SizedBox(height: 8),
-                                    ),
+                                            );
+                                          },
+                                          separatorBuilder: (context, index) =>
+                                              const SizedBox(height: 8),
+                                        ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              if (achievers.isNotEmpty && achievers.length <= 3)
+                Builder(
+                  builder: (context) {
+                    final screenPadding = MediaQuery.of(context).padding.right;
+                    const double imageWidth = 80;
+                    return Positioned(
+                      bottom: 100,
+                      right: -20 - screenPadding,
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(
+                            const SnackBar(
+                              content: Text('미션을 해주세요!'),
+                            ),
+                          );
+                        },
+                        child: Image.asset(
+                          'assets/images/profile/hide.png',
+                          width: imageWidth,
+                          height: 80,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+            ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -434,7 +476,6 @@ class MissionAchieversScreenState
                 shape: BoxShape.circle,
               ),
             ),
-            // 'Zzz' (sleep.png)일 경우, 원형 클리핑 없이 비율 유지
             if (achiever.name == 'Zzz')
               SizedBox(
                 width: circleSize,
