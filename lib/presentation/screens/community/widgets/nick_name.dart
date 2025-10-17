@@ -10,8 +10,11 @@ class NickName extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final av = ref.watch(profileByUidProvider(uid));
     return av.when(
-      data: (p) => Text(p.nickname.isNotEmpty ? p.nickname : '익명'),
-      loading: () => const SizedBox(width: 30, height: 12),
+      data: (p) => Text(
+        p.nickname.isNotEmpty ? p.nickname : '익명',
+        style: TextStyle(fontSize: 14),
+      ),
+      loading: () => const CircularProgressIndicator(),
       error: (_, __) => const Text('—'),
     );
   }
