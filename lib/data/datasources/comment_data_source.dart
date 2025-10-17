@@ -11,6 +11,17 @@ abstract interface class CommentDataSource {
     required String noteDetail,
   });
 
+  // 답글 생성 (서브컬렉션에 저장)
+  Future<CommentDto> createReply({
+    required String parentCommentId,
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  });
+
+  // 답글 목록 조회
+  Future<List<CommentDto>> fetchReplies(String parentCommentId);
+
   Future<PagedResult<CommentDto>> fetchByCommunity({
     required String communityId,
     required CommentOrder order,
