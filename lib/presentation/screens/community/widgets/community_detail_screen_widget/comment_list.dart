@@ -401,6 +401,17 @@ class CommentList extends ConsumerWidget {
                                 nickname: reply.uid,
                                 commentText: reply.noteDetail,
                                 createdAt: reply.createAt,
+                                onDelete: (me != null && me == reply.uid)
+                                    ? () async {
+                                        await ref
+                                            .read(detailVmProvider.notifier)
+                                            .deleteReply(
+                                              ref,
+                                              parentCommentId: comments[i].id,
+                                              replyId: reply.id,
+                                            );
+                                      }
+                                    : null,
                               );
                             },
                             child: Container(
