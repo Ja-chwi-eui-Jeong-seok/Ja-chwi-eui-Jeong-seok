@@ -17,7 +17,7 @@ class TripleArrowIcon extends StatelessWidget {
           offset: Offset(size * 2 / 3, 0),
           child: Icon(
             Icons.arrow_forward_ios,
-            color: const Color(0xFF8F8F8F),
+            color: const Color(0xFFEDC65A),
             size: size,
           ),
         ),
@@ -25,7 +25,7 @@ class TripleArrowIcon extends StatelessWidget {
           offset: const Offset(0, 0),
           child: Icon(
             Icons.arrow_forward_ios,
-            color: const Color(0xFF666666),
+            color: const Color(0xFFEDA85A),
             size: size,
           ),
         ),
@@ -33,7 +33,7 @@ class TripleArrowIcon extends StatelessWidget {
           offset: Offset(-size * 2 / 3, 0),
           child: Icon(
             Icons.arrow_forward_ios,
-            color: const Color(0xFF342E37),
+            color: const Color(0xFFED8B5A),
             size: size,
           ),
         ),

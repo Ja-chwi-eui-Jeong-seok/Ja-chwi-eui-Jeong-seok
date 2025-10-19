@@ -40,10 +40,11 @@ class AiChatCircle extends StatelessWidget {
             shape: BoxShape.circle,
             color: Colors.black,
           ),
-          child: Icon(
-            icon,
+          child: Image.asset(
+            'assets/images/icons/chat.png',
             color: Colors.white,
-            size: effectiveRadius,
+            height: 50,
+            width: 50,
           ),
         ),
       ),
