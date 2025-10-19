@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/calendar_view.dart';
@@ -26,6 +27,11 @@ class MissionSavedListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: CommonAppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => context.pop(),
+        ),
+        titleSpacing: 0.0,
         actions: [
           RefreshIconButton(
             onPressed: () => ref.invalidate(userMissionsProvider),
