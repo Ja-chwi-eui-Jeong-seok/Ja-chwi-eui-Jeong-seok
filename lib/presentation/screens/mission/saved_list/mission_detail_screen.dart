@@ -128,8 +128,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
-            const Divider(),
+            // const SizedBox(height: 16),
+            // const Divider(),
             const SizedBox(height: 16),
 
             // 내용
