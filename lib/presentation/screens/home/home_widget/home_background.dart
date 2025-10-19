@@ -12,13 +12,13 @@ class HomeBackground extends StatelessWidget {
       children: [
         // 언덕
         Positioned(
-          bottom: -0.1 * screenHeight, // 화면 높이 비율
+          bottom: -0.2 * screenHeight, // 화면 높이 비율
           left: -0.55 * screenWidth, // 화면 너비 비율
           right: -0.55 * screenWidth,
           child: Container(
             height: 0.45 * screenHeight, // 높이도 비율로
             decoration: BoxDecoration(
-              color: const Color(0xFFD9D9D9),
+              color: const Color(0xFFF5D5A3),
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(0.45 * screenHeight),
               ),
