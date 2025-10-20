@@ -102,8 +102,8 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
   @override
   Widget build(BuildContext context) {
     final sending = ref.watch(commentSendingProvider);
-    final replyMode = ref.watch(replyModeProvider);
-    final replyData = ref.watch(replyModeDataProvider);
+    ref.watch(replyModeProvider);
+    ref.watch(replyModeDataProvider);
 
     //uid 기반 프로필정보 로드(유저정보,위치정보)
     final profileAv = ref.watch(profileByUidProvider(widget.currentUid));
