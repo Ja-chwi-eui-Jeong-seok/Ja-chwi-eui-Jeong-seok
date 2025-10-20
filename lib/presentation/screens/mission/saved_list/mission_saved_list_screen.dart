@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/screens/mission/achievers/mission_calendar_utils.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/calendar_view.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/completed_mission_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
@@ -64,7 +64,7 @@ class MissionSavedListScreen extends ConsumerWidget {
     WidgetRef ref,
     DateTime selectedDate,
   ) {
-    final completedMissions = _mapMissionsToCalendarEvents(missions);
+    final completedMissions = mapMissionsToCalendarEvents(missions);
     final totalCompletedMissionsForMonth =
         _calculateTotalCompletedMissionsForMonth(missions, selectedDate);
     final daysInMonth = _getDaysInMonth(selectedDate);
@@ -133,26 +133,6 @@ class MissionSavedListScreen extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  Map<DateTime, Map<String, dynamic>> _mapMissionsToCalendarEvents(
-    List<Map<String, dynamic>> missions,
-  ) {
-    final Map<DateTime, Map<String, dynamic>> eventMap = {};
-    for (var mission in missions) {
-      final completedAt = (mission['missioncreatedate'] as Timestamp?)
-          ?.toDate();
-      if (completedAt != null) {
-        final date = DateTime.utc(
-          completedAt.year,
-          completedAt.month,
-          completedAt.day,
-        );
-
-        eventMap[date] = mission;
-      }
-    }
-    return eventMap;
   }
 
   int _getDaysInMonth(DateTime date) {

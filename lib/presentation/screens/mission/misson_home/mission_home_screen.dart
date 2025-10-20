@@ -6,6 +6,7 @@ import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.da
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
 import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission_card.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_profile_tile.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
@@ -169,65 +170,19 @@ class MissionHomeScreen extends ConsumerWidget {
                 final achiever = achievers[i];
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 32,
-                        child: Text(
-                          '${i + 1}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: ClipOval(
-                          child: Image(
-                            image:
-                                (achiever.imageFullUrl.startsWith('http')
-                                        ? NetworkImage(achiever.imageFullUrl)
-                                        : AssetImage(achiever.imageFullUrl))
-                                    as ImageProvider,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.person, size: 30),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              achiever.level,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              achiever.name,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        '${achiever.weekCount}회',
+                  child: AchieverProfileTile(
+                    achiever: achiever,
+                    leading: SizedBox(
+                      width: 32,
+                      child: Text(
+                        '${i + 1}',
                         style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    ],
+                    ),
                   ),
                 );
               }),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_profile_tile.dart';
 import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:intl/intl.dart';
@@ -224,106 +225,60 @@ class MissionAchieversScreenState
                                                   const EdgeInsets.symmetric(
                                                     vertical: 8.0,
                                                   ),
-                                              child: Row(
-                                                children: [
-                                                  SizedBox(
-                                                    width: 30,
-                                                    child: Text(
-                                                      '$rank',
-                                                      style: const TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 16),
-                                                  SizedBox(
-                                                    width: 48,
-                                                    height: 48,
-                                                    child: ClipOval(
-                                                      child: Image(
-                                                        image:
-                                                            (achiever.imageFullUrl
-                                                                        .startsWith(
-                                                                          'http',
-                                                                        )
-                                                                    ? NetworkImage(
-                                                                        achiever
-                                                                            .imageFullUrl,
-                                                                      )
-                                                                    : AssetImage(
-                                                                        achiever
-                                                                            .imageFullUrl,
-                                                                      ))
-                                                                as ImageProvider,
-                                                        fit: BoxFit.contain,
-                                                        errorBuilder:
-                                                            (
-                                                              context,
-                                                              error,
-                                                              stackTrace,
-                                                            ) => const Icon(
-                                                              Icons.person,
-                                                              size: 30,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 16),
-                                                  Text(
-                                                    achiever.level,
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Text(
-                                                    achiever.name,
+                                              child: AchieverProfileTile(
+                                                achiever: achiever,
+                                                leading: SizedBox(
+                                                  width: 30,
+                                                  child: Text(
+                                                    '$rank',
                                                     style: const TextStyle(
                                                       fontSize: 16,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
+                                                    textAlign: TextAlign.center,
                                                   ),
-                                                  const Spacer(),
-                                                  Text(
-                                                    '${achiever.weekCount}회',
-                                                    style: const TextStyle(
-                                                      color: Colors.grey,
+                                                ),
+                                                trailing: Row(
+                                                  children: [
+                                                    Text(
+                                                      '${achiever.weekCount}회',
+                                                      style: const TextStyle(
+                                                        color: Colors.grey,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      navigateToUserMissions(
-                                                        achiever,
-                                                      );
-                                                    },
-                                                    child: const Row(
-                                                      children: [
-                                                        Text(
-                                                          '상세보기',
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 13,
-                                                            fontWeight:
-                                                                FontWeight.bold,
+                                                    const SizedBox(width: 8),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        navigateToUserMissions(
+                                                          achiever,
+                                                        );
+                                                      },
+                                                      child: const Row(
+                                                        children: [
+                                                          Text(
+                                                            '상세보기',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontSize: 13,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        SizedBox(width: 2),
-                                                        Icon(
-                                                          Icons
-                                                              .arrow_forward_ios,
-                                                          color: Colors.black,
-                                                          size: 13,
-                                                        ),
-                                                      ],
+                                                          SizedBox(width: 2),
+                                                          Icon(
+                                                            Icons
+                                                                .arrow_forward_ios,
+                                                            color: Colors.black,
+                                                            size: 13,
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
                                               ),
                                             );
                                           },
