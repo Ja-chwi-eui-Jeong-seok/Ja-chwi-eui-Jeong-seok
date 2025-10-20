@@ -21,7 +21,7 @@ class _ProfileDetailState extends ConsumerState<ProfileDetail> {
     // ✅ 여기에서는 ref를 직접 받지 않고,
     // ConsumerState 내부의 `ref` 프로퍼티를 사용합니다.
     final uid = widget.extra?['uid'] as String?;
-    print('ProfileDetailScreen extra: ${widget.extra}');
+    print('ProfileDetailScreen----> extra: ${widget.extra}');
 
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +51,7 @@ class _ProfileDetailState extends ConsumerState<ProfileDetail> {
             onTabChanged: (index) {
               setState(() => selectedTab = index);
             },
-          ),
+          ),const SizedBox(height: 10),
           Expanded(
              child: ProfileCardList(
               extra: widget.extra,

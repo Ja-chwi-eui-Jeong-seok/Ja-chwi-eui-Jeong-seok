@@ -144,7 +144,6 @@ final GoRouter router = GoRouter(
       name: '커뮤니티',
       builder: (context, state) {
         final args = state.extra as Map<String, dynamic>?;
-
         return CommunityScreen(extra: args);
       },
       //builder: (context, state) => const CommunityScreen(),
@@ -152,27 +151,39 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/community-detail',
       name: '커뮤니티 상세',
-      builder: (context, state) {
-        final id = state.extra as String; // ← 리스트에서 넘긴 문서 id
-        return CommunityDetailScreen(id: id);
+       builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        final id = data['id'] as String;
+        final extra = (data['extra'] is Map<String, dynamic>)
+          ? data['extra'] as Map<String, dynamic>
+          : <String, dynamic>{};
+        return CommunityDetailScreen(id: id, extra: extra);
       },
     ),
     GoRoute(
       path: '/community-create',
       name: '커뮤니티 작성',
-      builder: (context, state) => const CommunityCreateScreen(),
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        return CommunityCreateScreen(extra: data);
+      },
     ),
     GoRoute(
       path: '/community-edit',
       name: '커뮤니티 수정',
       builder: (context, state) {
-        final id = state.extra as String;
-        return CommunityCreateScreen(id: id);
+        final data = state.extra as Map<String, dynamic>;
+        final id = data['id'] as String;
+
+        final extra = (data['extra'] is Map<String, dynamic>)
+          ? data['extra'] as Map<String, dynamic>
+          : <String, dynamic>{};
+        return CommunityCreateScreen(id: id, extra: extra);
       },
     ),
     GoRoute(
       path: '/profile-flow',
-
+      name: '프로필 흐름',
       redirect: (context, state) {
         final data = state.extra as Map<String, dynamic>?;
         final uid = data?['uid'] as String?;
