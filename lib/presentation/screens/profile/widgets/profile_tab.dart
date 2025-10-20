@@ -14,7 +14,7 @@ class _ProfileTapState extends State<ProfileTap> {
 
   final List<IconData> icons = [
     Icons.bookmark_outline,
-    Icons.edit_outlined,
+    Icons.border_color,
   ];
 
   @override

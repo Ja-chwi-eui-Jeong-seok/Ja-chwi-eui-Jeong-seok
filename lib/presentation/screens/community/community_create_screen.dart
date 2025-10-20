@@ -19,7 +19,8 @@ final selectedCategoryCodeProvider = StateProvider<int?>((_) => null);
 final selectedSubCategoryCodeProvider = StateProvider<int?>((_) => null);
 
 class CommunityCreateScreen extends ConsumerStatefulWidget {
-  const CommunityCreateScreen({super.key, this.id});
+    final Map<String, dynamic>? extra;
+  const CommunityCreateScreen({super.key, this.id, this.extra});
   final String? id;
 
   @override
@@ -461,7 +462,11 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                 ) {
                                   context.pushReplacement(
                                     '/community-detail',
-                                    extra: vmState.postId,
+                                    //extra: vmState.postId,
+                                    extra: {
+                                      'id': vmState.postId,   // 반드시 Map으로 전달
+                                      'extra': widget.extra, // 기존 extra가 있다면 같이 전달
+                                    },
                                   );
                                 });
                                 //게시글 리스트 초기화
@@ -512,7 +517,10 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                 ) {
                                   context.pushReplacement(
                                     '/community-detail',
-                                    extra: res.newId,
+                                    extra: {
+                                      'id': res.newId,   // 반드시 Map으로 전달
+                                      'extra': widget.extra, // 기존 extra가 있다면 같이 전달
+                                    },
                                   );
                                 });
                               }

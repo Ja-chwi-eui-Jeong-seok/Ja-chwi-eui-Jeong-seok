@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class BookmarkDetailScreen extends StatefulWidget {
+  final Map<String, dynamic>? extra; // ← 이 줄이 없으면 error
   final List<QueryDocumentSnapshot> bookmarkDocs;
 
-  const BookmarkDetailScreen({super.key, required this.bookmarkDocs});
+  const BookmarkDetailScreen({super.key, required this.bookmarkDocs, this.extra});
 
   @override
   State<BookmarkDetailScreen> createState() => _BookmarkDetailScreenState();
@@ -165,7 +167,7 @@ class _BookmarkDetailScreenState extends State<BookmarkDetailScreen> {
         title: const Text('저장 목록'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.autorenew_outlined),
             tooltip: '필터 초기화',
             onPressed: resetFilters,
           ),
@@ -188,7 +190,7 @@ class _BookmarkDetailScreenState extends State<BookmarkDetailScreen> {
                 // 🔹 상단 필터 표시
                 Container(
                   width: double.infinity,
-                  color: Colors.grey.shade200,
+                  color: Color(0xFFF6CE1A).withValues(alpha: 0.2),
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,6 +227,7 @@ class _BookmarkDetailScreenState extends State<BookmarkDetailScreen> {
                                 ? DateFormat('yyyy-MM-dd HH:mm').format(createdAt)
                                 : '';
                             final name = data['community_name'] ?? '제목 없음';
+                            final id = data['id'] ?? '제목 없음';
                             final location = data['location'] ?? '';
                             final nickname = data['nickname'] ?? '';
                             final thumbUrl = data['thumbUrl'];
@@ -247,9 +250,27 @@ class _BookmarkDetailScreenState extends State<BookmarkDetailScreen> {
                                   style: const TextStyle(height: 1.3),
                                 ),
                                 isThreeLine: true,
-                                trailing: const Icon(Icons.arrow_forward_ios,
-                                    size: 16, color: Colors.grey),
-                                onTap: () {},
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ],
+                                ),
+                                // onTap: () => context.push(
+                                //   '/community-detail',
+                                //   extra: {'id': id, 'extra': data},
+                                // ),
+                                onTap: () async {
+                                  await context.push(
+                                    '/community-detail',
+                                    extra: {'id': id, 'extra': widget.extra},
+                                  ); // 🔹 뒤로 돌아왔을 때 새로고침
+                                  await _loadCommunityData();
+                                },
                               ),
                             );
                           },
