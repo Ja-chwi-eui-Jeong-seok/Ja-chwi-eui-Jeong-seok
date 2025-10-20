@@ -5,7 +5,9 @@ import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_prov
 import 'package:percent_indicator/percent_indicator.dart';
 
 class HomeProgress extends ConsumerWidget {
-  const HomeProgress({super.key});
+  final Map<String, dynamic>? extra;
+
+  const HomeProgress({super.key, this.extra});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,11 +43,11 @@ class HomeProgress extends ConsumerWidget {
                     padding: const EdgeInsets.only(left: 10),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
+                        horizontal: 16,
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: Color(0xFFEDA85A),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -89,11 +91,8 @@ class HomeProgress extends ConsumerWidget {
                     lineHeight: 10.0,
                     percent: percent, // 계산된 진행률
                     barRadius: const Radius.circular(10),
-                    linearGradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF7FA8DA),
-                        Color(0xFF6664CE),
-                      ],
+                    linearGradient: LinearGradient(
+                      colors: [Color(0xFFEDA85A), Color(0xFFED8B5A)],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
