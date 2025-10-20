@@ -220,15 +220,15 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
     });
   }
 
-  @override
-  Future<void> restoreUser(String uid) async {
-    final docRef = _firestore.collection(kAuthCollection).doc(uid);
-    await docRef.update({
-      'user_delete_date': null,
-      'user_delete_note': '',
-      'deletion_scheduled': false,
-    });
-  }
+  // @override
+  // Future<void> restoreUser(String uid) async {
+  //   final docRef = _firestore.collection(kAuthCollection).doc(uid);
+  //   await docRef.update({
+  //     'user_delete_date': null,
+  //     'user_delete_note': '',
+  //     'deletion_scheduled': false,
+  //   });
+  // }
 
   @override
   Future<void> deleteUserAccount(String uid, {String? reason}) async {

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -58,39 +57,18 @@ class _AiChatState extends ConsumerState<AiChat> {
     ref.listen<bool>(aiTypingProvider, (_, __) => _jumpBottom());
 
     //
-    Future<void> _handleRetry(Map<String, dynamic> message) async {
-      try {
-        final firestore = FirebaseFirestore.instance;
 
-        // 🔹 기존 메시지를 다시 전송 (ex. 새 문서로 추가)
-        await firestore.collection('messages').add({
-          'text': message['text'],
-          'senderId': message['senderId'],
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-
-        // 🔹 실패했던 메시지 문서는 삭제
-        if (message['id'] != null) {
-          await firestore.collection('messages').doc(message['id']).delete();
-        }
-
-        debugPrint('✅ 메시지 재전송 성공');
-      } catch (e) {
-        debugPrint('⚠️ 메시지 재전송 실패: $e');
-      }
-    }
-
-    Future<void> _handleDelete(Map<String, dynamic> message) async {
-      try {
-        final firestore = FirebaseFirestore.instance;
-        if (message['id'] != null) {
-          await firestore.collection('messages').doc(message['id']).delete();
-          debugPrint('🗑️ 메시지 삭제 완료');
-        }
-      } catch (e) {
-        debugPrint('⚠️ 메시지 삭제 실패: $e');
-      }
-    }
+    // Future<void> _handleDelete(Map<String, dynamic> message) async {
+    //   try {
+    //     final firestore = FirebaseFirestore.instance;
+    //     if (message['id'] != null) {
+    //       await firestore.collection('messages').doc(message['id']).delete();
+    //       debugPrint('🗑️ 메시지 삭제 완료');
+    //     }
+    //   } catch (e) {
+    //     debugPrint('⚠️ 메시지 삭제 실패: $e');
+    //   }
+    // }
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
