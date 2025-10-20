@@ -18,7 +18,14 @@ import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.da
 import 'package:image_picker/image_picker.dart';
 
 /// 현재 선택된 주(week)를 관리하는 StateProvider. 기본값은 이번 주.
-final selectedWeekProvider = StateProvider<DateTime>((ref) => DateTime.now());
+final selectedWeekProvider = StateProvider.autoDispose<DateTime>(
+  (ref) => DateTime.now(),
+);
+
+/// 완료된 미션 캘린더에서 현재 선택된 월(month)을 관리하는 StateProvider.
+final selectedMonthProvider = StateProvider.autoDispose<DateTime>(
+  (ref) => DateTime.now(),
+);
 
 /// 특정 주의 미션 랭커 목록을 비동기적으로 가져오는 FutureProvider.
 final weeklyAchieversProvider =

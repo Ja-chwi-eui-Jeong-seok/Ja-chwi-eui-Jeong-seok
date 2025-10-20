@@ -3,18 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/calendar_view.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/completed_mission_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:table_calendar/table_calendar.dart';
-
-/// `focusedDay` 상태를 관리하는 Provider. 캘린더에서 현재 보여지는 월을 추적
-final focusedDayProvider = StateProvider<DateTime>((ref) => DateTime.now());
-
-/// `selectedDay` 상태를 관리하는 Provider. 사용자가 캘린더에서 선택한 날짜를 추적
-final selectedDayProvider = StateProvider<DateTime?>((ref) => DateTime.now());
 
 class MissionSavedListScreen extends ConsumerWidget {
   const MissionSavedListScreen({super.key});
@@ -22,8 +16,8 @@ class MissionSavedListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userMissionsAsync = ref.watch(userMissionsProvider);
-    final focusedDay = ref.watch(focusedDayProvider);
-    final selectedDay = ref.watch(selectedDayProvider);
+    // mission_providers.dart에 정의된 provider를 사용합니다.
+    final selectedDate = ref.watch(selectedMonthProvider);
 
     return Scaffold(
       appBar: CommonAppBar(
@@ -56,8 +50,7 @@ class MissionSavedListScreen extends ConsumerWidget {
                 _buildCalendarAndMissionSection(
                   userMissionsAsync.value ?? [],
                   ref,
-                  focusedDay,
-                  selectedDay,
+                  selectedDate,
                 ),
             ],
           ),
@@ -69,27 +62,27 @@ class MissionSavedListScreen extends ConsumerWidget {
   Widget _buildCalendarAndMissionSection(
     List<Map<String, dynamic>> missions,
     WidgetRef ref,
-    DateTime focusedDay,
-    DateTime? selectedDay,
+    DateTime selectedDate,
   ) {
     final completedMissions = _mapMissionsToCalendarEvents(missions);
     final totalCompletedMissionsForMonth =
-        _calculateTotalCompletedMissionsForMonth(missions, focusedDay);
-    final daysInMonth = _getDaysInMonth(focusedDay);
+        _calculateTotalCompletedMissionsForMonth(missions, selectedDate);
+    final daysInMonth = _getDaysInMonth(selectedDate);
 
     return Column(
       children: [
         CalendarView(
-          focusedDay: focusedDay,
-          selectedDay: selectedDay,
+          focusedDay: selectedDate,
+          selectedDay: selectedDate,
           totalCompletedMissions: totalCompletedMissionsForMonth,
           daysInMonth: daysInMonth,
           onDaySelected: (selected, focused) {
-            ref.read(selectedDayProvider.notifier).state = selected;
-            ref.read(focusedDayProvider.notifier).state = focused;
+            // 날짜 선택 시 selectedMonthProvider 상태 업데이트
+            ref.read(selectedMonthProvider.notifier).state = selected;
           },
           onPageChanged: (focused) {
-            ref.read(focusedDayProvider.notifier).state = focused;
+            // 페이지(월) 변경 시 selectedMonthProvider 상태 업데이트
+            ref.read(selectedMonthProvider.notifier).state = focused;
           },
           eventLoader: (day) {
             final date = DateTime.utc(day.year, day.month, day.day);
@@ -114,7 +107,7 @@ class MissionSavedListScreen extends ConsumerWidget {
             },
             markerBuilder: (context, day, events) {
               if (events.isNotEmpty) {
-                final isSelected = isSameDay(selectedDay, day);
+                final isSelected = isSameDay(selectedDate, day);
                 return Align(
                   alignment: Alignment.topCenter,
                   child: Container(
@@ -135,7 +128,7 @@ class MissionSavedListScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
         CompletedMissionSection(
-          selectedDay: selectedDay,
+          selectedDay: selectedDate,
           completedMissions: completedMissions,
         ),
       ],
