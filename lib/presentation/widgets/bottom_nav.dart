@@ -35,23 +35,18 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (mode) {
-      case BottomNavMode.tab:
-        return _buildTabNav(context);
-      case BottomNavMode.confirm:
-        return _buildConfirmNav(context);
-    }
+    return GestureDetector(
+      onHorizontalDragStart: (_) {}, // 스와이프 제스처 무시
+      onHorizontalDragUpdate: (_) {}, // 스와이프 제스처 무시
+      child: switch (mode) {
+        BottomNavMode.tab => _buildTabNav(context),
+        BottomNavMode.confirm => _buildConfirmNav(context),
+      },
+    );
   }
 
   Widget _buildTabNav(BuildContext context) {
     int currentIndex = _getCurrentIndex(context);
-
-    final routes = [
-      '/home',
-      '/mission',
-      '/community',
-      '/profile-detail',
-    ];
 
     return SafeArea(
       child: Container(
