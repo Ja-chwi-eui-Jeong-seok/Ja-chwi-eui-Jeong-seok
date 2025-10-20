@@ -7,6 +7,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../models/auth_model.dart';
 import 'dart:convert'; // utf8
 import 'dart:math'; // Random
+// ignore: depend_on_referenced_packages
 import 'package:crypto/crypto.dart'; // sha256
 
 abstract class AuthDataSource {
@@ -220,15 +221,15 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
     });
   }
 
-  @override
-  Future<void> restoreUser(String uid) async {
-    final docRef = _firestore.collection(kAuthCollection).doc(uid);
-    await docRef.update({
-      'user_delete_date': null,
-      'user_delete_note': '',
-      'deletion_scheduled': false,
-    });
-  }
+  // @override
+  // Future<void> restoreUser(String uid) async {
+  //   final docRef = _firestore.collection(kAuthCollection).doc(uid);
+  //   await docRef.update({
+  //     'user_delete_date': null,
+  //     'user_delete_note': '',
+  //     'deletion_scheduled': false,
+  //   });
+  // }
 
   @override
   Future<void> deleteUserAccount(String uid, {String? reason}) async {
