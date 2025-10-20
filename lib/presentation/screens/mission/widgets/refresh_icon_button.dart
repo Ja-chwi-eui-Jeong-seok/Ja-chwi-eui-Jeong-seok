@@ -9,7 +9,11 @@ class RefreshIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(CupertinoIcons.arrow_2_circlepath, color: Colors.black),
+      icon: Image.asset(
+        'assets/images/icons/reload.png',
+        width: 25,
+        height: 25,
+      ),
       onPressed: onPressed ?? () {},
     );
   }

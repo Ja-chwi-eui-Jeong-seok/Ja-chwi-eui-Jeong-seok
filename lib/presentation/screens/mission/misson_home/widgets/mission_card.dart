@@ -22,9 +22,14 @@ class MissionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 8, 10),
       decoration: BoxDecoration(
-        // color: const Color(0xFFF5F5F5),
-        // color: const Color(0xD3D3D3D3),
-        color: Colors.grey[200],
+        gradient: const LinearGradient(
+          colors: [
+            Colors.white,
+            Color(0xFFF4C997),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
