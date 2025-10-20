@@ -46,6 +46,7 @@ class _MissionHomeScreenState extends ConsumerState<MissionHomeScreen> {
               ref.invalidate(currentWeekAchieversProvider);
             },
           ),
+          const SizedBox(width: 24),
         ],
         titleSpacing: 20.0,
         titleTextStyle: const TextStyle(
