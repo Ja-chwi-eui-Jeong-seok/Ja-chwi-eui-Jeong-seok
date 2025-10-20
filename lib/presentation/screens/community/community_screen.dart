@@ -86,9 +86,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                labelColor: Color(0xFFEDC65A),
+                labelColor: Color(0xFFEDA85A),
                 indicator: const UnderlineTabIndicator(
-                  borderSide: BorderSide(color: Color(0xFFEDC65A), width: 3),
+                  borderSide: BorderSide(color: Color(0xFFEDA85A), width: 3),
                   insets: EdgeInsets.symmetric(horizontal: 16),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
@@ -135,7 +135,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 }
                 context.push('/community-create', extra: uid);
               },
-              backgroundColor: Colors.black,
+              backgroundColor: Color(0xFFEDA85A),
               foregroundColor: Colors.white,
               child: const Icon(Icons.edit),
             ),
@@ -523,7 +523,7 @@ class _CategoryDetailChips extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: selected
-                          ? Color(0xFFEDC65A)
+                          ? Color(0xFFEDA85A)
                           : Colors.white, // 선택 배경
                       border: Border.all(color: Colors.grey), // 항상 테두리
                       borderRadius: BorderRadius.circular(50),
