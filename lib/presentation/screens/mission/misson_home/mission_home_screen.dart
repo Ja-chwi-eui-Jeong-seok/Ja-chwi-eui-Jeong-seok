@@ -146,7 +146,7 @@ class MissionHomeScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
-                      'assets/images/tung.png',
+                      'assets/images/profile/tung.png',
                       width: 100,
                       height: 100,
                     ),
