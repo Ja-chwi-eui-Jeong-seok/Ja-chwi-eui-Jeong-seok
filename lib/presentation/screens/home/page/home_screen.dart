@@ -57,19 +57,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontSize: 28,
               ),
             ),
-            IconButton(
-              //
-              icon: Image.asset(
-                'assets/images/icons/bell.png',
-                height: 24,
-                width: 24,
-              ),
-              onPressed: () {
-                if (kDebugMode) {
-                  print('알림 창');
-                }
-              },
-            ),
+            // IconButton(
+            //   //
+            //   icon: Image.asset(
+            //     'assets/images/icons/bell.png',
+            //     height: 24,
+            //     width: 24,
+            //   ),
+            //   onPressed: () {
+            //     if (kDebugMode) {
+            //       print('알림 창');
+            //     }
+            //   },
+            // ),
           ],
         ),
       ),
