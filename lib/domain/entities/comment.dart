@@ -32,6 +32,9 @@ class Comment {
   // 금칙어 로그(필요 시)
   final List<String>? commentLog;
 
+  // 답글 목록
+  final List<Comment> replies;
+
   const Comment({
     required this.id,
     required this.communityId,
@@ -43,6 +46,7 @@ class Comment {
     this.deleteAt,
     required this.deleteYn,
     this.commentLog,
+    this.replies = const [],
   });
 
   Comment copyWith({
@@ -52,6 +56,7 @@ class Comment {
     DateTime? deleteAt,
     bool? deleteYn,
     List<String>? commentLog,
+    List<Comment>? replies,
   }) {
     return Comment(
       id: id,
@@ -64,6 +69,7 @@ class Comment {
       deleteAt: deleteAt ?? this.deleteAt,
       deleteYn: deleteYn ?? this.deleteYn,
       commentLog: commentLog ?? this.commentLog,
+      replies: replies ?? this.replies,
     );
   }
 

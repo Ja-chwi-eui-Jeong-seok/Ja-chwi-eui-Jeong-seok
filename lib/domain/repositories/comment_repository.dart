@@ -17,6 +17,14 @@ abstract interface class CommentRepository {
     required String noteDetail,
   });
 
+  /// 답글 생성 (서브컬렉션에 저장)
+  Future<Comment> createReply({
+    required String parentCommentId,
+    required String communityId,
+    required String uid,
+    required String noteDetail,
+  });
+
   Future<PagedComments> fetchByCommunity({
     required String communityId,
     required CommentOrder order,
@@ -27,6 +35,12 @@ abstract interface class CommentRepository {
   Future<void> incLike(String id, int delta);
   Future<void> update(String id, Map<String, dynamic> patch);
   Future<void> softDelete(String id);
+
+  /// 답글 소프트 삭제
+  Future<void> softDeleteReply({
+    required String parentCommentId,
+    required String replyId,
+  });
 
   /// 게시글별 댓글 수
   Future<int> getCountByCommunity(

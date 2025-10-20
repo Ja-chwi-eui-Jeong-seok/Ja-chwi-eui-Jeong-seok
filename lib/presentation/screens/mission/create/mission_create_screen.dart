@@ -163,76 +163,83 @@ class _MissionCreateScreenState extends ConsumerState<MissionCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CommonAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _missionTitle,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '미션을 수행하고 인증 사진을 남겨주세요!',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-              const Divider(color: Colors.grey),
-              const SizedBox(height: 24),
-              PhotoUploadSection(
-                photos: _photos,
-                onAddPhoto: _addPhotos,
-                onRemovePhoto: (index) {
-                  setState(() {
-                    _photos.removeAt(index);
-                  });
-                },
-              ),
-              const SizedBox(height: 24),
-              PublicToggleSwitch(
-                isPublic: _isPublic,
-                onToggle: () => setState(() => _isPublic = !_isPublic),
-              ),
-              const SizedBox(height: 16),
-              const Divider(color: Colors.grey),
-              const SizedBox(height: 16),
-              DescriptionInputField(controller: _descriptionController),
-            ],
+    // 화면의 빈 공간을 탭했을 때 키보드를 내리기 위해 GestureDetector를 사용합니다.
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: CommonAppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            onPressed: () => context.pop(),
           ),
+          titleSpacing: 0.0,
         ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: ElevatedButton(
-          onPressed: _isSubmitting ? null : _submitMission,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _missionTitle,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '미션을 수행하고 인증 사진을 남겨주세요!',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 24),
+                const Divider(color: Colors.grey),
+                const SizedBox(height: 24),
+                PhotoUploadSection(
+                  photos: _photos,
+                  onAddPhoto: _addPhotos,
+                  onRemovePhoto: (index) {
+                    setState(() {
+                      _photos.removeAt(index);
+                    });
+                  },
+                ),
+                const SizedBox(height: 24),
+                PublicToggleSwitch(
+                  isPublic: _isPublic,
+                  onToggle: () => setState(() => _isPublic = !_isPublic),
+                ),
+                const SizedBox(height: 16),
+                const Divider(color: Colors.grey),
+                const SizedBox(height: 16),
+                DescriptionInputField(controller: _descriptionController),
+              ],
             ),
-            side: BorderSide(color: Colors.grey.shade300),
-            elevation: 0,
           ),
-          child: _isSubmitting
-              ? const CircularProgressIndicator()
-              : Text(
-                  _isEditing ? '수정하기' : '확인',
-                  style: const TextStyle(fontSize: 18),
-                ),
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: ElevatedButton(
+            onPressed: _isSubmitting ? null : _submitMission,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              side: BorderSide(color: Colors.grey.shade300),
+              elevation: 0,
+            ),
+            child: _isSubmitting
+                ? const CircularProgressIndicator()
+                : Text(
+                    _isEditing ? '수정하기' : '확인',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+          ),
         ),
       ),
     );

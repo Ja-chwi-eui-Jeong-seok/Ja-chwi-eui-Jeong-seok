@@ -26,6 +26,7 @@ class CommunityDetailScreen extends ConsumerStatefulWidget {
 
 class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   final commentController = TextEditingController();
+  final commentFocusNode = FocusNode();
 
   // 상세 VM 프로바이더 인스턴스 보관
   late final provider = communityDetailVmProvider(widget.id);
@@ -42,6 +43,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   @override
   void dispose() {
     commentController.dispose();
+    commentFocusNode.dispose();
     super.dispose();
   }
 
@@ -105,6 +107,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         createdAtOf: (i) => st.comments[i].createAt,
         comments: st.comments,
         detailVmProvider: provider,
+        commentFocusNode: commentFocusNode,
       ),
     );
   }
@@ -320,6 +323,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     commentController: commentController,
                     submit: submit,
                     currentUid: currentUid,
+                    detailVmProvider: provider,
+                    focusNode: commentFocusNode,
                   ),
                 ),
             ],

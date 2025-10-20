@@ -30,7 +30,7 @@ class MissionHomeScreen extends ConsumerWidget {
             },
           ),
         ],
-        titleSpacing: 40.0,
+        titleSpacing: 20.0,
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 20,
@@ -141,7 +141,28 @@ class MissionHomeScreen extends ConsumerWidget {
         currentWeekAchieversAsync.when(
           data: (achievers) {
             if (achievers.isEmpty) {
-              return const Center(child: Text('이번 주 미션 달성자가 없습니다.'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/tung.png',
+                      width: 100,
+                      height: 100,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      '아직 아무도 달성 못했어요...',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '이웃보다 먼저 순위에 도달해보세요!',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
             }
             return Column(
               children: List.generate(achievers.take(3).length, (i) {

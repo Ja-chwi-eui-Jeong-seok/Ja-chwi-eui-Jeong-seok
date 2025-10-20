@@ -54,8 +54,6 @@ class CompletedMissionCard extends StatelessWidget {
       onTap: () {
         if (isReadOnly) {
           context.push('/mission-detail', extra: missionData);
-        } else {
-          context.push('/mission-create', extra: missionData);
         }
       },
       child: Card(
