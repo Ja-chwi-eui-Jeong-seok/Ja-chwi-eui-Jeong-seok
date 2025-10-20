@@ -11,12 +11,28 @@ import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
-class MissionHomeScreen extends ConsumerWidget {
+class MissionHomeScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? extra;
   const MissionHomeScreen({super.key, this.extra});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MissionHomeScreen> createState() => _MissionHomeScreenState();
+}
+
+class _MissionHomeScreenState extends ConsumerState<MissionHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 위젯이 초기화될 때마다 관련 데이터를 새로고침
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(todayMissionProvider);
+      ref.invalidate(currentWeekAchieversProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentWeekAchieversAsync = ref.watch(currentWeekAchieversProvider);
 
     final todayMissionAsync = ref.watch(todayMissionProvider);
@@ -54,13 +70,14 @@ class MissionHomeScreen extends ConsumerWidget {
                 ref,
                 currentWeekAchieversAsync,
               ),
+              const SizedBox(height: 140), // 하단 여백 추가
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNav(
         mode: BottomNavMode.tab,
-        userData: extra ?? {},
+        userData: widget.extra ?? {},
       ),
     );
   }
