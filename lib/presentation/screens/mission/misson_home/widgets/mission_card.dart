@@ -90,7 +90,10 @@ class MissionCard extends StatelessWidget {
                 children: [
                   Text(
                     '미션하기',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEDA85A),
+                    ),
                   ),
                   SizedBox(height: 6),
                   TripleArrowIcon(),
