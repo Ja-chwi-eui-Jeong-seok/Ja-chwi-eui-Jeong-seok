@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/go_to_completed_button.dart';
 
 class ProfileSection extends ConsumerWidget {

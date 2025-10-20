@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/core/utils/level_calculator.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class HomeProgress extends ConsumerWidget {

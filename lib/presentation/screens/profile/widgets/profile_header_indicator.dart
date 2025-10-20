@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:ja_chwi/core/utils/level_calculator.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfileHeaderIndicator extends ConsumerWidget {
@@ -15,7 +15,8 @@ class ProfileHeaderIndicator extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedImage = extra?['imageFullUrl'] ?? 'assets/images/profile/black.png';
+    final selectedImage =
+        extra?['imageFullUrl'] ?? 'assets/images/profile/black.png';
     final userColor = extra != null && extra!['color'] != null
         ? Color(int.tryParse('0xFF${extra!['color']}') ?? 0xFF6664CE)
         : const Color(0xFF6664CE);
@@ -27,10 +28,11 @@ class ProfileHeaderIndicator extends ConsumerWidget {
       data: (userProfile) {
         final missionCount = userProfile.missionCount;
         final currentLevel =
-            int.tryParse(calculateLevel(missionCount).replaceAll('Lv.', '')) ?? 1;
+            int.tryParse(calculateLevel(missionCount).replaceAll('Lv.', '')) ??
+            1;
         final missionsForNextLevel = currentLevel * 7;
-        final missionsInCurrentLevel =
-            (missionCount - ((currentLevel - 1) * 7)).clamp(0, 7);
+        final missionsInCurrentLevel = (missionCount - ((currentLevel - 1) * 7))
+            .clamp(0, 7);
         final percent = (missionsInCurrentLevel / 7).clamp(0.0, 1.0);
 
         return Column(
@@ -76,7 +78,7 @@ class ProfileHeaderIndicator extends ConsumerWidget {
                   child: CircularPercentIndicator(
                     radius: 130,
                     lineWidth: 20.0,
-                    percent: 1-(1 - percent),
+                    percent: 1 - (1 - percent),
                     animation: true,
                     circularStrokeCap: CircularStrokeCap.round,
                     backgroundColor: Colors.grey[300]!,
@@ -113,10 +115,10 @@ class ProfileHeaderIndicator extends ConsumerWidget {
                         const SizedBox(width: 6),
                         InkWell(
                           //onTap: onEditProfile,
-                           onTap: () {
-                              context.go('/profile', extra: extra);
-                            },
-                            child: const Icon(
+                          onTap: () {
+                            context.go('/profile', extra: extra);
+                          },
+                          child: const Icon(
                             Icons.edit_square,
                             size: 20,
                             color: Colors.grey,

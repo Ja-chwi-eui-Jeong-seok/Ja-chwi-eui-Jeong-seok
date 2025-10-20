@@ -6,7 +6,7 @@ import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/description_input_field.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/photo_upload_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/create/widgets/public_toggle_switch.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 
 class MissionCreateScreen extends ConsumerStatefulWidget {
   const MissionCreateScreen({super.key});
