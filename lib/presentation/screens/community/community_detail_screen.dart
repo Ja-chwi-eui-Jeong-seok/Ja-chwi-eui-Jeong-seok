@@ -170,7 +170,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           st.isBookmarked
                               ? Icons.bookmark
                               : Icons.bookmark_border,
-                          color: st.isBookmarked ? Colors.orange : null,
+                          color: st.isBookmarked ? Color(0xFFEDA85A) : null,
                         ),
                   onPressed: st.loadingBookmark
                       ? null
@@ -396,8 +396,8 @@ class _PostBody extends StatelessWidget {
       // height 고정 대신 최소 높이 보장
       constraints: const BoxConstraints(minHeight: 160),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFB8B8B8), width: 1),
-        borderRadius: BorderRadius.circular(16),
+        // border: Border.all(color: const Color(0xFFB8B8B8), width: 1),
+        // borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(8),
       child: Text(body),
