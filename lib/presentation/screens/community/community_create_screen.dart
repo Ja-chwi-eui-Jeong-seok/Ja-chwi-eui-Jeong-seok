@@ -73,6 +73,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
     ref.listen<CommunityCreateVm>(communityCreateVmProvider, (prev, next) {
       if (next.isEdit && !next.loading) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
           if (_titleController.text != next.title) {
             _titleController.text = next.title;
           }
@@ -478,6 +479,7 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                   WidgetsBinding.instance.addPostFrameCallback((
                                     _,
                                   ) {
+                                    if (!mounted) return;
                                     context.pushReplacement(
                                       '/community-detail',
                                       extra: vmState.postId,
