@@ -74,9 +74,9 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/home',
       name: '메인',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return HomeScreen(extra: data);
+        return NoTransitionPage(child: HomeScreen(extra: data));
       },
     ),
     GoRoute(
@@ -87,9 +87,9 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/mission',
       name: '미션',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return MissionHomeScreen(extra: data);
+        return NoTransitionPage(child: MissionHomeScreen(extra: data));
       },
     ),
     GoRoute(
@@ -142,10 +142,9 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/community',
       name: '커뮤니티',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final args = state.extra as Map<String, dynamic>?;
-
-        return CommunityScreen(extra: args);
+        return NoTransitionPage(child: CommunityScreen(extra: args));
       },
       //builder: (context, state) => const CommunityScreen(),
     ),
@@ -208,9 +207,9 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/profile-detail',
       name: '프로필 상세',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return ProfileDetail(extra: data);
+        return NoTransitionPage(child: ProfileDetail(extra: data));
       },
     ),
     GoRoute(
