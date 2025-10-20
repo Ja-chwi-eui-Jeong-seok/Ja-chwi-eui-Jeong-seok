@@ -116,6 +116,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final st = ref.watch(provider);
+    ref.listen<int>(communityChangedTickProvider, (_, __) {
+      ref.read(provider.notifier).loadInitial(ref); // 또는 reload()
+    });
     //현재유저의 uid 정보
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     //작성자가 유저와 일치하는지
