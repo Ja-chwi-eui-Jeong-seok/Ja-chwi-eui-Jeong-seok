@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:ja_chwi/core/constants/app_colors.dart';
+import 'package:ja_chwi/core/constants/app_sizes.dart';
 import 'package:ja_chwi/domain/entities/category.dart';
 import 'package:ja_chwi/presentation/common/utils/string_utils.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
@@ -84,20 +86,24 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               ),
               bottom: TabBar(
                 isScrollable: false,
-                unselectedLabelStyle: const TextStyle(fontSize: 14),
-                unselectedLabelColor: Colors.grey,
+                unselectedLabelStyle: const TextStyle(
+                  fontSize: AppSizes.fontSizeL,
+                ),
+                unselectedLabelColor: AppColors.grey,
                 labelStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: AppSizes.fontSizeL,
                   fontWeight: FontWeight.bold,
                 ),
-                labelColor: Color(0xFFEDA85A),
+                labelColor: AppColors.primary,
                 indicator: const UnderlineTabIndicator(
-                  borderSide: BorderSide(color: Color(0xFFEDA85A), width: 3),
+                  borderSide: BorderSide(color: AppColors.primary, width: 3),
                   insets: EdgeInsets.symmetric(horizontal: 16),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 tabs: [
-                  const Tab(text: '전체'), // "전체" 탭 추가
+                  const Tab(
+                    text: '전체',
+                  ), // "전체" 탭 추가
                   ...parents.map((p) => Tab(text: p.categoryName)),
                 ],
               ),
@@ -139,9 +145,12 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 }
                 context.push('/community-create', extra: uid);
               },
-              backgroundColor: Color(0xFFEDA85A),
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.edit),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+              child: Icon(
+                Icons.edit,
+                size: AppSizes.iconS,
+              ),
             ),
             bottomNavigationBar: BottomNav(
               mode: BottomNavMode.tab,
@@ -305,13 +314,15 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingL,
+              ),
               child: Row(
                 children: [
                   Text(
                     widget.detailName,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: AppSizes.fontSizeL,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -349,13 +360,15 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingL,
+              ),
               child: Row(
                 children: [
                   Text(
                     widget.detailName,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: AppSizes.fontSizeL,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -369,8 +382,8 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.only(
-                  left: 24,
-                  right: 24,
+                  left: AppSizes.paddingL,
+                  right: AppSizes.paddingL,
                   bottom: 100,
                 ),
                 itemCount:
@@ -397,7 +410,10 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                   //댓글수
                   final countAv = ref.watch(commentCountByPostProvider(x.id));
                   Widget commentCount = countAv.when(
-                    data: (c) => Text('$c'),
+                    data: (c) => Text(
+                      '$c',
+                      style: TextStyle(fontSize: AppSizes.fontSizeM),
+                    ),
                     loading: () => const SizedBox(
                       width: 14,
                       height: 14,
@@ -414,9 +430,12 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       height: 96,
                       //테두리
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(0xFFF2F2F2), width: 3),
+                        border: Border.all(
+                          color: AppColors.postBorder,
+                          width: 2,
+                        ),
                       ),
                       padding: const EdgeInsets.all(12),
                       child: Row(
@@ -439,12 +458,16 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
+                                        fontSize: AppSizes.fontSizeLM,
                                       ),
                                     ),
                                     Spacer(),
                                     Text(
                                       //날짜
                                       date,
+                                      style: const TextStyle(
+                                        fontSize: AppSizes.fontSizeLMS,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -459,7 +482,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                                     //댓글수 표시
                                     const Icon(
                                       Icons.mode_comment_outlined,
-                                      size: 18,
+                                      size: AppSizes.iconS,
                                     ),
                                     const SizedBox(
                                       width: 4,
@@ -509,7 +532,10 @@ class _CategoryDetailChips extends StatelessWidget {
         final current = controller.index;
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.paddingMS,
+            vertical: AppSizes.paddingS,
+          ),
           child: Row(
             children: List.generate(subs.length, (i) {
               final s = subs[i];
@@ -522,22 +548,24 @@ class _CategoryDetailChips extends StatelessWidget {
                   onTap: () => controller.animateTo(i),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
+                      horizontal: AppSizes.paddingM,
+                      vertical: AppSizes.paddingXS,
                     ),
                     decoration: BoxDecoration(
                       color: selected
-                          ? Color(0xFFEDA85A)
-                          : Colors.white, // 선택 배경
-                      border: Border.all(color: Colors.grey), // 항상 테두리
+                          ? AppColors.primary
+                          : AppColors.white, // 선택 배경
+                      border: Border.all(color: AppColors.grey), // 항상 테두리
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Text(
                       s.categoryDetailName,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: AppSizes.fontSizeM,
                         fontWeight: FontWeight.w600,
-                        color: selected ? Colors.white : Colors.grey, // 선택 글자색
+                        color: selected
+                            ? AppColors.white
+                            : AppColors.grey, // 선택 글자색
                       ),
                     ),
                   ),
@@ -613,13 +641,15 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingL,
+              ),
               child: Row(
                 children: [
                   const Text(
                     '전체',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: AppSizes.fontSizeL,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -636,7 +666,7 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                         padding: EdgeInsets.only(bottom: 100),
                         child: Text(
                           '아직 게시글이 없습니다',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: AppColors.grey),
                         ),
                       ),
               ),
@@ -658,13 +688,15 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingL,
+              ),
               child: Row(
                 children: [
                   const Text(
                     '전체',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: AppSizes.fontSizeL,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -676,8 +708,8 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.only(
-                  left: 24,
-                  right: 24,
+                  left: AppSizes.paddingL,
+                  right: AppSizes.paddingL,
                   bottom: 100,
                 ),
                 itemCount:
@@ -699,7 +731,10 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
 
                   final countAv = ref.watch(commentCountByPostProvider(x.id));
                   Widget commentCount = countAv.when(
-                    data: (c) => Text('$c'),
+                    data: (c) => Text(
+                      '$c',
+                      style: TextStyle(fontSize: AppSizes.fontSizeMS),
+                    ),
                     loading: () => const SizedBox(
                       width: 14,
                       height: 14,
@@ -716,9 +751,12 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                     child: Container(
                       height: 96,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(0xFFF2F2F2), width: 3),
+                        border: Border.all(
+                          color: AppColors.postBorder,
+                          width: AppSizes.borderM,
+                        ),
                       ),
                       padding: const EdgeInsets.all(12),
                       child: Row(
@@ -742,7 +780,12 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                                       ),
                                     ),
                                     Spacer(),
-                                    Text(date),
+                                    Text(
+                                      date,
+                                      style: TextStyle(
+                                        fontSize: AppSizes.fontSizeLMS,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 Spacer(),
@@ -752,7 +795,7 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                                     Spacer(),
                                     const Icon(
                                       Icons.mode_comment_outlined,
-                                      size: 18,
+                                      size: AppSizes.iconS,
                                     ),
                                     const SizedBox(width: 4),
                                     commentCount,
@@ -800,8 +843,8 @@ class _BookmarkIcon extends ConsumerWidget {
     return bookmarkStatusAsync.when(
       data: (isBookmarked) => Icon(
         isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-        size: 18,
-        color: isBookmarked ? Colors.orange : Colors.grey,
+        size: AppSizes.iconS,
+        color: isBookmarked ? AppColors.primary : AppColors.grey,
       ),
       loading: () => const SizedBox(
         width: 18,
@@ -810,8 +853,8 @@ class _BookmarkIcon extends ConsumerWidget {
       ),
       error: (_, __) => const Icon(
         Icons.bookmark_border,
-        size: 18,
-        color: Colors.grey,
+        size: AppSizes.iconS,
+        color: AppColors.grey,
       ),
     );
   }
