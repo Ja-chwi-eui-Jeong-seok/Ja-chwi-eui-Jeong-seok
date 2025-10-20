@@ -244,7 +244,6 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
 }
 
 class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
-  // build에서 만들지 말고, 필드로 고정
   late NotifierProvider<CommunityListVM, CommunityListState> provider;
   bool _ready = false; // provider 준비 여부
   ProviderSubscription<int>? _changedSub;
@@ -657,6 +656,7 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
         child: Column(
           children: [
             Padding(
+              //게시글 리스트 전체영역 기본패딩
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
@@ -793,21 +793,23 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                               ),
                             ],
                           ),
-                          Positioned.fill(
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
+                          Positioned(
+                            left: 250,
+                            top: 20,
                             child: IgnorePointer(
-                              child: Align(
-                                heightFactor: 0.5,
-                                alignment: Alignment.bottomCenter,
-                                child: Opacity(
-                                  opacity: 0.35,
-                                  child:
-                                      //Text('test'),
-                                      Image.asset(
-                                        pvImg,
-                                      ),
+                              child: ClipRect(
+                                child: Align(
+                                  //alignment: Alignment.bottomCenter,
+                                  //heightFactor: 0.5, // 아래 절반만 노출
+                                  child: Opacity(
+                                    opacity: 0.35,
+                                    child: Image.asset(
+                                      pvImg,
+                                      fit: BoxFit.cover, // 부모 채움
+                                      width: 66,
+                                      height: 66,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
