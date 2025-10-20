@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:ja_chwi/core/constants/app_colors.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
@@ -170,7 +171,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           st.isBookmarked
                               ? Icons.bookmark
                               : Icons.bookmark_border,
-                          color: st.isBookmarked ? Color(0xFFEDA85A) : null,
+                          color: st.isBookmarked ? AppColors.primary : null,
                         ),
                   onPressed: st.loadingBookmark
                       ? null
@@ -257,7 +258,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          const Divider(thickness: 2, color: AppColors.white),
                           //작성자정보 날짜정보
                           _HeaderRow(
                             author: author,
@@ -266,7 +267,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                                 ? 'assets/images/m_profile/m_black.png'
                                 : authorImg,
                           ),
-                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          const Divider(thickness: 2, color: AppColors.white),
                           _PostBody(
                             body: body,
                           ),
