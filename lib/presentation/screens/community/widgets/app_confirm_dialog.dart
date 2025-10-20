@@ -105,6 +105,7 @@ class AppConfirmDialog extends StatelessWidget {
   }
 }
 
+// ignore: unintended_html_in_doc_comment
 /// Future<bool?>로 바로 쓰기 좋은 헬퍼
 Future<bool?> showAppConfirmDialog(
   BuildContext context, {
