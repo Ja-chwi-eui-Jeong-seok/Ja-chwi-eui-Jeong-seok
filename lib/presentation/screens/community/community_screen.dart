@@ -32,6 +32,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('삭제가 완료되었습니다.')),
         );
+        // 메시지를 한 번만 표시하고, extra를 정리하기 위해 동일 경로로 교체
+        if (mounted) {
+          context.replace('/community');
+        }
       }
     });
   }

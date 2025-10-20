@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:ja_chwi/data/common/page_result.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
 import 'package:ja_chwi/data/dto/comment_dto.dart';
@@ -45,6 +46,7 @@ class CommentDataSourceImpl implements CommentDataSource {
   }
 
   // 답글 생성 (서브컬렉션에 저장)
+  @override
   Future<CommentDto> createReply({
     required String parentCommentId,
     required String communityId,
@@ -78,6 +80,7 @@ class CommentDataSourceImpl implements CommentDataSource {
   }
 
   // 답글 목록 조회
+  @override
   Future<List<CommentDto>> fetchReplies(String parentCommentId) async {
     final snapshot = await getReplyCol(parentCommentId)
         .where('comment_delete_yn', isEqualTo: false)
@@ -208,7 +211,9 @@ class CommentDataSourceImpl implements CommentDataSource {
       replyCount = repliesSnap.count ?? 0;
     } catch (e) {
       // collection group count가 인덱스/권한 문제로 실패하면 답글 카운트는 0으로 처리
-      print('Replies count failed: $e');
+      if (kDebugMode) {
+        print('Replies count failed: $e');
+      }
       replyCount = 0;
     }
 
