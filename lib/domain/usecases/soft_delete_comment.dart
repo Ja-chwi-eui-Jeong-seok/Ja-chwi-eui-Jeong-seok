@@ -9,3 +9,18 @@ class SoftDeleteComment {
     return repo.softDelete(commentId);
   }
 }
+
+class SoftDeleteReply {
+  final CommentRepository repo;
+  SoftDeleteReply(this.repo);
+
+  Future<void> call({
+    required String parentCommentId,
+    required String replyId,
+  }) {
+    return repo.softDeleteReply(
+      parentCommentId: parentCommentId,
+      replyId: replyId,
+    );
+  }
+}

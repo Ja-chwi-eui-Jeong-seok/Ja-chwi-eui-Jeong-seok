@@ -12,6 +12,7 @@ class CommentDto {
   final Timestamp? deleteAt; // comment_delete_date
   final bool deleteYn; // comment_delete_yn
   final List<String>? commentLog; // community_log (유지)
+  final List<CommentDto> replies; // 답글 목록
 
   CommentDto({
     required this.id,
@@ -24,6 +25,7 @@ class CommentDto {
     this.deleteAt,
     required this.deleteYn,
     this.commentLog,
+    this.replies = const [],
   });
 
   //댓글 불러오기(firebase에서 읽기)
@@ -39,6 +41,7 @@ class CommentDto {
       deleteAt: d['comment_delete_date'] as Timestamp?,
       deleteYn: (d['comment_delete_yn'] ?? false) as bool,
       commentLog: (d['comment_log'] as List?)?.cast<String>(),
+      replies: const [], // 답글은 별도로 로드
     );
   }
 
@@ -73,6 +76,7 @@ class CommentDto {
     Timestamp? deleteAt,
     bool? deleteYn,
     List<String>? commentLog,
+    List<CommentDto>? replies,
   }) {
     return CommentDto(
       id: id,
@@ -85,6 +89,7 @@ class CommentDto {
       deleteAt: deleteAt ?? this.deleteAt,
       deleteYn: deleteYn ?? this.deleteYn,
       commentLog: commentLog ?? this.commentLog,
+      replies: replies ?? this.replies,
     );
   }
 }
