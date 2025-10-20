@@ -33,9 +33,9 @@ class RelativeTimeTextKstState extends State<RelativeTimeTextKst> {
     if (diff.inHours < 24) return '${diff.inHours}시간 전';
     if (diff.inDays < 7) return '${diff.inDays}일 전';
     final w = (diff.inDays / 7).floor();
-    if (diff.inDays < 30) return '${w}주 전';
+    if (diff.inDays < 30) return '$w주 전';
     final m = (diff.inDays / 30).floor();
-    if (diff.inDays < 365) return '${m}개월 전';
+    if (diff.inDays < 365) return '$m개월 전';
     return '${(diff.inDays / 365).floor()}년 전';
   }
 

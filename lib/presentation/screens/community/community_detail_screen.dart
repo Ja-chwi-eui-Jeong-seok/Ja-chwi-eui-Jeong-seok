@@ -191,6 +191,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   ),
                   onPressed: () async {
                     softdelete() async {
+                      // 1) 먼저 다이얼로그 닫기
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+
+                      // 2) 실제 소프트 삭제 수행
                       final err = await ref
                           .read(provider.notifier)
                           .softDelete(ref);

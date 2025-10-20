@@ -8,10 +8,8 @@ void main() {
   group('Gemini API Tests', () {
     test('API Key validation', () async {
       // API 키 유효성 검사
-      print('🔍 API Key: ${TestConfig.apiKey}');
       expect(TestConfig.apiKey, isNotEmpty);
       expect(TestConfig.apiKey, startsWith('AIza'));
-      print('✅ API Key: ${TestConfig.apiKey.substring(0, 10)}...');
     });
 
     test('Basic API connection', () async {
@@ -34,9 +32,6 @@ void main() {
         }),
       );
 
-      print('📡 Status Code: ${response.statusCode}');
-      print('📄 Response: ${response.body}');
-
       expect(response.statusCode, isNot(equals(401))); // 인증 오류가 아님
     });
 
@@ -48,14 +43,10 @@ void main() {
 
       final response = await http.get(url);
 
-      print('📡 Models Status: ${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final models = data['models'] as List;
         final modelNames = models.map((m) => m['name']).toList();
-
-        print('📋 Available Models: $modelNames');
 
         // Gemini 2.0 Flash 모델이 있는지 확인
         final hasGeminiFlash = modelNames.any(

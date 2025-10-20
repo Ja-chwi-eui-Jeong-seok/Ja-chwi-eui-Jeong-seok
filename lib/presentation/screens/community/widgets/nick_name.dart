@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 
 class NickName extends ConsumerWidget {
-  const NickName({required this.uid});
+  const NickName({super.key, required this.uid});
   final String uid;
 
   @override
