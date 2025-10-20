@@ -788,12 +788,12 @@ class _BookmarkIcon extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    ///final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
 
-    // 자신의 글일 경우 북마크 아이콘을 숨김
-    if (currentUserUid == authorUid) {
-      return const SizedBox.shrink();
-    }
+    /// 자신의 글일 경우 북마크 아이콘을 숨김
+    // if (currentUserUid == authorUid) {
+    //   return const SizedBox.shrink();
+    // }
 
     final bookmarkStatusAsync = ref.watch(isBookmarkedProvider(postId));
 
