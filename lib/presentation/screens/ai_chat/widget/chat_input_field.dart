@@ -35,7 +35,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
         ),
         child: Row(
           children: [
-            // Recipe generator trigger (optional)
+            // 🍳 레시피 추천 아이콘 (옵션)
             if (widget.onGenerateRecipe != null)
               IconButton(
                 tooltip: '재료로 레시피 추천',
@@ -52,26 +52,57 @@ class _ChatInputFieldState extends State<ChatInputField> {
                   }
                 },
               ),
+
+            // 💬 텍스트 필드 + 전송 버튼
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade400),
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: '메시지를 입력하세요...',
-                    border: InputBorder.none,
-                  ),
-                  onSubmitted: (_) => _handleSend(),
+                child: Row(
+                  children: [
+                    // 입력창
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: TextField(
+                          controller: _controller,
+                          decoration: const InputDecoration(
+                            hintText: '메시지를 입력하세요...',
+                            border: InputBorder.none,
+                          ),
+                          onSubmitted: (_) => _handleSend(),
+                        ),
+                      ),
+                    ),
+
+                    // ✉️ 전송 버튼 (알약 모양)
+                    GestureDetector(
+                      onTap: _handleSend,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEDA85A),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          '전송',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: _handleSend,
             ),
           ],
         ),
