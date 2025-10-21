@@ -20,7 +20,8 @@ final selectedCategoryCodeProvider = StateProvider<int?>((_) => null);
 final selectedSubCategoryCodeProvider = StateProvider<int?>((_) => null);
 
 class CommunityCreateScreen extends ConsumerStatefulWidget {
-  const CommunityCreateScreen({super.key, this.id});
+    final Map<String, dynamic>? extra;
+  const CommunityCreateScreen({super.key, this.id, this.extra});
   final String? id;
 
   @override
@@ -482,7 +483,11 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                     if (!mounted) return;
                                     context.pushReplacement(
                                       '/community-detail',
-                                      extra: vmState.postId,
+                                      //extra: vmState.postId,
+                                    extra: {
+                                      'id': vmState.postId,   // 반드시 Map으로 전달
+                                      'extra': widget.extra, // 기존 extra가 있다면 같이 전달
+                                    },
                                     );
                                   });
                                   //게시글 리스트 초기화
@@ -532,58 +537,57 @@ class _CommunityCreateScreenState extends ConsumerState<CommunityCreateScreen> {
                                     return;
                                   }
 
-                                  //'예전 상세'를 '새 상세'로 교체
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) {
-                                    context.pushReplacement(
-                                      '/community-detail',
-                                      extra: res.newId,
-                                    );
-                                  });
-                                }
-                              },
-                              child: Opacity(
-                                opacity: submitState ? 0.6 : 1,
-                                child: Container(
-                                  width: 300,
-                                  height: 55,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-
-                                    border: Border.all(
-                                      color: AppColors.primary,
-                                    ),
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  child: Center(
-                                    child: submitState
-                                        ? const SizedBox(
-                                            width: 18,
-                                            height: 18,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : Text(
-                                            "확인",
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w500,
-                                              color: AppColors.white,
-                                            ),
+                                //'예전 상세'를 '새 상세'로 교체
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  context.pushReplacement(
+                                    '/community-detail',
+                                    extra: {
+                                      'id': res.newId,   // 반드시 Map으로 전달
+                                      'extra': widget.extra, // 기존 extra가 있다면 같이 전달
+                                    },
+                                  );
+                                });
+                              }
+                            },
+                            child: Opacity(
+                              opacity: submitState ? 0.6 : 1,
+                              child: Container(
+                                width: 300,
+                                height: 55,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Center(
+                                  child: submitState
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
                                           ),
-                                  ),
+                                        )
+                                      : Text(
+                                          "확인",
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+            ),
       ),
     );
   }

@@ -34,10 +34,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('삭제가 완료되었습니다.')),
         );
-        // 메시지를 한 번만 표시하고, extra를 정리하기 위해 동일 경로로 교체
-        if (mounted) {
-          context.replace('/community');
-        }
+          // 삭제 플래그 제거 → 일회성 처리
+        extra.remove('deleted');
       }
     });
   }
@@ -113,7 +111,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               children: [
                 // "전체" 탭 뷰
                 hasLocation
-                    ? _AllPostsView(location: location)
+                    ? _AllPostsView(location: location, extra: widget.extra)
                     : const NoLocationView(),
                 // 기존 카테고리 탭 뷰들
                 ...parents.map((p) {
@@ -121,6 +119,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                       ? _SecondDepthTabs(
                           parentCode: p.categoryCode,
                           location: location,
+                          extra: widget.extra,
                         )
                       : const NoLocationView();
                 }),
@@ -143,7 +142,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   );
                   return;
                 }
-                context.push('/community-create', extra: uid);
+                context.push('/community-create', extra: widget.extra);
               },
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
@@ -165,9 +164,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
 /// 상위 탭(부모 카테고리) → 하위 탭(세부 카테고리)을 표시하는 위젯
 class _SecondDepthTabs extends ConsumerStatefulWidget {
-  const _SecondDepthTabs({required this.parentCode, required this.location});
+  const _SecondDepthTabs({required this.parentCode, required this.location, required this.extra});
   final int parentCode;
   final String? location;
+  final Map<String, dynamic>? extra;
+  
 
   @override
   ConsumerState<_SecondDepthTabs> createState() => _SecondDepthTabsState();
@@ -227,6 +228,7 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
                       detailCode: s.categoryDetailCode,
                       detailName: s.categoryDetailName,
                       location: widget.location,
+                      extra: widget.extra,
                     );
                   }).toList(),
                 ),
@@ -246,11 +248,13 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
     required this.detailCode,
     required this.detailName,
     required this.location,
+    required this.extra, // ✅ 추가
   });
   final int parentCode;
   final int detailCode;
   final String detailName;
   final String? location;
+  final Map<String, dynamic>? extra; // ✅ 추가
 
   @override
   ConsumerState<_PostsPlaceholder> createState() => _PostsPlaceholderState();
@@ -438,7 +442,10 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                   return InkWell(
                     onTap: () => context.push(
                       '/community-detail',
-                      extra: x.id,
+                      extra: {
+                        'id': x.id,
+                        'extra': widget.extra, // 선택적으로 추가 데이터 전달 가능
+                      },
                     ),
                     child: Container(
                       height: 96,
@@ -621,8 +628,9 @@ class _CategoryDetailChips extends StatelessWidget {
 
 // "전체" 탭 뷰 - 모든 카테고리의 게시글을 표시
 class _AllPostsView extends ConsumerStatefulWidget {
-  const _AllPostsView({required this.location});
+  const _AllPostsView({required this.location, this.extra});
   final String? location;
+  final Map<String, dynamic>? extra;
 
   @override
   ConsumerState<_AllPostsView> createState() => _AllPostsViewState();
@@ -804,7 +812,10 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                   return InkWell(
                     onTap: () => context.push(
                       '/community-detail',
-                      extra: x.id,
+                      extra: {
+                        'id': x.id,
+                        'extra': widget.extra, // ✅ 이제 정상 작동
+                      },
                     ),
                     child: Container(
                       height: 96,

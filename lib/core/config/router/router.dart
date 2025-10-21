@@ -153,35 +153,46 @@ final GoRouter router = GoRouter(
       name: '커뮤니티',
       pageBuilder: (context, state) {
         final args = state.extra as Map<String, dynamic>?;
-        return NoTransitionPage(child: CommunityScreen(extra: args));
+        return CommunityScreen(extra: args);
       },
       //builder: (context, state) => const CommunityScreen(),
     ),
     GoRoute(
       path: '/community-detail',
       name: '커뮤니티 상세',
-      pageBuilder: (context, state) {
-        final id = state.extra as String; // ← 리스트에서 넘긴 문서 id
-        return NoTransitionPage(child: CommunityDetailScreen(id: id));
+       builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        final id = data['id'] as String;
+        final extra = (data['extra'] is Map<String, dynamic>)
+          ? data['extra'] as Map<String, dynamic>
+          : <String, dynamic>{};
+        return CommunityDetailScreen(id: id, extra: extra);
       },
     ),
     GoRoute(
       path: '/community-create',
       name: '커뮤니티 작성',
-      pageBuilder: (context, state) =>
-          const NoTransitionPage(child: CommunityCreateScreen()),
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        return CommunityCreateScreen(extra: data);
+      },
     ),
     GoRoute(
       path: '/community-edit',
       name: '커뮤니티 수정',
-      pageBuilder: (context, state) {
-        final id = state.extra as String;
-        return NoTransitionPage(child: CommunityCreateScreen(id: id));
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        final id = data['id'] as String;
+
+        final extra = (data['extra'] is Map<String, dynamic>)
+          ? data['extra'] as Map<String, dynamic>
+          : <String, dynamic>{};
+        return CommunityCreateScreen(id: id, extra: extra);
       },
     ),
     GoRoute(
       path: '/profile-flow',
-
+      name: '프로필 흐름',
       redirect: (context, state) {
         final data = state.extra as Map<String, dynamic>?;
         final uid = data?['uid'] as String?;
