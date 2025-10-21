@@ -1,48 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class MyPostDetailScreen extends StatefulWidget {
+  final Map<String, dynamic>? extra;
   final String uid;
 
-  const MyPostDetailScreen({super.key, required this.uid});
+  const MyPostDetailScreen({super.key, required this.uid, required this.extra});
 
   @override
   State<MyPostDetailScreen> createState() => _MyPostDetailScreenState();
 }
 
 class _MyPostDetailScreenState extends State<MyPostDetailScreen> {
-  final int _limit = 20;
-  final List<DocumentSnapshot> _posts = [];
-  DocumentSnapshot? _lastDocument;
-
-  bool _isLoading = false;
-  bool _hasMore = true;
-
   DateTimeRange? selectedDateRange;
   String? selectedLocation;
 
   @override
-  void initState() {
-    super.initState();
-    _fetchPosts(initial: true);
-  }
-
-  /// Firestore 조회 + 필터 적용
-  Future<void> _fetchPosts({bool initial = false}) async {
-    if (_isLoading) return;
-    if (!_hasMore && !initial) return;
-
-    setState(() => _isLoading = true);
-
-    Query query = FirebaseFirestore.instance
+  Widget build(BuildContext context) {
+    // Firestore 쿼리 생성
+    Query collectionQuery = FirebaseFirestore.instance
         .collection('communitylist')
         .where('create_user', isEqualTo: widget.uid)
         .where('community_delete_yn', isEqualTo: false)
         .orderBy('community_create_date', descending: true)
-        .limit(_limit);
+        .limit(20);
 
-    // 날짜 필터
+    // 날짜 필터 적용
     if (selectedDateRange != null) {
       final start = Timestamp.fromDate(DateTime(
         selectedDateRange!.start.year,
@@ -56,40 +41,140 @@ class _MyPostDetailScreenState extends State<MyPostDetailScreen> {
         selectedDateRange!.end.day,
         23, 59, 59,
       ));
-      query = query
+
+      collectionQuery = collectionQuery
           .where('community_create_date', isGreaterThanOrEqualTo: start)
           .where('community_create_date', isLessThanOrEqualTo: end);
     }
 
-    // 데이터 가져오기
-    final snapshot = await query.get();
+    // StreamBuilder 사용
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('내 글 상세'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.autorenew_outlined),
+            tooltip: '필터 초기화',
+            onPressed: () {
+              setState(() {
+                selectedDateRange = null;
+                selectedLocation = null;
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.date_range),
+            tooltip: '기간 선택',
+            onPressed: pickDateRange,
+          ),
+          IconButton(
+            icon: const Icon(Icons.location_on),
+            tooltip: '지역 필터',
+            onPressed: pickLocation,
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // 🔹 필터 표시 영역
+          Container(
+            width: double.infinity,
+            color: const Color(0xFFF6CE1A).withOpacity(0.2),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                StreamBuilder<QuerySnapshot>(
+                  stream: collectionQuery.snapshots(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                    return Text('커뮤니티 목록 총 $count개',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold));
+                  },
+                ),
+                if (selectedLocation != null && selectedLocation!.isNotEmpty)
+                  Text('지역: ${selectedLocation!}',
+                      style: const TextStyle(color: Colors.grey)),
+                if (selectedDateRange != null)
+                  Text(
+                    '기간: ${DateFormat('yy.MM.dd').format(selectedDateRange!.start)} ~ ${DateFormat('yy.MM.dd').format(selectedDateRange!.end)}',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: collectionQuery.snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-    // 지역 필터 (Bookmark 방식: 문자열 포함)
-    final filteredDocs = snapshot.docs.where((doc) {
-      if (selectedLocation != null && selectedLocation!.isNotEmpty) {
-        final location = doc['location'] ?? '';
-        return location.contains(selectedLocation!);
-      }
-      return true;
-    }).toList();
+                // 지역 필터 적용
+                var docs = snapshot.data!.docs;
+                if (selectedLocation != null && selectedLocation!.isNotEmpty) {
+                  docs = docs.where((doc) {
+                    final location = doc['location'] ?? '';
+                    return location.contains(selectedLocation!);
+                  }).toList();
+                }
 
-    if (initial) {
-      _posts.clear();
-      _hasMore = true;
-      _lastDocument = null;
-    }
+                if (docs.isEmpty) {
+                  return const Center(child: Text('조건에 맞는 글이 없습니다.'));
+                }
 
-    if (filteredDocs.isNotEmpty) {
-      _lastDocument = filteredDocs.last;
-      _posts.addAll(filteredDocs);
-    } else {
-      _hasMore = false;
-    }
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    final communityCreateDate =
+                        (data['community_create_date'] as Timestamp?)?.toDate();
+                    final formattedDate = communityCreateDate != null
+                        ? DateFormat('yyyy-MM-dd HH:mm').format(communityCreateDate)
+                        : '';
+                    final location = data['location'] ?? '';
+                    final title = data['community_name'] ?? '제목 없음';
+                    final docId = docs[index].id;
 
-    setState(() => _isLoading = false);
+                    return Card(
+                      margin:
+                          const EdgeInsets.symmetric(vertical: 6, horizontal: 15),
+                      color: Colors.transparent,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.grey, width: 1),
+                      ),
+                      child: ListTile(
+                        title: Text(title),
+                        subtitle: Text('$formattedDate | $location'),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                        onTap: () => context.push(
+                          '/community-detail',
+                          extra: {
+                            'id': docId,
+                            'extra': widget.extra,
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  /// 날짜 선택 후 즉시 재조회
+  /// 날짜 선택
   Future<void> pickDateRange() async {
     final now = DateTime.now();
     final range = await showDateRangePicker(
@@ -101,11 +186,10 @@ class _MyPostDetailScreenState extends State<MyPostDetailScreen> {
 
     if (range != null) {
       setState(() => selectedDateRange = range);
-      await _fetchPosts(initial: true); // 바로 재조회
     }
   }
 
-  /// 지역 선택 (문자열 포함)
+  /// 지역 선택
   Future<void> pickLocation() async {
     final loc = await showDialog<String>(
       context: context,
@@ -130,109 +214,6 @@ class _MyPostDetailScreenState extends State<MyPostDetailScreen> {
 
     if (loc != null) {
       setState(() => selectedLocation = loc);
-      await _fetchPosts(initial: true); // 바로 재조회
     }
-  }
-
-  /// 필터 초기화
-  Future<void> resetFilters() async {
-    setState(() {
-      selectedDateRange = null;
-      selectedLocation = null;
-    });
-    await _fetchPosts(initial: true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('내 글 상세'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: '필터 초기화',
-            onPressed: resetFilters,
-          ),
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            tooltip: '기간 선택',
-            onPressed: pickDateRange,
-          ),
-          IconButton(
-            icon: const Icon(Icons.location_on),
-            tooltip: '지역 필터',
-            onPressed: pickLocation,
-          ),
-        ],
-      ),
- body: Column(
-  children: [
-    // 🔹 필터 표시 영역 (선택된 날짜/지역)
-    if (selectedDateRange != null || (selectedLocation != null && selectedLocation!.isNotEmpty))
-      Container(
-        width: double.infinity,
-        color: Colors.grey.shade200,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (selectedLocation != null && selectedLocation!.isNotEmpty)
-              Text('지역: ${selectedLocation!}', style: const TextStyle(color: Colors.grey)),
-            if (selectedDateRange != null)
-              Text(
-                  '기간: ${DateFormat('yy.MM.dd').format(selectedDateRange!.start)} ~ '
-                  '${DateFormat('yy.MM.dd').format(selectedDateRange!.end)}',
-                  style: const TextStyle(color: Colors.grey)),
-          ],
-        ),
-      ),
-    
-    Expanded(
-      child: _isLoading && _posts.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : _posts.isEmpty
-              ? const Center(child: Text('조건에 맞는 글이 없습니다.'))
-              : ListView.builder(
-                  itemCount: _posts.length,
-                  itemBuilder: (context, index) {
-                    final data = _posts[index].data() as Map<String, dynamic>;
-                    final community_create_date =
-                        (data['community_create_date'] as Timestamp?)?.toDate();
-                    final formattedDate = community_create_date != null
-                        ? DateFormat('yyyy-MM-dd HH:mm').format(community_create_date)
-                        : '';
-                    final location = data['location'] ?? '';
-                    final title = data['community_name'] ?? '제목 없음';
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: ListTile(
-                        title: Text(title),
-                        subtitle: Text('$formattedDate | $location'),
-                        onTap: () {},
-                      ),
-                    );
-                  },
-                ),
-    ),
-    if (_hasMore)
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: ElevatedButton(
-          onPressed: _isLoading ? null : () => _fetchPosts(initial: false),
-          child: _isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
-              : const Text('더보기'),
-        ),
-      ),
-  ],
-),
-
-    );
   }
 }

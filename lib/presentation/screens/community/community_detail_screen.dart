@@ -17,7 +17,8 @@ import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
   // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
-  const CommunityDetailScreen({super.key, required this.id});
+  final Map<String, dynamic>? extra;
+  const CommunityDetailScreen({super.key, required this.id, this.extra});
   final String id;
 
   @override
@@ -211,10 +212,25 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         ).showSnackBar(SnackBar(content: Text(err)));
                       } else {
                         if (!context.mounted) return;
-                        context.pushReplacement(
-                          '/community',
-                          extra: {'deleted': true},
-                        ); // 삭제 후 목록으로 이동 , 스낵바용true전달
+                          // widget.extra가 Map<String, dynamic>인지 확인하고, 없으면 빈 Map 사용
+                          final originalExtra = widget.extra as Map<String, dynamic> ;
+
+                          // 기존 Map을 복사하고 deleted 플래그 추가
+                          final newExtra = {
+                            ...originalExtra, // 기존 값들 모두
+                            'deleted': true,  // 새 플래그 추가
+                          };
+
+                          context.pushReplacement(
+                            '/community',
+                            extra: newExtra,
+                          );
+                        // if (!context.mounted) return;
+                        // context.pushReplacement(
+                        //   '/community',
+                        //   extra: widget.extra,
+                        //   //extra: {'deleted': true},
+                        // ); // 삭제 후 목록으로 이동 , 스낵바용true전달
                       }
                     }
 
