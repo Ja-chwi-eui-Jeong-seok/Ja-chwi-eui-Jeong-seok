@@ -158,13 +158,17 @@ class ProfileCardList extends ConsumerWidget {
 
         final docs = snapshot.data!.docs;
 
-        if (docs.isEmpty) {
+          if (docs.isEmpty) {
           return const Padding(
-            padding: EdgeInsets.only(top: 4),
-            child: Text('작성한 글이 없습니다.'),
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(
+              child: Text(
+                '작성한 글이 없습니다.',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ),
           );
         }
-
         return Column(
           children: [
             ...docs.map((doc) {

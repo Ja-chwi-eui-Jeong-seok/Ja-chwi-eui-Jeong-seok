@@ -148,48 +148,59 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
-    GoRoute(
-      path: '/community',
-      name: '커뮤니티',
-      pageBuilder: (context, state) {
-        final args = state.extra as Map<String, dynamic>?;
-        return CommunityScreen(extra: args);
-      },
-      //builder: (context, state) => const CommunityScreen(),
-    ),
-    GoRoute(
-      path: '/community-detail',
-      name: '커뮤니티 상세',
-       builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>;
-        final id = data['id'] as String;
-        final extra = (data['extra'] is Map<String, dynamic>)
-          ? data['extra'] as Map<String, dynamic>
-          : <String, dynamic>{};
-        return CommunityDetailScreen(id: id, extra: extra);
-      },
-    ),
-    GoRoute(
-      path: '/community-create',
-      name: '커뮤니티 작성',
-      builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>;
-        return CommunityCreateScreen(extra: data);
-      },
-    ),
-    GoRoute(
-      path: '/community-edit',
-      name: '커뮤니티 수정',
-      builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>;
-        final id = data['id'] as String;
+   // 커뮤니티 메인
+GoRoute(
+  path: '/community',
+  name: '커뮤니티',
+  pageBuilder: (context, state) {
+    final args = state.extra as Map<String, dynamic>?;
+    return NoTransitionPage(
+      key: state.pageKey,
+      child: CommunityScreen(extra: args),
+    );
+  },
+),
 
-        final extra = (data['extra'] is Map<String, dynamic>)
+  // 커뮤니티 상세
+  GoRoute(
+    path: '/community-detail',
+    name: '커뮤니티 상세',
+    pageBuilder: (context, state) {
+      final data = state.extra as Map<String, dynamic>;
+      final id = data['id'] as String;
+      final extra = (data['extra'] is Map<String, dynamic>)
           ? data['extra'] as Map<String, dynamic>
           : <String, dynamic>{};
-        return CommunityCreateScreen(id: id, extra: extra);
-      },
-    ),
+      return NoTransitionPage(
+        child: CommunityDetailScreen(id: id, extra: extra),
+      );
+    },
+  ),
+
+  // 커뮤니티 작성
+  GoRoute(
+    path: '/community-create',
+    name: '커뮤니티 작성',
+    pageBuilder: (context, state) {
+      final data = state.extra as Map<String, dynamic>;
+      return NoTransitionPage(child: CommunityCreateScreen(extra: data));
+    },
+  ),
+
+  // 커뮤니티 수정
+  GoRoute(
+    path: '/community-edit',
+    name: '커뮤니티 수정',
+    pageBuilder: (context, state) {
+      final data = state.extra as Map<String, dynamic>;
+      final id = data['id'] as String;
+      final extra = (data['extra'] is Map<String, dynamic>)
+          ? data['extra'] as Map<String, dynamic>
+          : <String, dynamic>{};
+      return NoTransitionPage(child: CommunityCreateScreen(id: id, extra: extra));
+    },
+  ),
+
     GoRoute(
       path: '/profile-flow',
       name: '프로필 흐름',
