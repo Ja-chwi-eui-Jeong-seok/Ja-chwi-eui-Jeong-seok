@@ -440,13 +440,25 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                     error: (_, __) => const Text('0'),
                   );
                   return InkWell(
-                    onTap: () => context.push(
-                      '/community-detail',
-                      extra: {
-                        'id': x.id,
-                        'extra': widget.extra, // 선택적으로 추가 데이터 전달 가능
-                      },
-                    ),
+                    onTap: () async {
+                      // CommunityDetailScreen 호출 + docId 전달
+                      final result = await context.push<bool>(
+                        '/community-detail',
+                        extra: {'id': x.id, 'extra': widget.extra},
+                      );
+
+                      // 삭제/수정 후 true를 반환하면 refresh
+                      if (result == true) {
+                        setState(() {}); // 화면 재조회
+                      }
+                    },
+                    // onTap: () => context.push(
+                    //   '/community-detail',
+                    //   extra: {
+                    //     'id': x.id,
+                    //     'extra': widget.extra, // 선택적으로 추가 데이터 전달 가능
+                    //   },
+                    // ),
                     child: Container(
                       height: 96,
                       //테두리
@@ -810,13 +822,25 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                   );
 
                   return InkWell(
-                    onTap: () => context.push(
-                      '/community-detail',
-                      extra: {
-                        'id': x.id,
-                        'extra': widget.extra, // ✅ 이제 정상 작동
-                      },
-                    ),
+                    onTap: () async {
+                      // CommunityDetailScreen 호출 + docId 전달
+                      final result = await context.push<bool>(
+                        '/community-detail',
+                        extra: {'id': x.id, 'extra': widget.extra},
+                      );
+
+                      // 삭제/수정 후 true를 반환하면 refresh
+                      if (result == true) {
+                        setState(() {}); // 화면 재조회
+                      }
+                    },
+                    // onTap: () => context.push(
+                    //   '/community-detail',
+                    //   extra: {
+                    //     'id': x.id,
+                    //     'extra': widget.extra, // ✅ 이제 정상 작동
+                    //   },
+                    // ),
                     child: Container(
                       height: 96,
                       decoration: BoxDecoration(
