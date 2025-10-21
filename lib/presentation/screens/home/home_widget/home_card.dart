@@ -54,12 +54,15 @@ class HomeCard extends ConsumerWidget {
                           color: Colors.black, // 그라데이션 위에서 잘 보이게 색상 변경
                         ),
                       ),
-                      Text(
-                        mission.missiontitle,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black, // 텍스트 색상 조정
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          mission.missiontitle,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black, // 텍스트 색상 조정
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -74,7 +77,7 @@ class HomeCard extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            mission.tags.first,
+                            '#${mission.tags.first}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.black,
@@ -84,6 +87,7 @@ class HomeCard extends ConsumerWidget {
                     ],
                   ),
                 ),
+                const SizedBox(width: 36),
                 SizedBox(
                   width: 60,
                   height: 60,

@@ -28,14 +28,18 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final uid = extra['uid'] as String?; // extra에서 uid 추출
     final managerType = extra['managerType'] as bool?; // extra에서 권한 읽기
-    print('SettingsPage extra: $extra'); // ✅ 데이터 확인
+    //print('SettingsPage extra: $extra'); // ✅ 데이터 확인
     final isAdmin = managerType == true; // admin이면 true
 
     final isDarkMode = ref.watch(darkModeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("설정"),
+        title: const Text("설정",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            )),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () =>
@@ -46,7 +50,7 @@ class SettingsPage extends ConsumerWidget {
         children: [
           // 다크 모드
           SwitchListTile(
-            title: const Text("다크 모드"),
+            title: const Text("다크 모드",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
             value: isDarkMode,
             onChanged: (value) {
               ref.read(darkModeProvider.notifier).state = value;
@@ -57,7 +61,7 @@ class SettingsPage extends ConsumerWidget {
           // 신고 내역
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            title: const Text("신고 내역"),
+            title: const Text("신고 내역",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
             onTap: () {
               context.go('/my-report', extra: extra);
             },
@@ -65,7 +69,7 @@ class SettingsPage extends ConsumerWidget {
           // 차단 내역
           ListTile(
             leading: const Icon(Icons.do_not_disturb_on_outlined),
-            title: const Text("차단 내역"),
+            title: const Text("차단 내역",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
             onTap: () {
               context.go('/my-block', extra: extra);
             },
@@ -73,7 +77,7 @@ class SettingsPage extends ConsumerWidget {
           // 도움말
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text("도움말"),
+            title: const Text("도움말",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
             onTap: () {
               context.go('/help', extra: extra);
             },
@@ -87,7 +91,7 @@ class SettingsPage extends ConsumerWidget {
           // 로그아웃
           ListTile(
             leading: const Icon(Icons.cancel_outlined),
-            title: const Text("로그아웃"),
+            title: const Text("로그아웃",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
             onTap: () {
               showDialog(
                 context: context,
@@ -120,23 +124,11 @@ class SettingsPage extends ConsumerWidget {
               );
             },
           ),
-
-          // 계정 비활성화
-          // ListTile(
-          //   leading: const Icon(Icons.pause_circle, color: Colors.orange),
-          //   title: const Text(
-          //     "계정 비활성화",
-          //     style: TextStyle(color: Colors.orange),
-          //   ),
-          //   onTap: () {
-          //     _showDeactivateAccountDialog(context, uid);
-          //   },
-          // ),
-
           // 계정 완전 삭제
           ListTile(
             leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text("계정 완전 삭제", style: TextStyle(color: Colors.red)),
+            title: const Text("계정 완전 삭제",
+             style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold,fontSize: 16),),
             onTap: () {
               _showDeleteAccountDialog(context, uid);
             },
@@ -145,67 +137,17 @@ class SettingsPage extends ConsumerWidget {
           if (isAdmin)
             ListTile(
               leading: const Icon(Icons.admin_panel_settings),
-              title: const Text("관리자"),
+              title: const Text("관리자", style: TextStyle(fontWeight: FontWeight.bold),),
               onTap: () {
                 // 관리자 화면 이동
                 context.go('/admin', extra: extra);
               },
             ),
-          //  ListTile(
-          //   leading: const Icon(Icons.admin_panel_settings),
-          //   title: const Text("차단등록"),
-          //   onTap: () {
-          //     // 관리자 화면 이동
-          //     context.go('/block-user', extra: extra);
-          //   },
-          // ),
-          // ListTile(
-          //   leading: const Icon(Icons.admin_panel_settings),
-          //   title: const Text("신고등록"),
-          //   onTap: () {
-          //     // 관리자 화면 이동
-          //     context.go('/report-user', extra: extra);
-          //   },
-          // ),
         ],
       ),
     );
   }
 
-  void _showDeactivateAccountDialog(BuildContext context, String? uid) {
-    if (uid == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('사용자 정보를 찾을 수 없습니다.')),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("계정 비활성화"),
-          content: const Text(
-            "계정을 비활성화하면 로그인이 제한됩니다.\n"
-            "60일 후 계정과 모든 데이터가 자동으로 삭제됩니다.\n"
-            "이 기간 동안은 계정을 복구할 수 있습니다.\n\n"
-            "계정을 비활성화하시겠습니까?",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("취소"),
-            ),
-            TextButton(
-              onPressed: () => _deactivateAccount(context, uid),
-              style: TextButton.styleFrom(foregroundColor: Colors.orange),
-              child: const Text("비활성화"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _showDeleteAccountDialog(BuildContext context, String? uid) {
     if (uid == null) {
@@ -366,7 +308,11 @@ class SettingsPage extends ConsumerWidget {
             ),
           );
         }
-      } catch (e) {}
+      } catch (e) {
+        if (kDebugMode) {
+          print('🔴 스낵바 표시 실패: $e');
+        }
+      }
 
       // 3초 후 로그인 화면으로 이동 (사용자가 메시지를 읽을 시간 제공)
       Future.delayed(const Duration(seconds: 3), () {
