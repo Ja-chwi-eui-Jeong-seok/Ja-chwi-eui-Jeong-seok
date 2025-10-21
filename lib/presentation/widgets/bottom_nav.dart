@@ -35,27 +35,22 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (mode) {
-      case BottomNavMode.tab:
-        return _buildTabNav(context);
-      case BottomNavMode.confirm:
-        return _buildConfirmNav(context);
-    }
+    return GestureDetector(
+      onHorizontalDragStart: (_) {}, // 스와이프 제스처 무시
+      onHorizontalDragUpdate: (_) {}, // 스와이프 제스처 무시
+      child: switch (mode) {
+        BottomNavMode.tab => _buildTabNav(context),
+        BottomNavMode.confirm => _buildConfirmNav(context),
+      },
+    );
   }
 
   Widget _buildTabNav(BuildContext context) {
     int currentIndex = _getCurrentIndex(context);
 
-    final routes = [
-      '/home',
-      '/mission',
-      '/community',
-      '/profile-detail',
-    ];
-
     return SafeArea(
       child: Container(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(40),
@@ -82,31 +77,63 @@ class BottomNav extends StatelessWidget {
               );
               print('BottomNav onTap: index=$index, userData=$userData');
             },
-            selectedItemColor: Colors.red, // 선택된 아이콘 + 텍스트 색상
-            unselectedItemColor: Colors.grey, // 선택되지 않은 아이콘 색상
+            // selectedItemColor: Colors.red,
+            // unselectedItemColor: Colors.grey,
             backgroundColor: Colors.transparent,
             elevation: 0,
             showSelectedLabels: false,
             showUnselectedLabels: false,
             items: [
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined, size: 30.0),
+              BottomNavigationBarItem(
+                icon: Image.asset(
+                  'assets/images/icons/home.png',
+                  width: 30,
+                  height: 30,
+                ),
+                activeIcon: Image.asset(
+                  'assets/images/icons/s_home.png',
+                  width: 30,
+                  height: 30,
+                ),
                 label: "홈",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.article_outlined, size: 30.0, key: missionKey),
+                icon: Image.asset(
+                  'assets/images/icons/mission.png',
+                  width: 30,
+                  height: 30,
+                ),
+                activeIcon: Image.asset(
+                  'assets/images/icons/s_mission.png',
+                  width: 30,
+                  height: 30,
+                ),
                 label: "미션",
               ),
               BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.groups_outlined,
-                  size: 30.0,
-                  key: communityKey,
+                icon: Image.asset(
+                  'assets/images/icons/commu.png',
+                  width: 30,
+                  height: 30,
+                ),
+                activeIcon: Image.asset(
+                  'assets/images/icons/s_commu.png',
+                  width: 30,
+                  height: 30,
                 ),
                 label: "커뮤니티",
               ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.person_rounded, size: 30.0),
+              BottomNavigationBarItem(
+                icon: Image.asset(
+                  'assets/images/icons/profile.png',
+                  width: 30,
+                  height: 30,
+                ),
+                activeIcon: Image.asset(
+                  'assets/images/icons/s_profile.png',
+                  width: 30,
+                  height: 30,
+                ),
                 label: "내 정보",
               ),
             ],

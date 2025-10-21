@@ -51,69 +51,78 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/splash',
       name: '스플레시',
-      builder: (context, state) => const SplashScreen(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: SplashScreen()),
     ),
     GoRoute(
       path: '/guide',
       name: '가이드',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final args = state.extra as Map<String, dynamic>?;
-        return GuideScreen(extra: args);
+        return NoTransitionPage(child: GuideScreen(extra: args));
       },
     ),
     GoRoute(
       path: '/login',
       name: '로그인',
-      builder: (context, state) => const LoginScreen(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: LoginScreen()),
     ),
     GoRoute(
       path: '/privacy-policy',
       name: '개인정보처리방침',
-      builder: (context, state) => PrivacyPolicyPage(),
+      pageBuilder: (context, state) =>
+          NoTransitionPage(child: PrivacyPolicyPage()),
     ),
     GoRoute(
       path: '/home',
       name: '메인',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return HomeScreen(extra: data);
+        return NoTransitionPage(child: HomeScreen(extra: data));
       },
     ),
     GoRoute(
       path: '/ai-chat',
       name: 'ai채팅',
-      builder: (context, state) => const AiChat(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: AiChat()),
     ),
     GoRoute(
       path: '/mission',
       name: '미션',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return MissionHomeScreen(extra: data);
+        return NoTransitionPage(child: MissionHomeScreen(extra: data));
       },
     ),
     GoRoute(
       path: '/mission-create',
       name: '미션 작성',
-      builder: (context, state) => const MissionCreateScreen(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: MissionCreateScreen()),
     ),
     GoRoute(
       path: '/mission-detail',
       name: '미션 상세',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final missionData = state.extra as Map<String, dynamic>?;
         if (missionData == null) {
-          return const Scaffold(
-            body: Center(child: Text('미션 정보를 불러올 수 없습니다.')),
+          return const NoTransitionPage(
+            child: Scaffold(
+              body: Center(child: Text('미션 정보를 불러올 수 없습니다.')),
+            ),
           );
         }
-        return MissionDetailScreen(missionData: missionData);
+        return NoTransitionPage(
+          child: MissionDetailScreen(missionData: missionData),
+        );
       },
     ),
     GoRoute(
       path: '/mission-saved-list',
       name: '미션 저장목록',
-      builder: (context, state) => const MissionSavedListScreen(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: MissionSavedListScreen()),
     ),
     GoRoute(
       path: '/mission-achievers',
@@ -142,135 +151,143 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/community',
       name: '커뮤니티',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final args = state.extra as Map<String, dynamic>?;
-
-        return CommunityScreen(extra: args);
+        return NoTransitionPage(child: CommunityScreen(extra: args));
       },
       //builder: (context, state) => const CommunityScreen(),
     ),
     GoRoute(
       path: '/community-detail',
       name: '커뮤니티 상세',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final id = state.extra as String; // ← 리스트에서 넘긴 문서 id
-        return CommunityDetailScreen(id: id);
+        return NoTransitionPage(child: CommunityDetailScreen(id: id));
       },
     ),
     GoRoute(
       path: '/community-create',
       name: '커뮤니티 작성',
-      builder: (context, state) => const CommunityCreateScreen(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: CommunityCreateScreen()),
     ),
     GoRoute(
       path: '/community-edit',
       name: '커뮤니티 수정',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final id = state.extra as String;
-        return CommunityCreateScreen(id: id);
+        return NoTransitionPage(child: CommunityCreateScreen(id: id));
       },
     ),
     GoRoute(
       path: '/profile-flow',
-      builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>?; // extra 전체 받기
-        debugPrint("넘어온 데이터: $data");
 
+      redirect: (context, state) {
+        final data = state.extra as Map<String, dynamic>?;
         final uid = data?['uid'] as String?;
-        if (uid == null) {
-          context.go('/login');
-          return const SizedBox.shrink();
-        }
+        return uid == null ? '/login' : null;
+      },
 
-        return ProfileFlowPage(
-          uid: uid,
-          extra: data,
+      pageBuilder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+        final uid = data['uid'] as String; // redirect로 null 아님 보장
+        return NoTransitionPage(
+          child: ProfileFlowPage(uid: uid, extra: data),
         );
       },
     ),
+
     GoRoute(
       path: '/profile',
       name: '프로필',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return ProfileScreen(extra: data);
+        return NoTransitionPage(child: ProfileScreen(extra: data));
       },
     ),
     GoRoute(
       path: '/location',
       name: '동명 불러오기',
-      builder: (context, state) => const LocationSearchPage(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: LocationSearchPage()),
     ),
     GoRoute(
       path: '/location_search',
       name: ' 불러오기',
-      builder: (context, state) => const LocationAutocompleteWidget(),
+      pageBuilder: (context, state) =>
+          const NoTransitionPage(child: LocationAutocompleteWidget()),
     ),
 
     GoRoute(
       path: '/profile-detail',
       name: '프로필 상세',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return ProfileDetail(extra: data);
+        return NoTransitionPage(child: ProfileDetail(extra: data));
       },
     ),
     GoRoute(
       path: '/admin',
       name: '관리자 메뉴',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return AdminScreen(extra: data);
+        return NoTransitionPage(child: AdminScreen(extra: data));
       },
     ),
     GoRoute(
       path: '/my-report',
       name: '내가신고한내역',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return MyReportsPage(extra: data);
+        return NoTransitionPage(child: MyReportsPage(extra: data));
       },
     ),
     GoRoute(
       path: '/all-reports',
       name: '전체신고내역',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return ReportsPage(extra: data);
+        return NoTransitionPage(child: ReportsPage(extra: data));
       },
     ),
     GoRoute(
       path: '/report-user',
       name: '신고등록',
-      builder: (context, state) => const ReportUserPage(
-        myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
-        targetUid: 'MoDmwRSaBANwKlVLvyhEXgiD5Sn2',
+      pageBuilder: (context, state) => const NoTransitionPage(
+        child: ReportUserPage(
+          myUid: 'DM6Fcg8NtYXEiRXlwC4VnI8R7N52', // 실제 UID 전달
+          targetUid: 'MoDmwRSaBANwKlVLvyhEXgiD5Sn2',
+        ),
       ),
     ),
     GoRoute(
       path: '/report',
       name: '신고하기',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return ReportScreen(
-          targetUserId: data['targetUserId'] as String,
-          targetUserName: data['targetUserName'] as String?,
-          targetContent: data['targetContent'] as String?,
-          targetCreatedAt: data['targetCreatedAt'] as DateTime?,
+        return NoTransitionPage(
+          child: ReportScreen(
+            targetUserId: data['targetUserId'] as String,
+            targetUserName: data['targetUserName'] as String?,
+            targetContent: data['targetContent'] as String?,
+            targetCreatedAt: data['targetCreatedAt'] as DateTime?,
+          ),
         );
       },
     ),
     GoRoute(
       path: '/report-detail',
       name: '신고 세부사유',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return ReportDetailScreen(
-          targetUserId: data['targetUserId'] as String,
-          targetUserName: data['targetUserName'] as String?,
-          targetContent: data['targetContent'] as String?,
-          targetCreatedAt: data['targetCreatedAt'] as DateTime?,
-          selectedReason: data['selectedReason'] as String,
+        return NoTransitionPage(
+          child: ReportDetailScreen(
+            targetUserId: data['targetUserId'] as String,
+            targetUserName: data['targetUserName'] as String?,
+            targetContent: data['targetContent'] as String?,
+            targetCreatedAt: data['targetCreatedAt'] as DateTime?,
+            selectedReason: data['selectedReason'] as String,
+          ),
         );
       },
     ),
@@ -278,66 +295,66 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/block-user',
       name: '차단등록',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return BlockUserPage(extra: data);
+        return NoTransitionPage(child: BlockUserPage(extra: data));
       },
     ),
     GoRoute(
       path: '/my-block',
       name: '내가차단한내역',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return MyBlocksPage(extra: data);
+        return NoTransitionPage(child: MyBlocksPage(extra: data));
       },
     ),
     GoRoute(
       path: '/all-block',
       name: '전체차단내역',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return BlocksPage(extra: data);
+        return NoTransitionPage(child: BlocksPage(extra: data));
       },
     ),
     GoRoute(
       path: '/settings',
       name: '설정',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return SettingsPage(extra: data);
+        return NoTransitionPage(child: SettingsPage(extra: data));
       },
     ),
     // 도움말
     GoRoute(
       path: '/help',
       name: '도움말',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return HelpPage(extra: data);
+        return NoTransitionPage(child: HelpPage(extra: data));
       },
     ),
     GoRoute(
       path: '/help-admin',
       name: '도움말 등록',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return HelpAdminPage(extra: data);
+        return NoTransitionPage(child: HelpAdminPage(extra: data));
       },
     ),
     GoRoute(
       path: '/mission-list',
       name: '미션 리스트',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return AddMissionList(extra: data);
+        return NoTransitionPage(child: AddMissionList(extra: data));
       },
     ),
     GoRoute(
       path: '/category',
       name: '카테고리 리스트',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>? ?? {};
-        return CategoryPage(extra: data);
+        return NoTransitionPage(child: CategoryPage(extra: data));
       },
     ),
   ],

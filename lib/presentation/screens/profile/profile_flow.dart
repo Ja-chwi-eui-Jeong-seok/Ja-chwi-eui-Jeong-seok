@@ -187,7 +187,7 @@ class _DongSearchWidgetState extends State<DongSearchWidget> {
         TextField(
           controller: _controller,
           decoration: InputDecoration(
-            hintText: "동명을 입력하세요",
+            hintText: "ex) 서울특별시 동작구",
             suffixIcon: IconButton(
               icon: const Icon(Icons.search),
               onPressed: performSearch, // 돋보기 클릭

@@ -1,9 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ja_chwi/presentation/screens/mission/achievers/mission_calendar_utils.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_profile_tile.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/completed_mission_card.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -60,80 +61,6 @@ class _UserWeeklyMissionsScreenState
     }
   }
 
-  Map<DateTime, Map<String, dynamic>> _mapMissionsToCalendarEvents(
-    List<Map<String, dynamic>> missions,
-  ) {
-    final Map<DateTime, Map<String, dynamic>> eventMap = {};
-    for (var mission in missions) {
-      final completedAt = (mission['missioncreatedate'] as Timestamp?)
-          ?.toDate();
-      if (completedAt != null) {
-        final date = DateTime.utc(
-          completedAt.year,
-          completedAt.month,
-          completedAt.day,
-        );
-        eventMap[date] = mission;
-      }
-    }
-    return eventMap;
-  }
-
-  Widget _buildAchieverProfile(MissionAchiever achiever) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 60,
-          height: 60,
-          child: ClipOval(
-            child: Image(
-              image:
-                  (achiever.imageFullUrl.startsWith('http')
-                          ? NetworkImage(achiever.imageFullUrl)
-                          : AssetImage(achiever.imageFullUrl))
-                      as ImageProvider,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.person, size: 40),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                achiever.level,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                achiever.name,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '이번 주 ${achiever.weekCount}회 달성',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final missionsAsync = ref.watch(
@@ -160,11 +87,20 @@ class _UserWeeklyMissionsScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildAchieverProfile(widget.achiever),
+              AchieverProfileTile(
+                achiever: widget.achiever,
+                trailing: Text(
+                  '이번 주 ${widget.achiever.weekCount}회 달성',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
               const SizedBox(height: 16),
               missionsAsync.when(
                 data: (missions) {
-                  final completedMissions = _mapMissionsToCalendarEvents(
+                  final completedMissions = mapMissionsToCalendarEvents(
                     missions,
                   );
                   // final startOfWeek = widget.weekDate.subtract(
