@@ -153,19 +153,23 @@ final GoRouter router = GoRouter(
       name: '커뮤니티',
       pageBuilder: (context, state) {
         final args = state.extra as Map<String, dynamic>?;
-        return CommunityScreen(extra: args);
+
+        return MaterialPage(
+          key: state.pageKey, // important for GoRouter page management
+          child: CommunityScreen(extra: args),
+        );
       },
-      //builder: (context, state) => const CommunityScreen(),
+      // builder: (context, state) => CommunityScreen(extra: args), // only use builder if you want widget directly
     ),
     GoRoute(
       path: '/community-detail',
       name: '커뮤니티 상세',
-       builder: (context, state) {
+      builder: (context, state) {
         final data = state.extra as Map<String, dynamic>;
         final id = data['id'] as String;
         final extra = (data['extra'] is Map<String, dynamic>)
-          ? data['extra'] as Map<String, dynamic>
-          : <String, dynamic>{};
+            ? data['extra'] as Map<String, dynamic>
+            : <String, dynamic>{};
         return CommunityDetailScreen(id: id, extra: extra);
       },
     ),
@@ -185,8 +189,8 @@ final GoRouter router = GoRouter(
         final id = data['id'] as String;
 
         final extra = (data['extra'] is Map<String, dynamic>)
-          ? data['extra'] as Map<String, dynamic>
-          : <String, dynamic>{};
+            ? data['extra'] as Map<String, dynamic>
+            : <String, dynamic>{};
         return CommunityCreateScreen(id: id, extra: extra);
       },
     ),
