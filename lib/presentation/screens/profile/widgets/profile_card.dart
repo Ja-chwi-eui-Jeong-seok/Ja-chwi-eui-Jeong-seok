@@ -205,13 +205,24 @@ class ProfileCardList extends ConsumerWidget {
                       size: 16,
                       color: Colors.grey,
                     ),
-                    onTap: () => context.push(
-                      '/community-detail',
-                      extra: {
-                        'id': docId,
-                        'extra': extra,
-                      },
-                    ),
+                    onTap: () async {
+                      final result = await context.push<bool>(
+                        '/community-detail',
+                        extra: {'id': doc.id, 'extra': extra},
+                      );
+
+                      if (result == true) {
+                        // StatelessWidget인 경우 상위에서 refresh 필요
+                        // 필요하면 부모에서 setState 호출
+                      }
+                    },
+                    // onTap: () => context.push(
+                    //   '/community-detail',
+                    //   extra: {
+                    //     'id': docId,
+                    //     'extra': extra,
+                    //   },
+                    // ),
                   ),
                 ),
               );
