@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+4
+version: 1.0.0+8
 
 environment:
   sdk: ^3.9.0
@@ -76,14 +76,12 @@ dependencies:
   timezone: ^0.10.1
   google_generative_ai: ^0.4.7
   
-
-  dart_openai: ^5.1.0
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
-
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -95,11 +93,10 @@ dev_dependencies:
   json_serializable: ^6.11.1
   mockito: ^5.5.1
 
-
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: assets/icon/icon.png 
+  image_path: assets/icon/icon.png
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -114,11 +111,11 @@ flutter:
   assets:
     - assets/images/m_profile/
     - assets/images/profile/
+    - assets/images/icons/
     - assets/config/json/
     - assets/images/
     - assets/banned_words/slang.csv
     - assets/config/env/setting.env
-    - assets/config/csv/통계청_법정동 연계정보_20250602.csv
     # - assets/config/mock/
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -142,11 +139,11 @@ flutter:
     - family: GamjaFlower
       fonts:
         - asset: assets/fonts/GamjaFlower-Regular.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
+    #       - asset: fonts/TrajanPro_Bold.ttf
+    #         weight: 700
+    #
+    # For details regarding fonts from package dependencies,
+    # see https://flutter.dev/to/font-from-package
     - family: AppIcons
       fonts:
         - asset: assets/fonts/icomoon.ttf

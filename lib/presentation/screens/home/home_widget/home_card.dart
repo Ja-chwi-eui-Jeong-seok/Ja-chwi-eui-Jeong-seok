@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/triple_arrow_icon.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 
 //
 class HomeCard extends ConsumerWidget {
-  const HomeCard({super.key});
+  final Map<String, dynamic>? extra;
+  const HomeCard({super.key, this.extra});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -15,103 +15,114 @@ class HomeCard extends ConsumerWidget {
 
     return todayMissionAsync.when(
       data: (mission) => Card(
-        color: const Color(0xFFD9D9D9),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         elevation: 4,
-        child: Padding(
-          padding: const EdgeInsets.only(
-            top: 10,
-            bottom: 10,
-            right: 10,
-            left: 15,
-          ), // 카드 내부 전체 패딩
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '오늘의 미션',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                    // const SizedBox(height: 4),
-                    Text(
-                      mission.missiontitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (mission.tags.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 2,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white, // 밝은 베이지톤
+                Color(0xFFF5CFA3), // 오렌지 포인트
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(
+              top: 10,
+              bottom: 10,
+              right: 10,
+              left: 15,
+            ), // 카드 내부 전체 패딩
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '오늘의 미션',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.black, // 그라데이션 위에서 잘 보이게 색상 변경
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                      ),
+                      Text(
+                        mission.missiontitle,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black, // 텍스트 색상 조정
                         ),
-                        child: Text(
-                          mission.tags.first,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
+                      ),
+                      const SizedBox(height: 4),
+                      if (mission.tags.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            mission.tags.first,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      padding: EdgeInsets.zero,
                     ),
-                    padding: EdgeInsets.zero,
-                  ),
-                  onPressed: () {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      router.push('/mission-create');
-                    });
-                  },
-
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          '미션하기',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                    onPressed: () => context.push(
+                      '/mission-create',
+                      extra: mission.missiontitle,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: const [
+                          Text(
+                            '미션하기',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFED8B5A),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        const TripleArrowIcon(),
-                      ],
+                          SizedBox(height: 4),
+                          TripleArrowIcon(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

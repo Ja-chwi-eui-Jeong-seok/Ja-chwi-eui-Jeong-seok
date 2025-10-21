@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:ja_chwi/core/constants/app_colors.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
@@ -26,6 +27,7 @@ class CommunityDetailScreen extends ConsumerStatefulWidget {
 
 class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   final commentController = TextEditingController();
+  final commentFocusNode = FocusNode();
 
   // 상세 VM 프로바이더 인스턴스 보관
   late final provider = communityDetailVmProvider(widget.id);
@@ -42,6 +44,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   @override
   void dispose() {
     commentController.dispose();
+    commentFocusNode.dispose();
     super.dispose();
   }
 
@@ -105,6 +108,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         createdAtOf: (i) => st.comments[i].createAt,
         comments: st.comments,
         detailVmProvider: provider,
+        commentFocusNode: commentFocusNode,
       ),
     );
   }
@@ -112,6 +116,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final st = ref.watch(provider);
+    ref.listen<int>(communityChangedTickProvider, (_, __) {
+      ref.read(provider.notifier).loadInitial(ref); // 또는 reload()
+    });
     //현재유저의 uid 정보
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     //작성자가 유저와 일치하는지
@@ -167,7 +174,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           st.isBookmarked
                               ? Icons.bookmark
                               : Icons.bookmark_border,
-                          color: st.isBookmarked ? Colors.orange : null,
+                          color: st.isBookmarked ? AppColors.primary : null,
                         ),
                   onPressed: st.loadingBookmark
                       ? null
@@ -188,6 +195,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   ),
                   onPressed: () async {
                     softdelete() async {
+                      // 1) 먼저 다이얼로그 닫기
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+
+                      // 2) 실제 소프트 삭제 수행
                       final err = await ref
                           .read(provider.notifier)
                           .softDelete(ref);
@@ -248,7 +261,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          const Divider(thickness: 2, color: AppColors.white),
                           //작성자정보 날짜정보
                           _HeaderRow(
                             author: author,
@@ -257,7 +270,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                                 ? 'assets/images/m_profile/m_black.png'
                                 : authorImg,
                           ),
-                          const Divider(thickness: 2, color: Color(0xFFEBEBEB)),
+                          const Divider(thickness: 2, color: AppColors.white),
                           _PostBody(
                             body: body,
                           ),
@@ -320,6 +333,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     commentController: commentController,
                     submit: submit,
                     currentUid: currentUid,
+                    detailVmProvider: provider,
+                    focusNode: commentFocusNode,
                   ),
                 ),
             ],
@@ -391,8 +406,8 @@ class _PostBody extends StatelessWidget {
       // height 고정 대신 최소 높이 보장
       constraints: const BoxConstraints(minHeight: 160),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFB8B8B8), width: 1),
-        borderRadius: BorderRadius.circular(16),
+        // border: Border.all(color: const Color(0xFFB8B8B8), width: 1),
+        // borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(8),
       child: Text(body),

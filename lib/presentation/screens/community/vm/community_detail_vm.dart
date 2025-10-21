@@ -113,7 +113,7 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
         await bookmarkRepo.addBookmark(uid, bookmark);
         state = state.copyWith(isBookmarked: true);
       }
-      
+
       // 북마크 상태 변경 후 community screen에 반영
       ref.read(communityChangedTickProvider.notifier).state++;
     } catch (e) {
@@ -305,25 +305,56 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
     try {
       // 댓글 삭제 실행
       await ref.read(softDeleteCommentProvider).call(commentId);
-      
+
       // 로컬 상태에서 해당 댓글 제거
-      final updatedComments = state.comments.where((comment) => comment.id != commentId).toList();
-      
+      final updatedComments = state.comments
+          .where((comment) => comment.id != commentId)
+          .toList();
+
       // likedIds에서도 해당 댓글 ID 제거
-      final updatedLikedIds = Set<String>.from(state.likedIds)..remove(commentId);
-      
+      final updatedLikedIds = Set<String>.from(state.likedIds)
+        ..remove(commentId);
+
       state = state.copyWith(
         comments: updatedComments,
         likedIds: updatedLikedIds,
       );
 
-          ref.read(communityChangedTickProvider.notifier).state++;
+      ref.read(communityChangedTickProvider.notifier).state++;
 
-      
       debugPrint('댓글 삭제 완료: $commentId');
     } catch (e) {
       debugPrint('댓글 삭제 오류: $e');
       rethrow; // 에러를 다시 던져서 UI에서 처리할 수 있도록 함
+    }
+  }
+
+  /// 답글 추가
+  Future<void> addReply(
+    WidgetRef ref, {
+    required String parentCommentId,
+    required String uid,
+    required String text,
+  }) async {
+    try {
+      final createCommentUsecase = ref.read(createCommentProvider);
+      await createCommentUsecase.createReply(
+        parentCommentId: parentCommentId,
+        communityId: communityId,
+        uid: uid,
+        noteDetail: text,
+      );
+
+      // 댓글 목록 새로고침
+      await loadInitial(ref);
+
+      // 커뮤니티 변경 알림
+      ref.read(communityChangedTickProvider.notifier).state++;
+
+      debugPrint('답글 추가 완료: $parentCommentId');
+    } catch (e) {
+      debugPrint('답글 추가 오류: $e');
+      rethrow;
     }
   }
 
@@ -335,6 +366,31 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
       final softDeleteUsecase = ref.read(softDeleteCommunityProvider);
       await softDeleteUsecase.call(post.id);
       return null; // 성공 시 null 반환
+    } catch (e) {
+      return '삭제 중 오류가 발생했습니다: $e';
+    }
+  }
+
+  /// 답글 삭제
+  Future<String?> deleteReply(
+    WidgetRef ref, {
+    required String parentCommentId,
+    required String replyId,
+  }) async {
+    try {
+      final usecase = ref.read(softDeleteReplyProvider);
+      await usecase.call(
+        parentCommentId: parentCommentId,
+        replyId: replyId,
+      );
+
+      // 댓글 목록 새로고침
+      await loadInitial(ref);
+
+      // 커뮤니티 변경 알림 - 댓글 수/표시 갱신
+      ref.read(communityChangedTickProvider.notifier).state++;
+
+      return null;
     } catch (e) {
       return '삭제 중 오류가 발생했습니다: $e';
     }
