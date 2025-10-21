@@ -257,7 +257,6 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
 }
 
 class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
-  // build에서 만들지 말고, 필드로 고정
   late NotifierProvider<CommunityListVM, CommunityListState> provider;
   bool _ready = false; // provider 준비 여부
   ProviderSubscription<int>? _changedSub;
@@ -399,6 +398,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       ),
                     );
                   }
+
                   final x = st.items[i];
                   final date =
                       DateFormat(
@@ -406,13 +406,27 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       ).format(
                         x.communityCreateDate.toLocal(),
                       );
+                  final pv = x.createUser;
+                  final pvs = ref.watch(profileByUidProvider(x.createUser));
+
+                  final (pvImg, nickName) = pvs.when<(String, String)>(
+                    data: (p) => (
+                      p.imageFullUrl,
+                      p.nickname,
+                    ),
+                    loading: () => ('assets/images/profile/black.png', '집먼지'),
+                    error: (_, __) =>
+                        ('assets/images/profile/black.png', '집먼지'),
+                  );
 
                   //댓글수
                   final countAv = ref.watch(commentCountByPostProvider(x.id));
                   Widget commentCount = countAv.when(
                     data: (c) => Text(
                       '$c',
+
                       style: TextStyle(fontSize: AppSizes.fontSizeM),
+
                     ),
                     loading: () => const SizedBox(
                       width: 14,
@@ -437,72 +451,98 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                           width: 2,
                         ),
                       ),
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      //padding: const EdgeInsets.all(12),
+                      child: Stack(
                         children: [
-                          // 좌측 텍스트
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      // 제목
-                                      StringUtils.truncateWithEllipsis(
-                                        15,
-                                        x.communityName,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: AppSizes.fontSizeLM,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      //날짜
-                                      date,
-                                      style: const TextStyle(
-                                        fontSize: AppSizes.fontSizeLMS,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Spacer(),
-
-                                Row(
-                                  children: [
-                                    NickName(
-                                      uid: x.createUser,
-                                    ),
-                                    Spacer(),
-                                    //댓글수 표시
-                                    const Icon(
-                                      Icons.mode_comment_outlined,
-                                      size: AppSizes.iconS,
-                                    ),
-                                    const SizedBox(
-                                      width: 4,
-                                    ),
-                                    //댓글수위젯
-                                    commentCount,
-                                    const SizedBox(width: 10),
-                                    // 북마크 아이콘
-                                    _BookmarkIcon(
-                                      postId: x.id,
-                                      authorUid: x.createUser,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          // 우측 하트
                           Row(
-                            children: [],
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 좌측 텍스트
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            // 제목
+                                            StringUtils.truncateWithEllipsis(
+                                              15,
+                                              x.communityName,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          Text(
+                                            //날짜
+                                            date,
+                                          ),
+                                        ],
+                                      ),
+                                      Spacer(),
+
+                                      Row(
+                                        children: [
+                                          Text(
+                                            nickName,
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                          Spacer(),
+                                          //댓글수 표시
+                                          const Icon(
+                                            Icons.mode_comment_outlined,
+                                            size: 14,
+                                          ),
+                                          const SizedBox(
+                                            width: 4,
+                                          ),
+                                          //댓글수위젯
+                                          commentCount,
+                                          const SizedBox(width: 10),
+                                          // 북마크 아이콘
+                                          _BookmarkIcon(
+                                            postId: x.id,
+                                            authorUid: x.createUser,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // 우측 하트
+                              Row(
+                                children: [],
+                              ),
+                            ],
+                          ),
+                          Positioned(
+                            left: 250,
+                            top: 50,
+                            child: IgnorePointer(
+                              child: ClipRect(
+                                child: Align(
+                                  //alignment: Alignment.bottomCenter,
+                                  //heightFactor: 0.5, // 아래 절반만 노출
+                                  child: Opacity(
+                                    opacity: 0.35,
+                                    child: Image.asset(
+                                      pvImg,
+                                      // fit: BoxFit.cover, // 부모 채움
+                                      width: 70,
+                                      height: 70,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -688,9 +728,11 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
         child: Column(
           children: [
             Padding(
+
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSizes.paddingL,
               ),
+
               child: Row(
                 children: [
                   const Text(
@@ -733,14 +775,30 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                   Widget commentCount = countAv.when(
                     data: (c) => Text(
                       '$c',
+
                       style: TextStyle(fontSize: AppSizes.fontSizeMS),
+
                     ),
                     loading: () => const SizedBox(
-                      width: 14,
-                      height: 14,
+                      width: 10,
+                      height: 10,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    error: (_, __) => const Text('0'),
+                    error: (_, __) => const Text(
+                      '0',
+                      style: TextStyle(fontSize: 10),
+                    ),
+                  );
+                  final pv = ref.watch(profileByUidProvider(x.createUser));
+
+                  final (pvImg, nickName) = pv.when<(String, String)>(
+                    data: (p) => (
+                      p.imageFullUrl,
+                      p.nickname,
+                    ),
+                    loading: () => ('assets/images/profile/black.png', '집먼지'),
+                    error: (_, __) =>
+                        ('assets/images/profile/black.png', '집먼지'),
                   );
 
                   return InkWell(
@@ -758,55 +816,86 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                           width: AppSizes.borderM,
                         ),
                       ),
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      //padding: const EdgeInsets.all(12),
+                      child: Stack(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      StringUtils.truncateWithEllipsis(
-                                        15,
-                                        x.communityName,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            StringUtils.truncateWithEllipsis(
+                                              15,
+                                              x.communityName,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          Text(
+                                            date,
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                        ],
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                      Spacer(),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            nickName,
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                          Spacer(),
+                                          const Icon(
+                                            Icons.mode_comment_outlined,
+                                            size: 13,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          commentCount,
+                                          const SizedBox(width: 10),
+                                          _BookmarkIcon(
+                                            postId: x.id,
+                                            authorUid: x.createUser,
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      date,
-                                      style: TextStyle(
-                                        fontSize: AppSizes.fontSizeLMS,
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                                Spacer(),
-                                Row(
-                                  children: [
-                                    NickName(uid: x.createUser),
-                                    Spacer(),
-                                    const Icon(
-                                      Icons.mode_comment_outlined,
-                                      size: AppSizes.iconS,
+                              ),
+                            ],
+                          ),
+                          Positioned(
+                            left: 250,
+                            top: 50,
+                            child: IgnorePointer(
+                              child: ClipRect(
+                                child: Align(
+                                  //alignment: Alignment.bottomCenter,
+                                  //heightFactor: 0.5, // 아래 절반만 노출
+                                  child: Opacity(
+                                    opacity: 0.35,
+                                    child: Image.asset(
+                                      pvImg,
+                                      // fit: BoxFit.cover, // 부모 채움
+                                      width: 70,
+                                      height: 70,
                                     ),
-                                    const SizedBox(width: 4),
-                                    commentCount,
-                                    const SizedBox(width: 10),
-                                    _BookmarkIcon(
-                                      postId: x.id,
-                                      authorUid: x.createUser,
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
@@ -843,18 +932,22 @@ class _BookmarkIcon extends ConsumerWidget {
     return bookmarkStatusAsync.when(
       data: (isBookmarked) => Icon(
         isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+
         size: AppSizes.iconS,
         color: isBookmarked ? AppColors.primary : AppColors.grey,
+
       ),
       loading: () => const SizedBox(
-        width: 18,
-        height: 18,
+        width: 16,
+        height: 16,
         child: CircularProgressIndicator(strokeWidth: 2),
       ),
       error: (_, __) => const Icon(
         Icons.bookmark_border,
+
         size: AppSizes.iconS,
         color: AppColors.grey,
+
       ),
     );
   }
