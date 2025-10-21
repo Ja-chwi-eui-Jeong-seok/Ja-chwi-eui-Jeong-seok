@@ -84,7 +84,8 @@ class ProfileCardList extends ConsumerWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => BookmarkDetailScreen(
-                    bookmarkDocs: communityBookmarks,
+                   // bookmarkDocs: communityBookmarks,
+                    uid: uid!,
                     extra: extra,
                   ),
                 ),

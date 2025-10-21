@@ -30,6 +30,7 @@ class _ProfileTapState extends State<ProfileTap> {
             child: Stack(
               alignment: Alignment.bottomLeft,
               children: [
+                // 전체 밑줄
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -39,6 +40,7 @@ class _ProfileTapState extends State<ProfileTap> {
                     color: Colors.grey[300],
                   ),
                 ),
+                // 탭
                 Row(
                   children: List.generate(icons.length, (index) {
                     bool isSelected = index == selectedIndex;
@@ -48,24 +50,40 @@ class _ProfileTapState extends State<ProfileTap> {
                           setState(() {
                             selectedIndex = index;
                           });
-                          widget.onTabChanged(index); // ✅ 여기서 부모에게 전달
+                          widget.onTabChanged(index);
                         },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              icons[index],
-                              size: 24,
-                              color: isSelected ? Colors.black : Colors.grey,
-                            ),
-                            const SizedBox(height: 12),
-                          ],
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          color: Colors.transparent, // 터치 영역 확보
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // 아이콘 주변 박스
+                              Container(
+                                width: (icons.length * 2),
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.transparent
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  icons[index],
+                                  size: 24,
+                                  color: isSelected ? Colors.black : Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
                         ),
                       ),
                     );
                   }),
                 ),
+                // 선택된 밑줄
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeInOut,
