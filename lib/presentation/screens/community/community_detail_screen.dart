@@ -199,10 +199,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                             .showSnackBar(SnackBar(content: Text(err)));
                       } else {
                         if (!context.mounted) return;
+
                         // ★ 삭제 완료 후 호출 화면으로 돌아가면서 reload
                         ScaffoldMessenger.of(context)
                             .showSnackBar(SnackBar(content: Text('게시글이 삭제되었습니다.')));
                         context.pop(true);
+
                       }
                     }
 
@@ -220,6 +222,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
                 IconButton(
                   icon: const Icon(Icons.mode_edit_outline_outlined),
+
                    onPressed: () async {
                   // 수정 페이지로 이동하고, 돌아올 때 true를 받으면 reload
                    final result = await context.push('/community-edit', 
@@ -234,6 +237,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                      await ref.read(provider.notifier).loadInitial(ref);
                    }
                  },
+
                 ),
                 const SizedBox(width: 5),
               ],
