@@ -56,6 +56,20 @@ class _AiChatState extends ConsumerState<AiChat> {
     // AI 타이핑 상태 변화에도 하단 유지
     ref.listen<bool>(aiTypingProvider, (_, __) => _jumpBottom());
 
+    //
+
+    // Future<void> _handleDelete(Map<String, dynamic> message) async {
+    //   try {
+    //     final firestore = FirebaseFirestore.instance;
+    //     if (message['id'] != null) {
+    //       await firestore.collection('messages').doc(message['id']).delete();
+    //       debugPrint('🗑️ 메시지 삭제 완료');
+    //     }
+    //   } catch (e) {
+    //     debugPrint('⚠️ 메시지 삭제 실패: $e');
+    //   }
+    // }
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(

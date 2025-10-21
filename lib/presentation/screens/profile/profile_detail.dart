@@ -5,6 +5,7 @@ import 'package:ja_chwi/presentation/screens/profile/widgets/profile_tab.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_card.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 import 'package:go_router/go_router.dart';
+
 class ProfileDetail extends ConsumerStatefulWidget {
   final Map<String, dynamic>? extra;
   const ProfileDetail({super.key, this.extra});
@@ -20,7 +21,6 @@ class _ProfileDetailState extends ConsumerState<ProfileDetail> {
   Widget build(BuildContext context) {
     // ✅ 여기에서는 ref를 직접 받지 않고,
     // ConsumerState 내부의 `ref` 프로퍼티를 사용합니다.
-    final uid = widget.extra?['uid'] as String?;
     print('ProfileDetailScreen extra: ${widget.extra}');
 
     return Scaffold(
@@ -53,10 +53,10 @@ class _ProfileDetailState extends ConsumerState<ProfileDetail> {
             },
           ),
           Expanded(
-             child: ProfileCardList(
+            child: ProfileCardList(
               extra: widget.extra,
               filterType: selectedTab == 0 ? 'bookmark' : 'communitylist',
-      ),
+            ),
           ),
         ],
       ),

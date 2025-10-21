@@ -370,6 +370,31 @@ class CommunityDetailVM extends Notifier<CommunityDetailState> {
       return '삭제 중 오류가 발생했습니다: $e';
     }
   }
+
+  /// 답글 삭제
+  Future<String?> deleteReply(
+    WidgetRef ref, {
+    required String parentCommentId,
+    required String replyId,
+  }) async {
+    try {
+      final usecase = ref.read(softDeleteReplyProvider);
+      await usecase.call(
+        parentCommentId: parentCommentId,
+        replyId: replyId,
+      );
+
+      // 댓글 목록 새로고침
+      await loadInitial(ref);
+
+      // 커뮤니티 변경 알림 - 댓글 수/표시 갱신
+      ref.read(communityChangedTickProvider.notifier).state++;
+
+      return null;
+    } catch (e) {
+      return '삭제 중 오류가 발생했습니다: $e';
+    }
+  }
 }
 
 final commentSendingProvider = StateProvider.autoDispose<bool>((_) => false);

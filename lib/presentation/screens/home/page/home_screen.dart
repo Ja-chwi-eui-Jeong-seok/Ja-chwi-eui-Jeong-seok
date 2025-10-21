@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/core/config/router/router.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/ai_chat_circle.dart';
 import 'package:ja_chwi/presentation/screens/home/home_widget/circle_config.dart';
@@ -10,6 +9,7 @@ import 'package:ja_chwi/presentation/screens/home/home_widget/home_progress.dart
 import 'package:ja_chwi/presentation/screens/home/home_widget/monji_jump.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
+//ED8B5A
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic>? extra;
   final GlobalKey? missionKey;
@@ -57,14 +57,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontSize: 28,
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              onPressed: () {
-                if (kDebugMode) {
-                  print('알림 창');
-                }
-              },
-            ),
+            // IconButton(
+            //   //
+            //   icon: Image.asset(
+            //     'assets/images/icons/bell.png',
+            //     height: 24,
+            //     width: 24,
+            //   ),
+            //   onPressed: () {
+            //     if (kDebugMode) {
+            //       print('알림 창');
+            //     }
+            //   },
+            // ),
           ],
         ),
       ),
@@ -102,10 +107,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
-                  children: const [
-                    HomeProgress(),
+                  children: [
+                    HomeProgress(extra: userData),
                     SizedBox(height: 8),
-                    HomeCard(),
+                    HomeCard(extra: userData),
                   ],
                 ),
               ),

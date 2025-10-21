@@ -6,14 +6,12 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final double? titleSpacing;
   final TextStyle? titleTextStyle;
-  final bool? centerTitle;
 
   const CommonAppBar({
     super.key,
     this.actions,
     this.leading,
     this.titleSpacing,
-    this.centerTitle,
     this.titleTextStyle,
   });
 
@@ -23,7 +21,6 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title, style: titleTextStyle),
       titleSpacing: titleSpacing,
-      // centerTitle: centerTitle,
       actions: actions,
       leading: leading,
     );

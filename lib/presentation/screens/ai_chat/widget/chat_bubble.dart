@@ -140,18 +140,87 @@ class _ChatBubbleState extends State<ChatBubble> {
       mainAxisSize: MainAxisSize.min,
       children: [
         GestureDetector(
-          onTap: () {
-            widget.onRetry?.call(widget.message);
-            setState(() => _isFailed = false);
-          },
+          onTap: () => _showConfirmDialog(
+            context,
+            title: '다시 보내시겠습니까?',
+            onConfirm: () {
+              widget.onRetry?.call(widget.message);
+              setState(() => _isFailed = false);
+            },
+          ),
           child: const Icon(Icons.refresh, size: 12, color: Colors.black),
         ),
         const SizedBox(width: 2),
         GestureDetector(
-          onTap: () => widget.onDelete?.call(widget.message),
+          onTap: () => _showConfirmDialog(
+            context,
+            title: '정말 삭제하시겠습니까?',
+            onConfirm: () => widget.onDelete?.call(widget.message),
+          ),
           child: const Icon(Icons.close, size: 12, color: Colors.black),
         ),
       ],
     ),
   );
+
+  void _showConfirmDialog(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onConfirm,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        actions: [
+          // 취소 버튼: 알약 테두리
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.black),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 확인 버튼: 배경색 채운 알약
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: const Text(
+                '확인',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

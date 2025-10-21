@@ -4,18 +4,35 @@ import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/common/app_bar_titles.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_model.dart';
 import 'package:ja_chwi/presentation/screens/mission/core/model/mission_achiever.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/mission_card.dart';
+import 'package:ja_chwi/presentation/screens/mission/widgets/achiever_profile_tile.dart';
 import 'package:ja_chwi/presentation/screens/mission/misson_home/widgets/profile_section.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/refresh_icon_button.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
-class MissionHomeScreen extends ConsumerWidget {
+class MissionHomeScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? extra;
   const MissionHomeScreen({super.key, this.extra});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MissionHomeScreen> createState() => _MissionHomeScreenState();
+}
+
+class _MissionHomeScreenState extends ConsumerState<MissionHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 위젯이 초기화될 때마다 관련 데이터를 새로고침
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(todayMissionProvider);
+      ref.invalidate(currentWeekAchieversProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentWeekAchieversAsync = ref.watch(currentWeekAchieversProvider);
 
     final todayMissionAsync = ref.watch(todayMissionProvider);
@@ -29,8 +46,9 @@ class MissionHomeScreen extends ConsumerWidget {
               ref.invalidate(currentWeekAchieversProvider);
             },
           ),
+          const SizedBox(width: 24),
         ],
-        titleSpacing: 40.0,
+        titleSpacing: 20.0,
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 20,
@@ -53,13 +71,14 @@ class MissionHomeScreen extends ConsumerWidget {
                 ref,
                 currentWeekAchieversAsync,
               ),
+              const SizedBox(height: 140), // 하단 여백 추가
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNav(
         mode: BottomNavMode.tab,
-        userData: extra ?? {},
+        userData: widget.extra ?? {},
       ),
     );
   }
@@ -141,72 +160,47 @@ class MissionHomeScreen extends ConsumerWidget {
         currentWeekAchieversAsync.when(
           data: (achievers) {
             if (achievers.isEmpty) {
-              return const Center(child: Text('이번 주 미션 달성자가 없습니다.'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/profile/tung.png',
+                      width: 100,
+                      height: 100,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      '아직 아무도 달성 못했어요...',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '이웃보다 먼저 순위에 도달해보세요!',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
             }
             return Column(
               children: List.generate(achievers.take(3).length, (i) {
                 final achiever = achievers[i];
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 32,
-                        child: Text(
-                          '${i + 1}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: ClipOval(
-                          child: Image(
-                            image:
-                                (achiever.imageFullUrl.startsWith('http')
-                                        ? NetworkImage(achiever.imageFullUrl)
-                                        : AssetImage(achiever.imageFullUrl))
-                                    as ImageProvider,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.person, size: 30),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              achiever.level,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              achiever.name,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        '${achiever.weekCount}회',
+                  child: AchieverProfileTile(
+                    achiever: achiever,
+                    leading: SizedBox(
+                      width: 32,
+                      child: Text(
+                        '${i + 1}',
                         style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    ],
+                    ),
                   ),
                 );
               }),
