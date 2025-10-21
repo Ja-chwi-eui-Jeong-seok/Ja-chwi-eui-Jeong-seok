@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/screens/mission/core/providers/mission_providers.dart';
+import 'package:ja_chwi/presentation/providers/mission_providers.dart';
 import 'package:ja_chwi/presentation/screens/mission/saved_list/widgets/selected_day_mission_view.dart';
 
 class CompletedMissionSection extends ConsumerWidget {

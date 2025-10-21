@@ -28,6 +28,52 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     return DateFormat('yyyy년 MM월 dd일').format(date);
   }
 
+  void _showFullScreenImage(
+    BuildContext context,
+    List<dynamic> photos,
+    int initialIndex,
+  ) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PageView.builder(
+                controller: PageController(initialPage: initialIndex),
+                itemCount: photos.length,
+                itemBuilder: (context, index) {
+                  return InteractiveViewer(
+                    child: Image.network(
+                      photos[index] as String,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    ),
+                  );
+                },
+              ),
+              Positioned(
+                top: 40,
+                right: 20,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final String title = widget.missionData['title'] ?? '제목 없음';
@@ -64,15 +110,20 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                     });
                   },
                   itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          photos[index] as String,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.error, color: Colors.grey),
+                    return GestureDetector(
+                      onTap: () {
+                        _showFullScreenImage(context, photos, index);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            photos[index] as String,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.error, color: Colors.grey),
+                          ),
                         ),
                       ),
                     );
@@ -128,8 +179,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
-            const Divider(),
+            // const SizedBox(height: 16),
+            // const Divider(),
             const SizedBox(height: 16),
 
             // 내용

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:ja_chwi/data/common/page_result.dart';
 import 'package:ja_chwi/data/datasources/comment_data_source.dart';
 import 'package:ja_chwi/data/dto/comment_dto.dart';
@@ -45,6 +46,7 @@ class CommentDataSourceImpl implements CommentDataSource {
   }
 
   // 답글 생성 (서브컬렉션에 저장)
+  @override
   Future<CommentDto> createReply({
     required String parentCommentId,
     required String communityId,
@@ -78,6 +80,7 @@ class CommentDataSourceImpl implements CommentDataSource {
   }
 
   // 답글 목록 조회
+  @override
   Future<List<CommentDto>> fetchReplies(String parentCommentId) async {
     final snapshot = await getReplyCol(parentCommentId)
         .where('comment_delete_yn', isEqualTo: false)
@@ -161,18 +164,60 @@ class CommentDataSourceImpl implements CommentDataSource {
   }
 
   @override
+  Future<void> softDeleteReply({
+    required String parentCommentId,
+    required String replyId,
+  }) {
+    return getReplyCol(parentCommentId).doc(replyId).update({
+      'comment_delete_yn': true,
+      'comment_delete_date': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
   Future<int> countByCommunity({
     required String communityId,
     bool excludeDeleted = true,
   }) async {
-    Query<Map<String, dynamic>> q = col.where(
+    // 1) 상위 댓글 수
+    Query<Map<String, dynamic>> topLevelQuery = col.where(
       'community_id',
       isEqualTo: communityId,
     );
     if (excludeDeleted) {
-      q = q.where('comment_delete_yn', isEqualTo: false);
+      topLevelQuery = topLevelQuery.where(
+        'comment_delete_yn',
+        isEqualTo: false,
+      );
     }
-    final snap = await q.count().get();
-    return snap.count ?? 0;
+    final topLevelSnap = await topLevelQuery.count().get();
+
+    // 2) 모든 답글(replies) 수 - collection group 사용 (불가 시 0으로 대체)
+    int replyCount = 0;
+    try {
+      Query<Map<String, dynamic>> repliesQuery = fs
+          .collectionGroup('replies')
+          .where(
+            'community_id',
+            isEqualTo: communityId,
+          );
+      if (excludeDeleted) {
+        repliesQuery = repliesQuery.where(
+          'comment_delete_yn',
+          isEqualTo: false,
+        );
+      }
+      final repliesSnap = await repliesQuery.count().get();
+      replyCount = repliesSnap.count ?? 0;
+    } catch (e) {
+      // collection group count가 인덱스/권한 문제로 실패하면 답글 카운트는 0으로 처리
+      if (kDebugMode) {
+        print('Replies count failed: $e');
+      }
+      replyCount = 0;
+    }
+
+    final topCount = topLevelSnap.count ?? 0;
+    return topCount + replyCount;
   }
 }

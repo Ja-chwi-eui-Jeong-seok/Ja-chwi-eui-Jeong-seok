@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/mission/widgets/custom_tag.dart';
 
 class SelectedDayMissionView extends StatelessWidget {
@@ -35,101 +36,109 @@ class SelectedDayMissionView extends StatelessWidget {
       final bool isPublic = missionData['isPublic'] as bool? ?? false;
       final String description = missionData['description'] as String? ?? '';
 
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        constraints: const BoxConstraints(minHeight: 200),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 미션 제목
-                Padding(
-                  padding: const EdgeInsets.only(
-                    right: 70.0,
-                  ),
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // 태그
-                if (tags.isNotEmpty)
-                  Wrap(
-                    spacing: 8.0,
-                    runSpacing: 4.0,
-                    children: tags.map((tag) => CustomTag(tag)).toList(),
-                  ),
-                const SizedBox(height: 20),
-
-                // 인증 사진
-                if (photos.isNotEmpty) ...[
-                  SizedBox(
-                    height: 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: photos.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          width: 100,
-                          height: 100,
-                          margin: const EdgeInsets.only(right: 10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: NetworkImage(photos[index]),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-
-                // 설명
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              top: 4,
-              right: 0,
-              child: Row(
+      return GestureDetector(
+        onTap: () {
+          context.push('/mission-detail', extra: missionData);
+        },
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          constraints: const BoxConstraints(minHeight: 200),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    isPublic
-                        ? CupertinoIcons.lock_open_fill
-                        : CupertinoIcons.lock_fill,
-                    size: 16,
-                    color: Colors.black54,
+                  // 미션 제목
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      right: 70.0,
+                    ),
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(height: 8),
+
+                  // 태그
+                  if (tags.isNotEmpty)
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: tags.map((tag) => CustomTag(tag)).toList(),
+                    ),
+                  const SizedBox(height: 20),
+
+                  // 인증 사진
+                  if (photos.isNotEmpty) ...[
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: photos.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            width: 100,
+                            height: 100,
+                            margin: const EdgeInsets.only(right: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              image: DecorationImage(
+                                image: NetworkImage(photos[index]),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // 설명
                   Text(
-                    isPublic ? '공개' : '비공개',
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black87,
+                      height: 1.5,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              Positioned(
+                top: 4,
+                right: 0,
+                child: Row(
+                  children: [
+                    Icon(
+                      isPublic
+                          ? CupertinoIcons.lock_open_fill
+                          : CupertinoIcons.lock_fill,
+                      size: 16,
+                      color: Colors.black54,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      isPublic ? '공개' : '비공개',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       );
     } else {

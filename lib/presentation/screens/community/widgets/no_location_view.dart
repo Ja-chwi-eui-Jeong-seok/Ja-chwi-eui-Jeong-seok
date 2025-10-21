@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class NoLocationView extends StatelessWidget {
-  const NoLocationView();
+  const NoLocationView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class NoLocationView extends StatelessWidget {
           const Text('위치가 등록되지 않았습니다.', style: TextStyle(color: Colors.grey)),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: () => context.push('/profile'), //TODO:경로
+            onPressed: () => context.push('/profile'),
             icon: const Icon(Icons.location_on_outlined),
             label: const Text('위치 등록하러 가기'),
           ),
