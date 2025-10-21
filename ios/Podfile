@@ -38,6 +38,13 @@ end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
+    # Flutter 기본 설정 유지
+    flutter_additional_ios_build_settings(target) if defined?(flutter_additional_ios_build_settings)
+
+    # 경고를 에러로 취급하지 않음 + 따옴표 include 경고 비활성화
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+      config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
+    end
   end
 end
