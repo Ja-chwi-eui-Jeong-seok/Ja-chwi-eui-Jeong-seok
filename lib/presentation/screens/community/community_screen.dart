@@ -11,7 +11,6 @@ import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/screens/community/widgets/nick_name.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/no_location_view.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
@@ -28,25 +27,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final extra = GoRouterState.of(context).extra;
-      if (extra is Map && extra['deleted'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('삭제가 완료되었습니다.')),
-        );
-        // 메시지를 한 번만 표시하고, extra를 정리하기 위해 동일 경로로 교체
-        if (mounted) {
-          context.replace('/community');
-        }
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final extra = widget.extra;
-    if (kDebugMode) debugPrint('CommunityScreen extra: $extra');
-
     final catState = ref.watch(categoryVMProvider);
 
     // 프로필 통해 위치 얻기
@@ -113,7 +97,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               children: [
                 // "전체" 탭 뷰
                 hasLocation
-                    ? _AllPostsView(location: location)
+                    ? _AllPostsView(location: location, extra: widget.extra)
                     : const NoLocationView(),
                 // 기존 카테고리 탭 뷰들
                 ...parents.map((p) {
@@ -121,6 +105,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                       ? _SecondDepthTabs(
                           parentCode: p.categoryCode,
                           location: location,
+                          extra: widget.extra,
                         )
                       : const NoLocationView();
                 }),
@@ -143,7 +128,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   );
                   return;
                 }
-                context.push('/community-create', extra: uid);
+                context.push('/community-create', extra: widget.extra);
               },
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
@@ -154,7 +139,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             ),
             bottomNavigationBar: BottomNav(
               mode: BottomNavMode.tab,
-              userData: extra,
+              userData:
+                  GoRouterState.of(context).extra as Map<String, dynamic>?,
             ),
           ),
         );
@@ -165,9 +151,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
 /// 상위 탭(부모 카테고리) → 하위 탭(세부 카테고리)을 표시하는 위젯
 class _SecondDepthTabs extends ConsumerStatefulWidget {
-  const _SecondDepthTabs({required this.parentCode, required this.location});
+  const _SecondDepthTabs({
+    required this.parentCode,
+    required this.location,
+    required this.extra,
+  });
   final int parentCode;
   final String? location;
+  final Map<String, dynamic>? extra;
 
   @override
   ConsumerState<_SecondDepthTabs> createState() => _SecondDepthTabsState();
@@ -227,6 +218,7 @@ class _SecondDepthTabsState extends ConsumerState<_SecondDepthTabs> {
                       detailCode: s.categoryDetailCode,
                       detailName: s.categoryDetailName,
                       location: widget.location,
+                      extra: widget.extra,
                     );
                   }).toList(),
                 ),
@@ -246,11 +238,13 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
     required this.detailCode,
     required this.detailName,
     required this.location,
+    required this.extra, // ✅ 추가
   });
   final int parentCode;
   final int detailCode;
   final String detailName;
   final String? location;
+  final Map<String, dynamic>? extra; // ✅ 추가
 
   @override
   ConsumerState<_PostsPlaceholder> createState() => _PostsPlaceholderState();
@@ -269,9 +263,10 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
     _changedSub = ref.listenManual<int>(
       communityChangedTickProvider,
       (prev, next) {
-        if (!_ready || !mounted) return;
         ref.invalidate(provider);
-        Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+        Future.microtask(() {
+          ref.read(provider.notifier).loadInitial(ref);
+        });
       },
     );
   }
@@ -406,7 +401,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       ).format(
                         x.communityCreateDate.toLocal(),
                       );
-                  final pv = x.createUser;
                   final pvs = ref.watch(profileByUidProvider(x.createUser));
 
                   final (pvImg, nickName) = pvs.when<(String, String)>(
@@ -426,7 +420,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       '$c',
 
                       style: TextStyle(fontSize: AppSizes.fontSizeM),
-
                     ),
                     loading: () => const SizedBox(
                       width: 14,
@@ -436,10 +429,28 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                     error: (_, __) => const Text('0'),
                   );
                   return InkWell(
-                    onTap: () => context.push(
-                      '/community-detail',
-                      extra: x.id,
-                    ),
+                    onTap: () async {
+                      // CommunityDetailScreen 호출 + docId 전달
+                      final result = await context.push<bool>(
+                        '/community-detail',
+                        extra: {'id': x.id, 'extra': widget.extra},
+                      );
+
+                      // 삭제/수정 후 true를 반환하면 refresh
+                      if (result == true) {
+                        if (kDebugMode) debugPrint('삭제 후 돌아옴, 목록 새로고침');
+                        // communityChangedTickProvider 증가로 목록 새로고침
+                        ref.read(communityChangedTickProvider.notifier).state++;
+                        setState(() {}); // 화면 재조회
+                      }
+                    },
+                    // onTap: () => context.push(
+                    //   '/community-detail',
+                    //   extra: {
+                    //     'id': x.id,
+                    //     'extra': widget.extra, // 선택적으로 추가 데이터 전달 가능
+                    //   },
+                    // ),
                     child: Container(
                       height: 96,
                       //테두리
@@ -524,7 +535,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                             ],
                           ),
                           Positioned(
-                            left: 250,
+                            left: 220,
                             top: 50,
                             child: IgnorePointer(
                               child: ClipRect(
@@ -621,8 +632,9 @@ class _CategoryDetailChips extends StatelessWidget {
 
 // "전체" 탭 뷰 - 모든 카테고리의 게시글을 표시
 class _AllPostsView extends ConsumerStatefulWidget {
-  const _AllPostsView({required this.location});
+  const _AllPostsView({required this.location, this.extra});
   final String? location;
+  final Map<String, dynamic>? extra;
 
   @override
   ConsumerState<_AllPostsView> createState() => _AllPostsViewState();
@@ -640,9 +652,10 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
     _changedSub = ref.listenManual<int>(
       communityChangedTickProvider,
       (prev, next) {
-        if (!_ready || !mounted) return;
         ref.invalidate(provider);
-        Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+        Future.microtask(() {
+          ref.read(provider.notifier).loadInitial(ref);
+        });
       },
     );
   }
@@ -728,7 +741,6 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
         child: Column(
           children: [
             Padding(
-
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSizes.paddingL,
               ),
@@ -777,7 +789,6 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                       '$c',
 
                       style: TextStyle(fontSize: AppSizes.fontSizeMS),
-
                     ),
                     loading: () => const SizedBox(
                       width: 10,
@@ -802,10 +813,21 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                   );
 
                   return InkWell(
-                    onTap: () => context.push(
-                      '/community-detail',
-                      extra: x.id,
-                    ),
+                    onTap: () async {
+                      // CommunityDetailScreen 호출 + docId 전달
+                      final result = await context.push<bool>(
+                        '/community-detail',
+                        extra: {'id': x.id, 'extra': widget.extra},
+                      );
+
+                      // 삭제/수정 후 true를 반환하면 refresh
+                      if (result == true) {
+                        if (kDebugMode) debugPrint('삭제 후 돌아옴, 목록 새로고침');
+                        // communityChangedTickProvider 증가로 목록 새로고침
+                        ref.read(communityChangedTickProvider.notifier).state++;
+                        setState(() {}); // 화면 재조회
+                      }
+                    },
                     child: Container(
                       height: 96,
                       decoration: BoxDecoration(
@@ -878,7 +900,7 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                             ],
                           ),
                           Positioned(
-                            left: 250,
+                            left: 220,
                             top: 50,
                             child: IgnorePointer(
                               child: ClipRect(
@@ -935,7 +957,6 @@ class _BookmarkIcon extends ConsumerWidget {
 
         size: AppSizes.iconS,
         color: isBookmarked ? AppColors.primary : AppColors.grey,
-
       ),
       loading: () => const SizedBox(
         width: 16,
@@ -947,7 +968,6 @@ class _BookmarkIcon extends ConsumerWidget {
 
         size: AppSizes.iconS,
         color: AppColors.grey,
-
       ),
     );
   }

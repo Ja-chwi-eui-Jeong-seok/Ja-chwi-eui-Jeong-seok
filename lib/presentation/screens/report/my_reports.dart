@@ -65,6 +65,14 @@ class _MyReportsPageState extends State<MyReportsPage> {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
           final reports = snapshot.data!.docs;
+          if (reports.isEmpty) {
+            return const Center(
+              child: Text(
+                '신고한 내역이 없습니다.',
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+            );
+          }
 
           // targetId 기준 그룹화 + 전체 UID 수집
           Map<String, List<Map<String, dynamic>>> groupedReports = {};

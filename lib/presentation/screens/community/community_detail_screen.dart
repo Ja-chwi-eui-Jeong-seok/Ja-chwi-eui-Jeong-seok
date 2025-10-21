@@ -13,12 +13,13 @@ import 'package:ja_chwi/presentation/screens/community/widgets/app_confirm_dialo
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_list.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_write.dart';
 
-//타임존
-
+/// CommunityDetailScreen
+/// 삭제/수정 후 호출 화면으로 돌아가면서 reload 가능하도록 수정됨
 class CommunityDetailScreen extends ConsumerStatefulWidget {
-  // 라우터에서 id를 extra로 넘김: context.push('/community-detail', extra: x.id)
-  const CommunityDetailScreen({super.key, required this.id});
+  final Map<String, dynamic>? extra;
   final String id;
+
+  const CommunityDetailScreen({super.key, required this.id, this.extra});
 
   @override
   ConsumerState<CommunityDetailScreen> createState() =>
@@ -36,9 +37,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   void initState() {
     super.initState();
     // 첫 진입 시 단건 게시글 + 댓글 초기 로드
-    Future.microtask(
-      () => ref.read(provider.notifier).loadInitial(ref),
-    );
+    Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
   }
 
   @override
@@ -48,29 +47,28 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     super.dispose();
   }
 
-  //댓글입력
+  /// 댓글 입력
   Future<void> submit() async {
     if (!mounted) return;
     final text = commentController.text.trim();
+
     // 빈값 가드
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('댓글을 입력하세요')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('댓글을 입력하세요')));
       return;
     }
+
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 필요합니다.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
       return;
     }
-    await ref
-        .read(provider.notifier)
-        .createComment(
+
+    await ref.read(provider.notifier).createComment(
           ref,
-          uid: uid, //uid로 프로필조회 -> 닉네임, 프로필이미지
+          uid: uid,
           text: text,
         );
 
@@ -78,22 +76,16 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     commentController.clear();
   }
 
+  /// 댓글 리스트
   Widget _pagedList(WidgetRef ref, CommunityDetailState st) {
-    // 자식(ListView 등) 스크롤 이벤트를 이 콜백에서 받는다.
     return NotificationListener<ScrollNotification>(
       onNotification: (n) {
-        // 위치가 변할 때마다 들어오는 업데이트 알림만 처리
         if (n is ScrollUpdateNotification) {
-          //n.metrics.maxScrollExtent - n.metrics.pixels 바닥까지 남은 거리
-          //pixels 현재위치
-          //maxScrollExtent 스크롤 가능한 최대 위치
           final remain = n.metrics.maxScrollExtent - n.metrics.pixels;
-          // 200px 이내로 접근했고, 현재 로딩 중이 아니며, 더 가져올 게 있으면 페이지 로드
           if (remain < 200 && !st.loadingComments && st.hasMore) {
             ref.read(provider.notifier).loadMore(ref);
           }
         }
-        // 알림을 상위로 계속 올림 true면 중단
         return false;
       },
       child: CommentList(
@@ -116,19 +108,19 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final st = ref.watch(provider);
-    ref.listen<int>(communityChangedTickProvider, (_, __) {
-      ref.read(provider.notifier).loadInitial(ref); // 또는 reload()
-    });
-    //현재유저의 uid 정보
-    final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    //작성자가 유저와 일치하는지
-    final isOwner =
-        st.post != null &&
-        currentUid != null &&
-        st.post!.createUser == currentUid;
 
-    // 화면 헤더 데이터 구성
-    //게시글과 게시글 작성자 정보
+    // Community 목록 변경 시 자동 reload
+    ref.listen<int>(communityChangedTickProvider, (_, __) {
+      ref.read(provider.notifier).loadInitial(ref);
+    });
+
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+
+    // 게시글 작성자가 현재 유저인지
+    final isOwner =
+        st.post != null && currentUid != null && st.post!.createUser == currentUid;
+
+    // 게시글 정보
     final title = st.post?.communityName ?? '제목';
     final authorUid = st.post?.createUser;
     final author = authorUid == null
@@ -145,23 +137,22 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                 data: (p) => p.thumbUrl,
                 orElse: () => 'assets/images/m_profile/m_black.png',
               );
-    //날짜 포맷
+
     final created = st.post == null
         ? '09.17 17:47'
-        : DateFormat('MM.dd HH:mm').format(
-            st.post!.communityCreateDate.toLocal(),
-          );
+        : DateFormat('MM.dd HH:mm').format(st.post!.communityCreateDate.toLocal());
+
     final body = st.post?.communityDetail ?? '게시글내용';
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: DefaultTabController(
-        // TabBar/TabBarView 연결
         length: 2,
         child: Scaffold(
           appBar: CommonAppBar(
             actions: [
+              // 북마크 버튼 (본인 글이 아닌 경우)
               if (!isOwner) ...[
                 IconButton(
                   icon: st.loadingBookmark
@@ -186,6 +177,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         },
                 ),
               ],
+
+              // 삭제/수정 버튼 (본인 글인 경우)
               if (isOwner) ...[
                 IconButton(
                   icon: Icon(
@@ -195,26 +188,23 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   ),
                   onPressed: () async {
                     softdelete() async {
-                      // 1) 먼저 다이얼로그 닫기
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      }
+                      // 다이얼로그 닫기
+                      if (Navigator.of(context).canPop()) Navigator.of(context).pop();
 
-                      // 2) 실제 소프트 삭제 수행
-                      final err = await ref
-                          .read(provider.notifier)
-                          .softDelete(ref);
+                      // 실제 삭제 수행
+                      final err = await ref.read(provider.notifier).softDelete(ref);
                       if (!context.mounted) return;
                       if (err != null) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(err)));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(err)));
                       } else {
                         if (!context.mounted) return;
-                        context.pushReplacement(
-                          '/community',
-                          extra: {'deleted': true},
-                        ); // 삭제 후 목록으로 이동 , 스낵바용true전달
+
+                        // ★ 삭제 완료 후 호출 화면으로 돌아가면서 reload
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text('게시글이 삭제되었습니다.')));
+                        context.pop(true);
+
                       }
                     }
 
@@ -232,13 +222,24 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
                 IconButton(
                   icon: const Icon(Icons.mode_edit_outline_outlined),
-                  onPressed: () {
-                    context.push('/community-edit', extra: st.post!.id);
-                  },
+
+                   onPressed: () async {
+                  // 수정 페이지로 이동하고, 돌아올 때 true를 받으면 reload
+                   final result = await context.push('/community-edit', 
+                     extra: {
+                       'id': widget.id,
+                       'extra': widget.extra,
+                     },
+                   );
+                
+                   // 수정 완료 후 돌아온 경우 데이터 다시 불러오기
+                   if (result == true && mounted) {
+                     await ref.read(provider.notifier).loadInitial(ref);
+                   }
+                 },
+
                 ),
-                SizedBox(
-                  width: 5,
-                ),
+                const SizedBox(width: 5),
               ],
             ],
           ),
@@ -246,23 +247,16 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             children: [
               NestedScrollView(
                 headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                  //SliverToBoxAdapter제목,헤더,게시글 시작
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(24, 15, 24, 50),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          //제목
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text(title,
+                              style: const TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold)),
                           const Divider(thickness: 2, color: AppColors.white),
-                          //작성자정보 날짜정보
                           _HeaderRow(
                             author: author,
                             createdAt: created,
@@ -271,20 +265,14 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                                 : authorImg,
                           ),
                           const Divider(thickness: 2, color: AppColors.white),
-                          _PostBody(
-                            body: body,
-                          ),
+                          _PostBody(body: body),
                         ],
                       ),
                     ),
                   ),
-
-                  //SliverToBoxAdapter 제목,헤더,게시글 끝
                   const SliverToBoxAdapter(
                     child: Divider(thickness: 10, color: Color(0xFFEBEBEB)),
                   ),
-                  //
-                  //SliverPersistentHeader 댓글해더 시작
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: _PlainHeaderDelegate(
@@ -293,37 +281,27 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         builder: (context) {
                           return _SortTabs(
                             onTap: (i) {
-                              // 탭 전환 시 TabBarView도 함께 전환
                               final ctrl = DefaultTabController.of(context);
                               ctrl.animateTo(i);
 
-                              // 정렬 스위치
                               final ord = i == 0
                                   ? CommentOrder.latest
                                   : CommentOrder.popular;
-                              ref
-                                  .read(provider.notifier)
-                                  .refreshComments(ref, ord);
+                              ref.read(provider.notifier).refreshComments(ref, ord);
                             },
                           );
                         },
                       ),
                     ),
-                  ), //SliverPersistentHeader 댓글해더 끝
+                  ),
                 ],
-                body:
-                    //댓글리스트
-                    TabBarView(
-                      children: [
-                        //최신순
-                        _pagedList(ref, st),
-                        //추천순
-                        _pagedList(ref, st),
-                      ],
-                    ),
+                body: TabBarView(
+                  children: [
+                    _pagedList(ref, st),
+                    _pagedList(ref, st),
+                  ],
+                ),
               ),
-
-              //댓글 입력창(비로그인시 입력창 안보이게)
               if (currentUid != null)
                 Positioned(
                   left: 0,
@@ -345,7 +323,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   }
 }
 
-//헤더
+// ----------------- 헤더, 게시글, 탭 위젯 -----------------
+
 class _HeaderRow extends StatelessWidget {
   const _HeaderRow({
     required this.author,
@@ -373,18 +352,11 @@ class _HeaderRow extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.access_time,
-                size: 14,
-                color: Colors.grey.shade600,
-              ),
+              Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
               const SizedBox(width: 4),
               Text(
                 createdAt,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
             ],
           ),
@@ -394,7 +366,6 @@ class _HeaderRow extends StatelessWidget {
   }
 }
 
-//게시글
 class _PostBody extends StatelessWidget {
   const _PostBody({required this.body});
   final String body;
@@ -403,51 +374,33 @@ class _PostBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      // height 고정 대신 최소 높이 보장
       constraints: const BoxConstraints(minHeight: 160),
-      decoration: BoxDecoration(
-        // border: Border.all(color: const Color(0xFFB8B8B8), width: 1),
-        // borderRadius: BorderRadius.circular(16),
-      ),
       padding: const EdgeInsets.all(8),
       child: Text(body),
     );
   }
 }
 
-//해더댈리게이트(최신순추천순)
-//SliverPersistentHeader 델리게이트 ---
-//SliverPersistentHeader는 스크롤했을때 TabBar부분이 고정되게 해주는 어댑터
-//SliverPersistentHeader를 쓰기위해 delegate로 정의하는 부분
 class _PlainHeaderDelegate extends SliverPersistentHeaderDelegate {
   _PlainHeaderDelegate({required this.child, required this.height});
   final Widget child;
   final double height;
-  //header의 최소높이와 최대높이를 지정하는 부분
+
   @override
   double get minExtent => height;
   @override
   double get maxExtent => height;
 
   @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: Colors.white,
-      child: SizedBox(height: height, child: child),
-    );
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(color: Colors.white, child: SizedBox(height: height, child: child));
   }
 
-  //델리게이트 리빌드 여부 결정, 탭바는 겨의 안바뀌니까 false
   @override
   bool shouldRebuild(covariant _PlainHeaderDelegate oldDelegate) =>
       oldDelegate.child != child || oldDelegate.height != height;
 }
 
-//최신순 추천순 위젯
 class _SortTabs extends StatelessWidget {
   const _SortTabs({required this.onTap});
   final ValueChanged<int> onTap;
@@ -460,10 +413,10 @@ class _SortTabs extends StatelessWidget {
       builder: (_, __) {
         final idx = controller.index;
         TextStyle style(bool selected) => TextStyle(
-          fontSize: 14,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          color: selected ? Colors.black : Colors.grey,
-        );
+              fontSize: 14,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? Colors.black : Colors.grey,
+            );
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -473,7 +426,7 @@ class _SortTabs extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 onTap: () => onTap(0),
                 child: Text('최신순', style: style(idx == 0)),
-              ),
+              ),              
               const SizedBox(width: 8),
               const Text('|', style: TextStyle(color: Colors.grey)),
               const SizedBox(width: 8),
