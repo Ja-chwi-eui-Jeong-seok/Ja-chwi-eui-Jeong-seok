@@ -5,7 +5,7 @@ import 'package:ja_chwi/domain/entities/comment.dart';
 import 'package:ja_chwi/presentation/providers/block_provider.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
-import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/RelativeTimeTextKst.dart';
+import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/relativeTimeTextKst.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/heart_button.dart';
 import 'package:ja_chwi/presentation/providers/reply_mode_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/community_detail_screen_widget/comment_long_press_actions.dart';
@@ -573,29 +573,21 @@ class CommentList extends ConsumerWidget {
   }
 
   void _toggleReplyInput(WidgetRef ref, Comment parentComment) {
-    print('답글달기 버튼 클릭됨: ${parentComment.id}');
-
     final replyMode = ref.read(replyModeProvider);
     final replyData = ref.read(replyModeDataProvider);
-
-    print('현재 답글 모드: $replyMode');
-    print('현재 답글 데이터: $replyData');
 
     // 이미 답글 모드이고 같은 댓글에 대한 답글인 경우 일반 모드로 복귀
     if (replyMode == ReplyMode.replying &&
         replyData != null &&
         replyData.parentCommentId == parentComment.id) {
-      print('답글 모드 해제');
       ref.read(replyModeProvider.notifier).state = ReplyMode.none;
       ref.read(replyModeDataProvider.notifier).state = null;
     } else {
-      print('답글 모드로 전환');
       // 답글 모드로 전환
       ref
           .read(profileByUidProvider(parentComment.uid))
           .when(
             data: (profile) {
-              print('프로필 로드 성공: ${profile.nickname}');
               ref.read(replyModeProvider.notifier).state = ReplyMode.replying;
               ref.read(replyModeDataProvider.notifier).state = ReplyModeData(
                 parentCommentId: parentComment.id,
@@ -604,7 +596,6 @@ class CommentList extends ConsumerWidget {
               );
             },
             loading: () {
-              print('프로필 로딩 중');
               // 로딩 중이면 UID로 표시
               ref.read(replyModeProvider.notifier).state = ReplyMode.replying;
               ref.read(replyModeDataProvider.notifier).state = ReplyModeData(
@@ -614,7 +605,6 @@ class CommentList extends ConsumerWidget {
               );
             },
             error: (_, __) {
-              print('프로필 로드 에러');
               // 에러 시 UID로 표시
               ref.read(replyModeProvider.notifier).state = ReplyMode.replying;
               ref.read(replyModeDataProvider.notifier).state = ReplyModeData(

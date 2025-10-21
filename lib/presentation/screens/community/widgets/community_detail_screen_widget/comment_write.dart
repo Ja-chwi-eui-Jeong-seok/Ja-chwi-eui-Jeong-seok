@@ -1,6 +1,7 @@
 // 입력창
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ja_chwi/core/constants/app_colors.dart';
 import 'package:ja_chwi/core/utils/xss.dart';
 import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_detail_vm.dart';
@@ -102,8 +103,8 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
   @override
   Widget build(BuildContext context) {
     final sending = ref.watch(commentSendingProvider);
-    final replyMode = ref.watch(replyModeProvider);
-    final replyData = ref.watch(replyModeDataProvider);
+    ref.watch(replyModeProvider);
+    ref.watch(replyModeDataProvider);
 
     //uid 기반 프로필정보 로드(유저정보,위치정보)
     final profileAv = ref.watch(profileByUidProvider(widget.currentUid));
@@ -146,7 +147,10 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Color.fromARGB(0, 255, 255, 255), Colors.white],
+                      colors: [
+                        Color.fromARGB(0, 255, 255, 255),
+                        AppColors.white,
+                      ],
                     ),
                   ),
                 ),
@@ -201,7 +205,7 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
               //     ),
               //   ),
               Container(
-                color: Colors.white,
+                color: AppColors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 25,
                   vertical: 20,
@@ -265,7 +269,7 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
                               ),
                             ),
                             Material(
-                              color: Colors.black,
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.circular(25),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(25),
@@ -287,7 +291,7 @@ class _CommentWriteState extends ConsumerState<CommentWrite> {
                                         : Text(
                                             '확인',
                                             style: TextStyle(
-                                              color: Colors.white,
+                                              color: AppColors.white,
                                             ),
                                           ),
                                   ),

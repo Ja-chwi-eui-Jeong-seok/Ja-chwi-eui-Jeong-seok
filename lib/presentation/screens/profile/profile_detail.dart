@@ -5,6 +5,7 @@ import 'package:ja_chwi/presentation/screens/profile/widgets/profile_tab.dart';
 import 'package:ja_chwi/presentation/screens/profile/widgets/profile_card.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 import 'package:go_router/go_router.dart';
+
 class ProfileDetail extends ConsumerStatefulWidget {
   final Map<String, dynamic>? extra;
   const ProfileDetail({super.key, this.extra});
@@ -53,10 +54,10 @@ class _ProfileDetailState extends ConsumerState<ProfileDetail> {
             },
           ),const SizedBox(height: 10),
           Expanded(
-             child: ProfileCardList(
+            child: ProfileCardList(
               extra: widget.extra,
               filterType: selectedTab == 0 ? 'bookmark' : 'communitylist',
-      ),
+            ),
           ),
         ],
       ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,10 +89,10 @@ class AppleLoginButton extends ConsumerWidget {
     final isLoading = authState.status == AuthStatus.loading;
 
     // iOS에서만 Apple 로그인 버튼 표시
-    //TODO : 안드로이드에서도 보여줄지 정하기
-    // if (!Platform.isIOS) {
-    //   return SizedBox.shrink(); // Android에서는 버튼 숨김
-    // }
+
+    if (!Platform.isIOS) {
+      return SizedBox.shrink(); // Android에서는 버튼 숨김
+    }
 
     return Container(
       height: 56, // iPad에서 더 쉽게 터치할 수 있도록 높이 증가
