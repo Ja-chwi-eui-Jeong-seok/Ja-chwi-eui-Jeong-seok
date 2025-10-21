@@ -212,19 +212,20 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         ).showSnackBar(SnackBar(content: Text(err)));
                       } else {
                         if (!context.mounted) return;
-                          // widget.extra가 Map<String, dynamic>인지 확인하고, 없으면 빈 Map 사용
-                          final originalExtra = widget.extra as Map<String, dynamic> ;
+                        // widget.extra가 Map<String, dynamic>인지 확인하고, 없으면 빈 Map 사용
+                        final originalExtra =
+                            widget.extra as Map<String, dynamic>;
 
-                          // 기존 Map을 복사하고 deleted 플래그 추가
-                          final newExtra = {
-                            ...originalExtra, // 기존 값들 모두
-                            'deleted': true,  // 새 플래그 추가
-                          };
+                        // 기존 Map을 복사하고 deleted 플래그 추가
+                        final newExtra = {
+                          ...originalExtra, // 기존 값들 모두
+                          'deleted': true, // 새 플래그 추가
+                        };
 
-                          context.pushReplacement(
-                            '/community',
-                            extra: newExtra,
-                          );
+                        context.pushReplacement(
+                          '/community',
+                          extra: newExtra,
+                        );
                         // if (!context.mounted) return;
                         // context.pushReplacement(
                         //   '/community',
@@ -249,7 +250,13 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                 IconButton(
                   icon: const Icon(Icons.mode_edit_outline_outlined),
                   onPressed: () {
-                    context.push('/community-edit', extra: st.post!.id);
+                    context.push(
+                      '/community-edit',
+                      extra: {
+                        'id': st.post!.id,
+                        'extra': {},
+                      },
+                    );
                   },
                 ),
                 SizedBox(
