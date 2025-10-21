@@ -148,6 +148,7 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
+
    // 커뮤니티 메인
 GoRoute(
   path: '/community',
@@ -200,6 +201,7 @@ GoRoute(
       return NoTransitionPage(child: CommunityCreateScreen(id: id, extra: extra));
     },
   ),
+
 
     GoRoute(
       path: '/profile-flow',
