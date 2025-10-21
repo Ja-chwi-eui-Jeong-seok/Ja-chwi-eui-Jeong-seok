@@ -155,13 +155,27 @@ class _MyPostDetailScreenState extends State<MyPostDetailScreen> {
                           size: 16,
                           color: Colors.grey,
                         ),
-                        onTap: () => context.push(
-                          '/community-detail',
-                          extra: {
-                            'id': docId,
-                            'extra': widget.extra,
-                          },
-                        ),
+                        onTap: () async {
+                          final result = await context.push<bool>(
+                            '/community-detail',
+                            extra: {
+                              'id': docId,        // 삭제/수정 대상 문서 ID
+                              'extra': widget.extra, // 기존 전달 정보
+                            },
+                          );
+
+                          // CommunityDetailScreen에서 pop(true)를 반환하면 화면 새로고침
+                          if (result == true) {
+                            setState(() {}); // 데이터 재조회
+                          }
+                        },
+                        // onTap: () => context.push(
+                        //   '/community-detail',
+                        //   extra: {
+                        //     'id': docId,
+                        //     'extra': widget.extra,
+                        //   },
+                        // ),
                       ),
                     );
                   },
