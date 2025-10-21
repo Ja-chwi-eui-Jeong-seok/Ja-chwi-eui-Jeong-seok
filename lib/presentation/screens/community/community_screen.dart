@@ -390,6 +390,17 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                         x.communityCreateDate.toLocal(),
                       );
                   final pv = x.createUser;
+                  final pvs = ref.watch(profileByUidProvider(x.createUser));
+
+                  final (pvImg, nickName) = pvs.when<(String, String)>(
+                    data: (p) => (
+                      p.imageFullUrl,
+                      p.nickname,
+                    ),
+                    loading: () => ('assets/images/profile/black.png', '집먼지'),
+                    error: (_, __) =>
+                        ('assets/images/profile/black.png', '집먼지'),
+                  );
 
                   //댓글수
                   final countAv = ref.watch(commentCountByPostProvider(x.id));
@@ -418,68 +429,98 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Color(0xFFF2F2F2), width: 3),
                       ),
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      //padding: const EdgeInsets.all(12),
+                      child: Stack(
                         children: [
-                          // 좌측 텍스트
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      // 제목
-                                      StringUtils.truncateWithEllipsis(
-                                        15,
-                                        x.communityName,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                    Text(
-                                      //날짜
-                                      date,
-                                    ),
-                                  ],
-                                ),
-                                Spacer(),
-
-                                Row(
-                                  children: [
-                                    NickName(
-                                      uid: x.createUser,
-                                    ),
-                                    Spacer(),
-                                    //댓글수 표시
-                                    const Icon(
-                                      Icons.mode_comment_outlined,
-                                      size: 14,
-                                    ),
-                                    const SizedBox(
-                                      width: 4,
-                                    ),
-                                    //댓글수위젯
-                                    commentCount,
-                                    const SizedBox(width: 10),
-                                    // 북마크 아이콘
-                                    _BookmarkIcon(
-                                      postId: x.id,
-                                      authorUid: x.createUser,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          // 우측 하트
                           Row(
-                            children: [],
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 좌측 텍스트
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            // 제목
+                                            StringUtils.truncateWithEllipsis(
+                                              15,
+                                              x.communityName,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          Text(
+                                            //날짜
+                                            date,
+                                          ),
+                                        ],
+                                      ),
+                                      Spacer(),
+
+                                      Row(
+                                        children: [
+                                          Text(
+                                            nickName,
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                          Spacer(),
+                                          //댓글수 표시
+                                          const Icon(
+                                            Icons.mode_comment_outlined,
+                                            size: 14,
+                                          ),
+                                          const SizedBox(
+                                            width: 4,
+                                          ),
+                                          //댓글수위젯
+                                          commentCount,
+                                          const SizedBox(width: 10),
+                                          // 북마크 아이콘
+                                          _BookmarkIcon(
+                                            postId: x.id,
+                                            authorUid: x.createUser,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // 우측 하트
+                              Row(
+                                children: [],
+                              ),
+                            ],
+                          ),
+                          Positioned(
+                            left: 250,
+                            top: 50,
+                            child: IgnorePointer(
+                              child: ClipRect(
+                                child: Align(
+                                  //alignment: Alignment.bottomCenter,
+                                  //heightFactor: 0.5, // 아래 절반만 노출
+                                  child: Opacity(
+                                    opacity: 0.35,
+                                    child: Image.asset(
+                                      pvImg,
+                                      // fit: BoxFit.cover, // 부모 채움
+                                      width: 70,
+                                      height: 70,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -736,66 +777,70 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Color(0xFFF2F2F2), width: 3),
                       ),
-                      padding: const EdgeInsets.all(12),
+                      //padding: const EdgeInsets.all(12),
                       child: Stack(
                         children: [
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          StringUtils.truncateWithEllipsis(
-                                            15,
-                                            x.communityName,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            StringUtils.truncateWithEllipsis(
+                                              15,
+                                              x.communityName,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                          Spacer(),
+                                          Text(
+                                            date,
+                                            style: TextStyle(fontSize: 12),
                                           ),
-                                        ),
-                                        Spacer(),
-                                        Text(
-                                          date,
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                    Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          nickName,
-                                          style: TextStyle(fontSize: 14),
-                                        ),
-                                        Spacer(),
-                                        const Icon(
-                                          Icons.mode_comment_outlined,
-                                          size: 13,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        commentCount,
-                                        const SizedBox(width: 10),
-                                        _BookmarkIcon(
-                                          postId: x.id,
-                                          authorUid: x.createUser,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                      Spacer(),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            nickName,
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                          Spacer(),
+                                          const Icon(
+                                            Icons.mode_comment_outlined,
+                                            size: 13,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          commentCount,
+                                          const SizedBox(width: 10),
+                                          _BookmarkIcon(
+                                            postId: x.id,
+                                            authorUid: x.createUser,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                           Positioned(
                             left: 250,
-                            top: 20,
+                            top: 50,
                             child: IgnorePointer(
                               child: ClipRect(
                                 child: Align(
@@ -805,9 +850,9 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                                     opacity: 0.35,
                                     child: Image.asset(
                                       pvImg,
-                                      fit: BoxFit.cover, // 부모 채움
-                                      width: 66,
-                                      height: 66,
+                                      // fit: BoxFit.cover, // 부모 채움
+                                      width: 70,
+                                      height: 70,
                                     ),
                                   ),
                                 ),
