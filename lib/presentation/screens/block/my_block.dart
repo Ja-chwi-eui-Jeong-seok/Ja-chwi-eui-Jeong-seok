@@ -111,7 +111,12 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
 
           final blocks = snapshot.data;
           if (blocks == null || blocks.isEmpty) {
-            return const Center(child: Text("차단한 내역이 없습니다."));
+            return const Center(
+              child: Text(
+                "차단한 내역이 없습니다.",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+            );
           }
 
           final uids = blocks.map((b) => b['userId'] as String).toSet();
