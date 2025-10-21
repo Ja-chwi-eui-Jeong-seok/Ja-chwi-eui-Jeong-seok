@@ -11,7 +11,6 @@ import 'package:ja_chwi/presentation/providers/user_profile_by_uid_provider.dart
 import 'package:ja_chwi/presentation/screens/community/vm/category_vm.dart';
 import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ja_chwi/presentation/screens/community/widgets/nick_name.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/no_location_view.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
 
@@ -28,23 +27,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final extra = GoRouterState.of(context).extra;
-      if (extra is Map && extra['deleted'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('삭제가 완료되었습니다.')),
-        );
-          // 삭제 플래그 제거 → 일회성 처리
-        extra.remove('deleted');
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final extra = widget.extra;
-    if (kDebugMode) debugPrint('CommunityScreen extra: $extra');
-
     final catState = ref.watch(categoryVMProvider);
 
     // 프로필 통해 위치 얻기
@@ -153,7 +139,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             ),
             bottomNavigationBar: BottomNav(
               mode: BottomNavMode.tab,
-              userData: extra,
+              userData:
+                  GoRouterState.of(context).extra as Map<String, dynamic>?,
             ),
           ),
         );
@@ -164,11 +151,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
 /// 상위 탭(부모 카테고리) → 하위 탭(세부 카테고리)을 표시하는 위젯
 class _SecondDepthTabs extends ConsumerStatefulWidget {
-  const _SecondDepthTabs({required this.parentCode, required this.location, required this.extra});
+  const _SecondDepthTabs({
+    required this.parentCode,
+    required this.location,
+    required this.extra,
+  });
   final int parentCode;
   final String? location;
   final Map<String, dynamic>? extra;
-  
 
   @override
   ConsumerState<_SecondDepthTabs> createState() => _SecondDepthTabsState();
@@ -273,9 +263,10 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
     _changedSub = ref.listenManual<int>(
       communityChangedTickProvider,
       (prev, next) {
-        if (!_ready || !mounted) return;
         ref.invalidate(provider);
-        Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+        Future.microtask(() {
+          ref.read(provider.notifier).loadInitial(ref);
+        });
       },
     );
   }
@@ -410,7 +401,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       ).format(
                         x.communityCreateDate.toLocal(),
                       );
-                  final pv = x.createUser;
                   final pvs = ref.watch(profileByUidProvider(x.createUser));
 
                   final (pvImg, nickName) = pvs.when<(String, String)>(
@@ -430,7 +420,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       '$c',
 
                       style: TextStyle(fontSize: AppSizes.fontSizeM),
-
                     ),
                     loading: () => const SizedBox(
                       width: 14,
@@ -449,6 +438,9 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
 
                       // 삭제/수정 후 true를 반환하면 refresh
                       if (result == true) {
+                        if (kDebugMode) debugPrint('삭제 후 돌아옴, 목록 새로고침');
+                        // communityChangedTickProvider 증가로 목록 새로고침
+                        ref.read(communityChangedTickProvider.notifier).state++;
                         setState(() {}); // 화면 재조회
                       }
                     },
@@ -543,7 +535,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                             ],
                           ),
                           Positioned(
-                            left: 250,
+                            left: 220,
                             top: 50,
                             child: IgnorePointer(
                               child: ClipRect(
@@ -660,9 +652,10 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
     _changedSub = ref.listenManual<int>(
       communityChangedTickProvider,
       (prev, next) {
-        if (!_ready || !mounted) return;
         ref.invalidate(provider);
-        Future.microtask(() => ref.read(provider.notifier).loadInitial(ref));
+        Future.microtask(() {
+          ref.read(provider.notifier).loadInitial(ref);
+        });
       },
     );
   }
@@ -748,7 +741,6 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
         child: Column(
           children: [
             Padding(
-
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSizes.paddingL,
               ),
@@ -797,7 +789,6 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                       '$c',
 
                       style: TextStyle(fontSize: AppSizes.fontSizeMS),
-
                     ),
                     loading: () => const SizedBox(
                       width: 10,
@@ -831,16 +822,12 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
 
                       // 삭제/수정 후 true를 반환하면 refresh
                       if (result == true) {
+                        if (kDebugMode) debugPrint('삭제 후 돌아옴, 목록 새로고침');
+                        // communityChangedTickProvider 증가로 목록 새로고침
+                        ref.read(communityChangedTickProvider.notifier).state++;
                         setState(() {}); // 화면 재조회
                       }
                     },
-                    // onTap: () => context.push(
-                    //   '/community-detail',
-                    //   extra: {
-                    //     'id': x.id,
-                    //     'extra': widget.extra, // ✅ 이제 정상 작동
-                    //   },
-                    // ),
                     child: Container(
                       height: 96,
                       decoration: BoxDecoration(
@@ -913,7 +900,7 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                             ],
                           ),
                           Positioned(
-                            left: 250,
+                            left: 220,
                             top: 50,
                             child: IgnorePointer(
                               child: ClipRect(
@@ -970,7 +957,6 @@ class _BookmarkIcon extends ConsumerWidget {
 
         size: AppSizes.iconS,
         color: isBookmarked ? AppColors.primary : AppColors.grey,
-
       ),
       loading: () => const SizedBox(
         width: 16,
@@ -982,7 +968,6 @@ class _BookmarkIcon extends ConsumerWidget {
 
         size: AppSizes.iconS,
         color: AppColors.grey,
-
       ),
     );
   }

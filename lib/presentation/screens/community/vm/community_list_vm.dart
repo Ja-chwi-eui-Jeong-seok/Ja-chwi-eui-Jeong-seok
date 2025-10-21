@@ -36,15 +36,14 @@ class CommunityListState {
 class CommunityListVM extends Notifier<CommunityListState> {
   CommunityListVM(this.categoryCode, this.detailCode, this.location);
 
-  final int? categoryCode;    // nullable로 변경
-  final int? detailCode;      // nullable로 변경
+  final int? categoryCode; // nullable로 변경
+  final int? detailCode; // nullable로 변경
   final String location;
 
   @override
   CommunityListState build() => const CommunityListState();
   //UI에서 스피너 조건 st.isLoading && st.hasMore 로 변경, 전에는 isLoading만 있어서수정함
   Future<void> loadInitial(WidgetRef ref) async {
-    if (state.isLoading) return;
     //state = state.copyWith(isLoading: true); 2025.09.25 17시 이전 코드
     state = const CommunityListState(isLoading: true);
     try {
@@ -91,8 +90,8 @@ class CommunityListVM extends Notifier<CommunityListState> {
 
 /// provider 팩토리: (상위코드, 하위코드)별로 VM 생성
 NotifierProvider<CommunityListVM, CommunityListState> communityListVmProvider({
-  int? categoryCode,    // nullable로 변경
-  int? detailCode,      // nullable로 변경
+  int? categoryCode, // nullable로 변경
+  int? detailCode, // nullable로 변경
   required String location,
 }) {
   return NotifierProvider<CommunityListVM, CommunityListState>(
@@ -112,16 +111,22 @@ final commentCountByPostProvider = FutureProvider.family<int, String>((
 });
 
 // 북마크 상태 확인 provider
-final isBookmarkedProvider = FutureProvider.family<bool, String>((ref, postId) async {
+final isBookmarkedProvider = FutureProvider.family<bool, String>((
+  ref,
+  postId,
+) async {
   // communityChangedTickProvider를 감지하여 북마크 상태 변경 시 재요청
   ref.watch(communityChangedTickProvider);
-  
+
   final uid = FirebaseAuth.instance.currentUser?.uid;
   if (uid == null) return false;
-  
+
   try {
     final bookmarkRepo = ref.read(bookmarkRepoProvider);
-    final bookmarksStream = bookmarkRepo.getBookmarks(uid, BookmarkType.community);
+    final bookmarksStream = bookmarkRepo.getBookmarks(
+      uid,
+      BookmarkType.community,
+    );
     final bookmarks = await bookmarksStream.first;
     return bookmarks.any((bookmark) => bookmark.id == postId);
   } catch (e) {
