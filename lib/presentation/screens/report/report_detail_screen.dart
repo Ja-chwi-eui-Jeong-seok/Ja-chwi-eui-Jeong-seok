@@ -101,118 +101,137 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: GestureDetector(
+        onTap: () {
+          // 키보드 포커스 해제 (키보드 내리기)
+          FocusScope.of(context).unfocus();
+        },
+        behavior: HitTestBehavior.translucent, // 빈 공간도 터치 인식되게
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 선택된 사유와 대상 정보 표시
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.selectedReason,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 선택된 사유와 대상 정보 표시
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.selectedReason,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          if (widget.targetCreatedAt != null) ...[
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  size: 14,
+                                  color: Colors.grey.shade600,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  DateFormat(
+                                    'MM.dd HH:mm',
+                                  ).format(widget.targetCreatedAt!.toLocal()),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                  ),
-                  if (widget.targetCreatedAt != null) ...[
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 14,
-                          color: Colors.grey.shade600,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          DateFormat('MM.dd HH:mm').format(widget.targetCreatedAt!.toLocal()),
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
+
+                    const SizedBox(height: 24),
+
+                    // 세부사유 입력
+                    const Text(
+                      '신고 세부사유에 대하여 얘기해주세요.',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
                     ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: _detailController,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                        hintText: '신고 사유를 자세히 설명해주세요.',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                    // Spacer 제거 (하단 버튼은 Column 밖의 고정 패딩에 위치)
                   ],
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 세부사유 입력
-            const Text(
-              '신고 세부사유에 대하여 얘기해주세요.',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: _detailController,
-              maxLines: 6,
-              decoration: InputDecoration(
-                hintText: '신고 사유를 자세히 설명해주세요.',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.black),
-                ),
-                contentPadding: const EdgeInsets.all(16),
               ),
             ),
 
-            const SizedBox(height: 40),
-
-            // 작성 완료 버튼
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitReport,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  elevation: 0,
-                  side: BorderSide(color: Colors.grey.shade300),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            // 작성 완료 버튼 (하단 고정)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 50),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isSubmitting ? null : _submitReport,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 0,
+                    side: BorderSide(color: Colors.grey.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.black,
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.black,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          '작성 완료',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      )
-                    : const Text(
-                        '작성 완료',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                ),
               ),
             ),
           ],
