@@ -123,6 +123,7 @@ class CommentList extends ConsumerWidget {
         }
 
         return Column(
+          key: ValueKey(comments[i].id),
           children: [
             GestureDetector(
               onLongPressStart: isBlocked
@@ -398,6 +399,7 @@ class CommentList extends ConsumerWidget {
                           );
 
                           return GestureDetector(
+                            key: ValueKey(reply.id),
                             onLongPressStart: isReplyBlocked
                                 ? null
                                 : (details) async {
