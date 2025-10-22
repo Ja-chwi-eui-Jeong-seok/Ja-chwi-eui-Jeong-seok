@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ja_chwi/data/datasources/block_datasource.dart';
 import 'package:ja_chwi/data/repositories/block_repository_impl.dart';
@@ -33,16 +34,21 @@ final blockUserActionProvider =
     });
 
 // 현재 사용자가 차단한 유저 목록을 가져오는 provider
-final blockedUsersProvider = FutureProvider<List<String>>((ref) async {
+final blockedUsersProvider = StreamProvider<List<String>>((ref) {
   final currentUser = FirebaseAuth.instance.currentUser;
-  if (currentUser == null) return [];
-  
-  try {
-    final blockedUsers = await ref
-        .read(blockRepositoryProvider)
-        .fetchBlockedUsersByMe(currentUser.uid);
-    return blockedUsers.map((block) => block.userId).toList();
-  } catch (e) {
-    return [];
-  }
+  if (currentUser == null) return Stream.value(<String>[]);
+
+  // 실시간으로 내가 차단한 사용자 목록을 스트리밍
+  final stream = FirebaseFirestore.instance
+      .collection('blocks')
+      .where('blockedBy', isEqualTo: currentUser.uid)
+      .snapshots()
+      .map(
+        (snapshot) => snapshot.docs
+            .map((doc) => (doc.data()['userId'] as String?) ?? '')
+            .where((uid) => uid.isNotEmpty)
+            .toList(),
+      );
+
+  return stream;
 });

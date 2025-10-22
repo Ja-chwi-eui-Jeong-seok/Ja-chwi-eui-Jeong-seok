@@ -1,17 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ja_chwi/presentation/providers/block_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class MyBlocksPage extends StatefulWidget {
+class MyBlocksPage extends ConsumerStatefulWidget {
   final Map<String, dynamic>? extra;
   const MyBlocksPage({super.key, this.extra});
 
   @override
-  State<MyBlocksPage> createState() => _MyBlocksPageState();
+  ConsumerState<MyBlocksPage> createState() => _MyBlocksPageState();
 }
 
-class _MyBlocksPageState extends State<MyBlocksPage> {
+class _MyBlocksPageState extends ConsumerState<MyBlocksPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   late Future<List<Map<String, dynamic>>> _myBlocks;
 
@@ -71,6 +73,10 @@ class _MyBlocksPageState extends State<MyBlocksPage> {
       setState(() {
         _myBlocks = fetchMyBlocks(widget.extra?['uid']);
       });
+      // 차단 목록 provider를 무효화하여 앱 전역에서 차단 상태가 갱신되도록 함
+      try {
+        ref.invalidate(blockedUsersProvider);
+      } catch (_) {}
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('차단이 해제되었습니다.')),

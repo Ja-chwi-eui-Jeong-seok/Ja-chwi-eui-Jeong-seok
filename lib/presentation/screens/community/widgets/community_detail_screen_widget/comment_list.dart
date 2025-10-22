@@ -389,31 +389,45 @@ class CommentList extends ConsumerWidget {
                       ),
                       child: Column(
                         children: comments[i].replies.map((reply) {
+                          // 체크: 답글 작성자가 차단된 유저인지
+                          final isReplyBlocked = blockedUsersAsync.when(
+                            data: (blockedUsers) =>
+                                blockedUsers.contains(reply.uid),
+                            loading: () => false,
+                            error: (_, __) => false,
+                          );
+
                           return GestureDetector(
-                            onLongPressStart: (details) async {
-                              final me = FirebaseAuth.instance.currentUser?.uid;
-                              await showCommentContextMenu(
-                                context: context,
-                                ref: ref,
-                                details: details,
-                                meUid: me,
-                                targetUid: reply.uid,
-                                nickname: reply.uid,
-                                commentText: reply.noteDetail,
-                                createdAt: reply.createAt,
-                                onDelete: (me != null && me == reply.uid)
-                                    ? () async {
-                                        await ref
-                                            .read(detailVmProvider.notifier)
-                                            .deleteReply(
-                                              ref,
-                                              parentCommentId: comments[i].id,
-                                              replyId: reply.id,
-                                            );
-                                      }
-                                    : null,
-                              );
-                            },
+                            onLongPressStart: isReplyBlocked
+                                ? null
+                                : (details) async {
+                                    final me =
+                                        FirebaseAuth.instance.currentUser?.uid;
+                                    await showCommentContextMenu(
+                                      context: context,
+                                      ref: ref,
+                                      details: details,
+                                      meUid: me,
+                                      targetUid: reply.uid,
+                                      nickname: reply.uid,
+                                      commentText: reply.noteDetail,
+                                      createdAt: reply.createAt,
+                                      onDelete: (me != null && me == reply.uid)
+                                          ? () async {
+                                              await ref
+                                                  .read(
+                                                    detailVmProvider.notifier,
+                                                  )
+                                                  .deleteReply(
+                                                    ref,
+                                                    parentCommentId:
+                                                        comments[i].id,
+                                                    replyId: reply.id,
+                                                  );
+                                            }
+                                          : null,
+                                    );
+                                  },
                             child: Container(
                               color: Colors.white,
                               margin: const EdgeInsets.only(bottom: 8),
@@ -432,54 +446,11 @@ class CommentList extends ConsumerWidget {
                                           borderRadius: BorderRadius.circular(
                                             22.5,
                                           ),
-                                          child: Consumer(
-                                            builder: (context, ref, child) {
-                                              final profileAsync = ref.watch(
-                                                profileByUidProvider(reply.uid),
-                                              );
-
-                                              return profileAsync.when(
-                                                data: (profile) {
-                                                  final thumbUrl =
-                                                      profile.thumbUrl;
-                                                  if (thumbUrl.isEmpty) {
-                                                    return Image.asset(
-                                                      'assets/images/m_profile/m_black.png',
-                                                    );
-                                                  }
-                                                  if (thumbUrl.startsWith(
-                                                    'http',
-                                                  )) {
-                                                    return Image.network(
-                                                      thumbUrl,
-                                                    );
-                                                  }
-                                                  return Image.asset(thumbUrl);
-                                                },
-                                                loading: () => Image.asset(
+                                          child: isReplyBlocked
+                                              ? Image.asset(
                                                   'assets/images/m_profile/m_black.png',
-                                                ),
-                                                error: (_, __) => Image.asset(
-                                                  'assets/images/m_profile/m_black.png',
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ),
-
-                                      const SizedBox(width: 12),
-
-                                      // 답글 내용 (댓글과 동일한 구조)
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                // 닉네임 (댓글과 동일한 스타일)
-                                                Consumer(
+                                                )
+                                              : Consumer(
                                                   builder: (context, ref, child) {
                                                     final profileAsync = ref
                                                         .watch(
@@ -489,39 +460,109 @@ class CommentList extends ConsumerWidget {
                                                         );
 
                                                     return profileAsync.when(
-                                                      data: (profile) => Text(
-                                                        profile.nickname,
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
+                                                      data: (profile) {
+                                                        final thumbUrl =
+                                                            profile.thumbUrl;
+                                                        if (thumbUrl.isEmpty) {
+                                                          return Image.asset(
+                                                            'assets/images/m_profile/m_black.png',
+                                                          );
+                                                        }
+                                                        if (thumbUrl.startsWith(
+                                                          'http',
+                                                        )) {
+                                                          return Image.network(
+                                                            thumbUrl,
+                                                          );
+                                                        }
+                                                        return Image.asset(
+                                                          thumbUrl,
+                                                        );
+                                                      },
+                                                      loading: () => Image.asset(
+                                                        'assets/images/m_profile/m_black.png',
                                                       ),
-                                                      loading: () => Text(
-                                                        reply.uid,
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                      error: (_, __) => Text(
-                                                        'error',
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
+                                                      error: (_, __) => Image.asset(
+                                                        'assets/images/m_profile/m_black.png',
                                                       ),
                                                     );
                                                   },
                                                 ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 12),
+
+                                      // 답글 내용 (차단된 경우 토글 가능)
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                // 닉네임 (차단된 경우 대체 텍스트)
+                                                isReplyBlocked
+                                                    ? Text(
+                                                        '차단된 사용자',
+                                                        style: const TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: Colors.grey,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      )
+                                                    : Consumer(
+                                                        builder: (context, ref, child) {
+                                                          final profileAsync =
+                                                              ref.watch(
+                                                                profileByUidProvider(
+                                                                  reply.uid,
+                                                                ),
+                                                              );
+
+                                                          return profileAsync.when(
+                                                            data: (profile) => Text(
+                                                              profile.nickname,
+                                                              style: const TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            loading: () => Text(
+                                                              reply.uid,
+                                                              style: const TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            error: (_, __) => Text(
+                                                              'error',
+                                                              style: const TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
 
                                                 const SizedBox(width: 8),
 
@@ -538,18 +579,76 @@ class CommentList extends ConsumerWidget {
 
                                             const SizedBox(height: 4),
 
-                                            // 답글 내용 (댓글과 동일한 스타일)
-                                            Text(
-                                              reply.noteDetail,
-                                              maxLines: 5,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                              ),
-                                            ),
+                                            // 답글 내용 (차단된 경우 표시 토글)
+                                            isReplyBlocked
+                                                ? GestureDetector(
+                                                    onTap: () {
+                                                      final currentVisibility = ref
+                                                          .read(
+                                                            blockedCommentVisibilityProvider(
+                                                              reply.uid,
+                                                            ).notifier,
+                                                          )
+                                                          .state;
+                                                      ref
+                                                              .read(
+                                                                blockedCommentVisibilityProvider(
+                                                                  reply.uid,
+                                                                ).notifier,
+                                                              )
+                                                              .state =
+                                                          !currentVisibility;
+                                                    },
+                                                    child: Builder(
+                                                      builder: (context) {
+                                                        final isVisible = ref.watch(
+                                                          blockedCommentVisibilityProvider(
+                                                            reply.uid,
+                                                          ),
+                                                        );
+                                                        return Text(
+                                                          isVisible
+                                                              ? reply.noteDetail
+                                                              : '(차단된 유저입니다)',
+                                                          maxLines: 5,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: isVisible
+                                                                ? null
+                                                                : Colors.grey,
+                                                            fontStyle: isVisible
+                                                                ? null
+                                                                : FontStyle
+                                                                      .italic,
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    reply.noteDetail,
+                                                    maxLines: 5,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
                                           ],
                                         ),
                                       ),
+
+                                      // 차단 상태 아이콘
+                                      if (isReplyBlocked) ...[
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.visibility_outlined,
+                                          size: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
                                     ],
                                   ),
                                   SizedBox(
