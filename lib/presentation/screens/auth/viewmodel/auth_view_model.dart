@@ -50,9 +50,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
       state = state.copyWith(user: user, status: AuthStatus.success);
     } catch (e) {
+      String errorMessage = "로그인 중 오류가 발생했습니다.";
+
+      if (e.toString().contains('user-not-found')) {
+        errorMessage = "등록되지 않은 사용자입니다. 다시 로그인해주세요.";
+      } else if (e.toString().contains('invalid-credential')) {
+        errorMessage = "인증 정보가 올바르지 않습니다.";
+      } else if (e.toString().contains('network-request-failed')) {
+        errorMessage = "네트워크 연결을 확인해주세요.";
+      } else if (e.toString().contains('too-many-requests')) {
+        errorMessage = "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.";
+      }
+
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: errorMessage,
       );
     }
   }
