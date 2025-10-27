@@ -97,6 +97,16 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
         return AuthModel.fromMap(snapshot.data()!, snapshot.id);
       }
     } catch (e) {
+      // Firebase Auth 에러를 더 구체적으로 처리
+      if (e.toString().contains('user-not-found')) {
+        throw Exception('등록되지 않은 사용자입니다.');
+      } else if (e.toString().contains('invalid-credential')) {
+        throw Exception('인증 정보가 올바르지 않습니다.');
+      } else if (e.toString().contains('network-request-failed')) {
+        throw Exception('네트워크 연결을 확인해주세요.');
+      } else if (e.toString().contains('too-many-requests')) {
+        throw Exception('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
       rethrow;
     }
   }
@@ -164,6 +174,16 @@ class AuthRemoteDataSourceImpl implements AuthDataSource {
         return existingUser;
       }
     } catch (e) {
+      // Firebase Auth 에러를 더 구체적으로 처리
+      if (e.toString().contains('user-not-found')) {
+        throw Exception('등록되지 않은 사용자입니다.');
+      } else if (e.toString().contains('invalid-credential')) {
+        throw Exception('인증 정보가 올바르지 않습니다.');
+      } else if (e.toString().contains('network-request-failed')) {
+        throw Exception('네트워크 연결을 확인해주세요.');
+      } else if (e.toString().contains('too-many-requests')) {
+        throw Exception('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
       rethrow;
     }
   }
