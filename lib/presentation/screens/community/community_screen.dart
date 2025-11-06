@@ -13,6 +13,7 @@ import 'package:ja_chwi/presentation/screens/community/vm/community_list_vm.dart
 import 'package:go_router/go_router.dart';
 import 'package:ja_chwi/presentation/screens/community/widgets/no_location_view.dart';
 import 'package:ja_chwi/presentation/widgets/bottom_nav.dart';
+import 'package:ja_chwi/domain/entities/community.dart';
 
 //커뮤니티 화면 (카테고리 탭 2단구조 + 게시글 패치)
 class CommunityScreen extends ConsumerStatefulWidget {
@@ -238,13 +239,13 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
     required this.detailCode,
     required this.detailName,
     required this.location,
-    required this.extra, // ✅ 추가
+    required this.extra,
   });
   final int parentCode;
   final int detailCode;
   final String detailName;
   final String? location;
-  final Map<String, dynamic>? extra; // ✅ 추가
+  final Map<String, dynamic>? extra;
 
   @override
   ConsumerState<_PostsPlaceholder> createState() => _PostsPlaceholderState();
@@ -252,14 +253,13 @@ class _PostsPlaceholder extends ConsumerStatefulWidget {
 
 class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
   late NotifierProvider<CommunityListVM, CommunityListState> provider;
-  bool _ready = false; // provider 준비 여부
+  bool _ready = false;
   ProviderSubscription<int>? _changedSub;
 
   @override
   void initState() {
     super.initState();
     _maybeInitProviderAndLoad();
-    // build 밖에서는 listenManual 사용
     _changedSub = ref.listenManual<int>(
       communityChangedTickProvider,
       (prev, next) {
@@ -273,14 +273,13 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
 
   @override
   void dispose() {
-    //해제
     _changedSub?.close();
     super.dispose();
   }
 
   void _maybeInitProviderAndLoad() {
     final loc = widget.location;
-    if (loc == null || loc.isEmpty) return; // 아직 준비 안됨
+    if (loc == null || loc.isEmpty) return;
 
     provider = communityListVmProvider(
       categoryCode: widget.parentCode,
@@ -289,7 +288,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
     );
     _ready = true;
 
-    // 초기 로드 1회
     Future.microtask(() {
       if (!mounted) return;
       ref.read(provider.notifier).loadInitial(ref);
@@ -298,11 +296,9 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
 
   @override
   Widget build(BuildContext context) {
-    // location 없거나 provider 아직 준비 안됐으면 안내뷰
     if (!_ready) return const NoLocationView();
 
     final st = ref.watch(provider);
-    // 빈 목록/로딩 처리
     if (st.items.isEmpty) {
       return Scaffold(
         body: Column(
@@ -315,10 +311,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                 children: [
                   Text(
                     widget.detailName,
-                    style: const TextStyle(
-                      fontSize: AppSizes.fontSizeL,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Spacer(),
                 ],
@@ -333,7 +326,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                         padding: EdgeInsets.only(bottom: 100),
                         child: Text(
                           '아직 게시글이 없습니다',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: AppColors.grey),
                         ),
                       ),
               ),
@@ -342,6 +335,7 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
         ),
       );
     }
+
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
         onNotification: (n) {
@@ -361,18 +355,13 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                 children: [
                   Text(
                     widget.detailName,
-                    style: const TextStyle(
-                      fontSize: AppSizes.fontSizeL,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Spacer(),
                 ],
               ),
             ),
             const SizedBox(height: 12),
-
-            // 게시글 리스트
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.only(
@@ -382,7 +371,6 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                 ),
                 itemCount:
                     st.items.length + ((st.isLoading && st.hasMore) ? 1 : 0),
-
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, i) {
                   if (i >= st.items.length) {
@@ -393,172 +381,8 @@ class _PostsPlaceholderState extends ConsumerState<_PostsPlaceholder> {
                       ),
                     );
                   }
-
-                  final x = st.items[i];
-                  final date =
-                      DateFormat(
-                        'yyyy.MM.dd',
-                      ).format(
-                        x.communityCreateDate.toLocal(),
-                      );
-                  final pvs = ref.watch(profileByUidProvider(x.createUser));
-
-                  final (pvImg, nickName) = pvs.when<(String, String)>(
-                    data: (p) => (
-                      p.imageFullUrl,
-                      p.nickname,
-                    ),
-                    loading: () => ('assets/images/profile/black.png', '집먼지'),
-                    error: (_, __) =>
-                        ('assets/images/profile/black.png', '집먼지'),
-                  );
-
-                  //댓글수
-                  final countAv = ref.watch(commentCountByPostProvider(x.id));
-                  Widget commentCount = countAv.when(
-                    data: (c) => Text(
-                      '$c',
-
-                      style: TextStyle(fontSize: AppSizes.fontSizeM),
-                    ),
-                    loading: () => const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    error: (_, __) => const Text('0'),
-                  );
-                  return InkWell(
-                    onTap: () async {
-                      // CommunityDetailScreen 호출 + docId 전달
-                      final result = await context.push<bool>(
-                        '/community-detail',
-                        extra: {'id': x.id, 'extra': widget.extra},
-                      );
-
-                      // 삭제/수정 후 true를 반환하면 refresh
-                      if (result == true) {
-                        if (kDebugMode) debugPrint('삭제 후 돌아옴, 목록 새로고침');
-                        // communityChangedTickProvider 증가로 목록 새로고침
-                        ref.read(communityChangedTickProvider.notifier).state++;
-                        setState(() {}); // 화면 재조회
-                      }
-                    },
-                    // onTap: () => context.push(
-                    //   '/community-detail',
-                    //   extra: {
-                    //     'id': x.id,
-                    //     'extra': widget.extra, // 선택적으로 추가 데이터 전달 가능
-                    //   },
-                    // ),
-                    child: Container(
-                      height: 96,
-                      //테두리
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.postBorder,
-                          width: 2,
-                        ),
-                      ),
-                      //padding: const EdgeInsets.all(12),
-                      child: Stack(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 좌측 텍스트
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            // 제목
-                                            StringUtils.truncateWithEllipsis(
-                                              15,
-                                              x.communityName,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Spacer(),
-                                          Text(
-                                            //날짜
-                                            date,
-                                          ),
-                                        ],
-                                      ),
-                                      Spacer(),
-
-                                      Row(
-                                        children: [
-                                          Text(
-                                            nickName,
-                                            style: TextStyle(fontSize: 14),
-                                          ),
-                                          Spacer(),
-                                          //댓글수 표시
-                                          const Icon(
-                                            Icons.mode_comment_outlined,
-                                            size: 14,
-                                          ),
-                                          const SizedBox(
-                                            width: 4,
-                                          ),
-                                          //댓글수위젯
-                                          commentCount,
-                                          const SizedBox(width: 10),
-                                          // 북마크 아이콘
-                                          _BookmarkIcon(
-                                            postId: x.id,
-                                            authorUid: x.createUser,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              // 우측 하트
-                              Row(
-                                children: [],
-                              ),
-                            ],
-                          ),
-                          Positioned(
-                            left: 220,
-                            top: 50,
-                            child: IgnorePointer(
-                              child: ClipRect(
-                                child: Align(
-                                  //alignment: Alignment.bottomCenter,
-                                  //heightFactor: 0.5, // 아래 절반만 노출
-                                  child: Opacity(
-                                    opacity: 0.35,
-                                    child: Image.asset(
-                                      pvImg,
-                                      // fit: BoxFit.cover, // 부모 채움
-                                      width: 70,
-                                      height: 70,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                  final post = st.items[i];
+                  return _PostListItem(post: post, extra: widget.extra);
                 },
               ),
             ),
@@ -575,7 +399,7 @@ class _CategoryDetailChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = DefaultTabController.of(context); //!제거함
+    final controller = DefaultTabController.of(context);
 
     return AnimatedBuilder(
       animation: controller.animation!,
@@ -699,12 +523,9 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
               ),
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     '전체',
-                    style: TextStyle(
-                      fontSize: AppSizes.fontSizeL,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Spacer(),
                 ],
@@ -744,15 +565,11 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSizes.paddingL,
               ),
-
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     '전체',
-                    style: TextStyle(
-                      fontSize: AppSizes.fontSizeL,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Spacer(),
                 ],
@@ -778,153 +595,153 @@ class _AllPostsViewState extends ConsumerState<_AllPostsView> {
                       ),
                     );
                   }
-                  final x = st.items[i];
-                  final date = DateFormat('yyyy.MM.dd').format(
-                    x.communityCreateDate.toLocal(),
-                  );
-
-                  final countAv = ref.watch(commentCountByPostProvider(x.id));
-                  Widget commentCount = countAv.when(
-                    data: (c) => Text(
-                      '$c',
-
-                      style: TextStyle(fontSize: AppSizes.fontSizeMS),
-                    ),
-                    loading: () => const SizedBox(
-                      width: 10,
-                      height: 10,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    error: (_, __) => const Text(
-                      '0',
-                      style: TextStyle(fontSize: 10),
-                    ),
-                  );
-                  final pv = ref.watch(profileByUidProvider(x.createUser));
-
-                  final (pvImg, nickName) = pv.when<(String, String)>(
-                    data: (p) => (
-                      p.imageFullUrl,
-                      p.nickname,
-                    ),
-                    loading: () => ('assets/images/profile/black.png', '집먼지'),
-                    error: (_, __) =>
-                        ('assets/images/profile/black.png', '집먼지'),
-                  );
-
-                  return InkWell(
-                    onTap: () async {
-                      // CommunityDetailScreen 호출 + docId 전달
-                      final result = await context.push<bool>(
-                        '/community-detail',
-                        extra: {'id': x.id, 'extra': widget.extra},
-                      );
-
-                      // 삭제/수정 후 true를 반환하면 refresh
-                      if (result == true) {
-                        if (kDebugMode) debugPrint('삭제 후 돌아옴, 목록 새로고침');
-                        // communityChangedTickProvider 증가로 목록 새로고침
-                        ref.read(communityChangedTickProvider.notifier).state++;
-                        setState(() {}); // 화면 재조회
-                      }
-                    },
-                    child: Container(
-                      height: 96,
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.postBorder,
-                          width: AppSizes.borderM,
-                        ),
-                      ),
-                      //padding: const EdgeInsets.all(12),
-                      child: Stack(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            StringUtils.truncateWithEllipsis(
-                                              15,
-                                              x.communityName,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          Spacer(),
-                                          Text(
-                                            date,
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                        ],
-                                      ),
-                                      Spacer(),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            nickName,
-                                            style: TextStyle(fontSize: 14),
-                                          ),
-                                          Spacer(),
-                                          const Icon(
-                                            Icons.mode_comment_outlined,
-                                            size: 13,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          commentCount,
-                                          const SizedBox(width: 10),
-                                          _BookmarkIcon(
-                                            postId: x.id,
-                                            authorUid: x.createUser,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Positioned(
-                            left: 220,
-                            top: 50,
-                            child: IgnorePointer(
-                              child: ClipRect(
-                                child: Align(
-                                  //alignment: Alignment.bottomCenter,
-                                  //heightFactor: 0.5, // 아래 절반만 노출
-                                  child: Opacity(
-                                    opacity: 0.35,
-                                    child: Image.asset(
-                                      pvImg,
-                                      // fit: BoxFit.cover, // 부모 채움
-                                      width: 70,
-                                      height: 70,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                  final post = st.items[i];
+                  return _PostListItem(post: post, extra: widget.extra);
                 },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PostListItem extends ConsumerWidget {
+  const _PostListItem({
+    required this.post,
+    required this.extra,
+  });
+
+  final Community post;
+  final Map<String, dynamic>? extra;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final date = DateFormat(
+      'yyyy.MM.dd',
+    ).format(post.communityCreateDate.toLocal());
+    final pvs = ref.watch(profileByUidProvider(post.createUser));
+
+    final (pvImg, nickName) = pvs.when<(String, String)>(
+      data: (p) => (p.imageFullUrl, p.nickname),
+      loading: () => ('assets/images/profile/black.png', '집먼지'),
+      error: (_, __) => ('assets/images/profile/black.png', '집먼지'),
+    );
+
+    final countAv = ref.watch(commentCountByPostProvider(post.id));
+    Widget commentCount = countAv.when(
+      data: (c) => Text(
+        '$c',
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+      loading: () => const SizedBox(
+        width: 14,
+        height: 14,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      error: (_, __) => Text(
+        '0',
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+    );
+
+    return InkWell(
+      onTap: () async {
+        final result = await context.push<bool>(
+          '/community-detail',
+          extra: {'id': post.id, 'extra': extra},
+        );
+
+        if (result == true) {
+          ref.read(communityChangedTickProvider.notifier).state++;
+        }
+      },
+      child: Container(
+        height: 96,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.postBorder,
+            width: 2,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              StringUtils.truncateWithEllipsis(
+                                15,
+                                post.communityName,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              date,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            Text(
+                              nickName,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const Spacer(),
+                            const Icon(
+                              Icons.mode_comment_outlined,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            commentCount,
+                            const SizedBox(width: 10),
+                            _BookmarkIcon(
+                              postId: post.id,
+                              authorUid: post.createUser,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              left: 220,
+              top: 50,
+              child: IgnorePointer(
+                child: ClipRect(
+                  child: Align(
+                    child: Opacity(
+                      opacity: 0.35,
+                      child: Image.asset(
+                        pvImg,
+                        width: 70,
+                        height: 70,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -942,19 +759,11 @@ class _BookmarkIcon extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ///final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-
-    /// 자신의 글일 경우 북마크 아이콘을 숨김
-    // if (currentUserUid == authorUid) {
-    //   return const SizedBox.shrink();
-    // }
-
     final bookmarkStatusAsync = ref.watch(isBookmarkedProvider(postId));
 
     return bookmarkStatusAsync.when(
       data: (isBookmarked) => Icon(
         isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-
         size: AppSizes.iconS,
         color: isBookmarked ? AppColors.primary : AppColors.grey,
       ),
@@ -965,7 +774,6 @@ class _BookmarkIcon extends ConsumerWidget {
       ),
       error: (_, __) => const Icon(
         Icons.bookmark_border,
-
         size: AppSizes.iconS,
         color: AppColors.grey,
       ),
