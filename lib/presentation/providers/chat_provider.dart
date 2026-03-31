@@ -17,7 +17,12 @@ final firestoreProvider = Provider<FirebaseFirestore>((ref) {
 
 /// Gemini DataSource Provider
 final geminiDataSourceProvider = Provider<GeminiDataSourceImpl>((ref) {
-  final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+  final apiKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
+  if (apiKey.isEmpty || apiKey == 'REPLACE_WITH_GEMINI_API_KEY') {
+    throw Exception(
+      'GEMINI_API_KEY가 설정되지 않았습니다. assets/config/env/setting.env에 새 키를 넣어주세요.',
+    );
+  }
   return GeminiDataSourceImpl(apiKey);
 });
 

@@ -71,9 +71,7 @@ final userProfileProvider = StreamProvider<UserProfile>((ref) {
 /// MissionRepository를 제공하는 Provider
 final missionRepositoryProvider = Provider<MissionRepository>((ref) {
   final firestore = FirebaseFirestore.instance;
-  final storage = FirebaseStorage.instanceFor(
-    bucket: 'gs://ja-chwi-eui-jeong-seok',
-  );
+  final storage = FirebaseStorage.instance;
   final dataSource = MissionDataSourceImpl(firestore, storage);
   return MissionRepositoryImpl(dataSource);
 });
